@@ -1,0 +1,11 @@
+VERSION = "0.0.3"
+HOST = '192.168.0.87'
+PORT = 4042
+CHARHOST = '192.168.0.87'
+CHARPORT = 4043
+LOGDIR="/home/exaltia/"
+SQLSERVER = '192.168.0.92'
+SQLUSER = "root"
+SQLPASS = "xyoktb8i"
+SQLDB = "dbtest"
+LOGFILE = 'authmultivers.log'
