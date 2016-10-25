@@ -1,113 +1,378 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
+<head>
+    <!-- Meta, title, CSS, favicons, etc. -->
     <meta charset="utf-8">
-    <!--<meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1">-->
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="description" content="">
+    <meta name="keywords" content="">
     <meta name="author" content="">
-	<META HTTP-EQUIV="CACHE-CONTROL" CONTENT="NO-CACHE">
-	<META HTTP-EQUIV="PRAGMA" CONTENT="NO-CACHE">
-    <!-- Favicon -->
-    <link rel="shortcut icon" type="image/png" href="http://davidn.de/apple-touch-icon.png" />
-    <link rel="apple-touch-icon" href="http://davidn.de/apple-touch-icon-57x57-precomposed.png" />
-    <link rel="apple-touch-icon" sizes="72x72" href="http://davidn.de/apple-touch-icon-72x72-precomposed.png" />
-    <link rel="apple-touch-icon" sizes="114x114" href="http://davidn.de/apple-touch-icon-114x114-precomposed.png" />
 
-    <title>{{ apptitle }}</title>
-	<!-- Latest compiled and minified CSS -->
-	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
-    <!-- old  Bootstrap core CSS
-    <link href="//https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">-->
+    <title>Title</title>
 
-    <!-- Custom styles for this template -->
-    <style type="text/css">
-        body {
-		  bottom: 0px;
-		  top: 80px;
-		  margin-bottom: 100px;
-        }
-        #chat-input {
-          position: fixed;
-          right: 0;
-          left: 0;
-          bottom: 0;
-          z-index: 1030;
-          margin-bottom: 0;
-		  background-color: #fff;}
-        #chat-input .form-actions {
-          margin-top: 0;
-          margin-bottom: 0;
-        }
-		#a {
-		  margin-top: 40px;
-		  max-height: 640px;}
-		#div, container {
-		  margin-top: 80px;}
-		  
-    </style>
+    <!-- Icons set -->
+    <link rel="stylesheet" href="../static/css/fonts.css">
 
-    <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
-    <!--[if lt IE 9]>
-      <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
-      <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
-    <![endif]-->
-  </head>
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans:400,400i,600,600i,700,700i" rel="stylesheet">
 
-  <body>
+    <link rel="stylesheet" href="../static/css/normalize.css">
+    <link rel="stylesheet" href="../static/css/bootstrap.min.css">
+    <link rel="stylesheet" href="../static/css/jquery.mCustomScrollbar.min.css">
+    <link rel="stylesheet" href="../static/css/styles.css">
 
-    <div class="navbar navbar-inverse navbar-fixed-top" role="navigation">
-      <div class="container">
+    <!-- Media styles -->
+    <link rel="stylesheet" href="../static/css/media.css">
+</head>
+<body>
+
+<div class="top-bar">
+
+    <div class="first-section top-bar-section">
+        <nav class="nav-menu settings-menu">
+            <ul>
+                <li><a href="#" class="menu-btn pull-left app-menu-show-btn"><span class="icon-menu"></span></a></li>
+            </ul>
+        </nav>
+
         <div class="navbar-header">
-          <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
-            <span class="sr-only">Toggle navigation</span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-          </button>
+            <a class="navbar-brand" href="#">Logo</a>
         </div>
-        <div class="collapse navbar-collapse">
-          <ul class="nav navbar-nav">
-              <li {% if room == 1 %}class="active"{% end %}><a href="/room/1">trucmachin 1</a></li>
-              <li {% if room == 2 %}class="active"{% end %}><a href="/room/2">Room 2</a></li>
-              <li {% if room == 3 %}class="active"{% end %}><a href="/room/3">Room 3</a></li>
-              <li {% if room == 4 %}class="active"{% end %}><a href="/room/4">Room 4</a></li>
-              {% if not user %}<li class="active"><a href="/login">Sign In</a></li> {% end %}
-              <!-- <li class="divider"></li> -->
-              {% if user %}<li><a href="/logout">Sign Out</a></li> {% end %}
-          </ul>
-        </div><!--/.nav-collapse -->
-      </div>
+        <span class="site-description">Title</span>
+
+        <nav class="nav-menu settings-menu">
+            <ul>
+                <li><a href="#" class="menu-btn pull-left"><span class="icon-plus"></span></a></li>
+            </ul>
+        </nav>
     </div>
 
-    <div class="container">
+    <div class="second-section top-bar-section">
+        <nav class="nav-menu">
+            <ul>
+                <li><a href="#" class="menu-btn pull-left"><span class="icon-plus"></span></a></li>
+                <li><a href="#" class="menu-btn pull-left"><span class="icon-members"></span></a></li>
+                <li><a href="#" class="menu-btn pull-left"><span class="icon-area-chart"></span></a></li>
+                <li><a href="#" class="menu-btn pull-left"><span class="icon-file"></span></a></li>
+                <li><a href="#" class="menu-btn pull-left"><span class="icon-envelope"></span></a></li>
+                <li><a href="#" class="menu-btn pull-left"><span class="icon-speaker"></span></a></li>
+                <li><a href="#" class="menu-btn pull-left"><span class="icon-search"></span></a></li>
+                <li><a href="#" class="menu-btn pull-left"><span class="icon-comments"></span></a></li>
+                <li><a href="#" class="menu-btn pull-left"><span class="icon-pin"></span></a></li>
+                <li><a href="#" class="menu-btn pull-left"><span class="icon-support"></span></a><span class="badge">2</span></li>
+                <li><a href="#" class="menu-btn pull-left"><span class="icon-notification"></span></a><span class="badge">16</span></li>
+            </ul>
+        </nav>
 
-      <div class="">
-        {% if room %}
-          <h1>Room {{room}}</h1>
-        {% else %}
-          <h1>{{ apptitle }}</h1>
-        {% end %}
-        {% raw content %}
-      </div>
+        <div class="user-section">
+            <a href="#" class="user-avatar thumbnail">
+                <img src="../static/images/user-avatar.png" alt="">
+            </a>
+        </div>
 
-    </div><!-- /.container -->
+        <nav class="nav-menu settings-menu">
+            <ul>
+                <li><a href="#" class="menu-btn pull-left right-sidebar-show-btn"><span class="icon-settings"></span></a></li>
+            </ul>
+        </nav>
+    </div>
 
+</div><!-- /.top-bar -->
 
-    <!-- Bootstrap core JavaScript
-    ================================================== -->
-    <!-- Placed at the end of the document so the pages load faster -->
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
-    <script src="http://getbootstrap.com/dist/js/bootstrap.min.js"></script>
-	<script src="http://www.appelsiini.net/download/jquery.jeditable.mini.js"><!--Booh, change that to make it local!--></script>
-	<script>
-		$(document).ready(function() {
-		$('.sousmessage').editable('http://192.168.0.92:8888/save');
-		});
-	</script>
-    {% if 'chat' in globals() and chat %}
-        <!-- Application script -->
-        <script src="{{ static_url('app.js') }}" type="text/javascript"></script>
-    {% end %}
-  </body>
+<div class="container-fluid">
+    <div class="row">
+        <div class="content-container">
+            <aside id="left_sidebar" class="sidebar left-sidebar">
+                <div class="space-menu">
+                    <div class="scrollbar-section">
+                        <ul class="users-list self-avatar">
+                            <li>
+                                <a href="#" class="thumbnail user-avatar">
+                                    <img src="../static/images/user-avatar.png" alt="">
+                                </a>
+                            </li>
+                        </ul>
+                        <ul class="menu-list">
+                            <li><a href="#" class="icon-wrapper"><span class="icon-comment"></span></a></li>
+                            <li><a href="#" class="icon-wrapper"><span class="icon-calendar"></span></a></li>
+                            <li><a href="#" class="icon-wrapper"><span class="icon-check"></span></a></li>
+                            <li><a href="#" class="icon-wrapper"><span class="icon-check"></span></a></li>
+                        </ul>
+                        <ul class="users-list">
+                            <li>
+                                <a href="#" class="thumbnail user-avatar">
+                                    <img src="../static/images/user-avatar.png" alt="">
+                                </a>
+                            </li>
+                        </ul>
+                        <a href="#" class="icon-wrapper"><span class="icon-plus"></span></a>
+                    </div>
+                </div>
+                <div class="app-menu">
+                    <div class="scrollbar-section">
+                        <div class="channels-widget">
+                            <div class="title">
+                                <span class="icon-comment"></span>
+                                <span>Chat</span>
+                                <span class="badge">999 <span class="plus">+</span></span>
+                            </div>
+                            <div class="info"><span>Channel</span><span class="channels-count">(5)</span><a href="#"><span class="icon-plus"></span></a></div>
+                            <ul class="channels-list">
+                                <li><a href="#">#Mission 0</a></li>
+                                <li><a href="#">#Chatname</a></li>
+                                <li><a href="#">#Mission 1</a></li>
+                            </ul>
+                        </div>
+                        <div class="dates-widget">
+                            <div class="title">
+                                <span class="icon-calendar"></span>
+                                <span>Agenda</span>
+                            </div>
+                            <ul class="dates-list">
+                                <li><a href="#"><span class="icon-check"></span><span>Liste 1</span></a></li>
+                                <li><a href="#"><span class="icon-check"></span><span>Liste 2</span></a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+            <div class="content_container">
+                <div id="messages_container" class="messages_container">
+                    <div class="scrollbar-section">
+                        <div class="messages_wrapper">
+                            <div class="day-divider">
+                                <span>1 Septembre 2016</span>
+                            </div>
+                            <div id="daymessages" class="day-messages">
+                                {% raw content %}
+
+                                <div class="message-container">
+                                    <a href="#" class="thumbnail user-avatar"><img src="../static/images/user-avatar.png" alt=""></a>
+                                    <div class="message">
+                                        <div class="info"><a href="#" class="user-name">Member 1</a><span class="info">Aujourd'hui à 14:55</span></div>
+                                        <div>Lorem ipsum dolor sit amet</div>
+                                    </div>
+                                    <a href="#" class="menu-btn"></a>
+                                </div>
+                                <div class="message-container">
+                                    <a href="#" class="thumbnail user-avatar"><img src="../static/images/user-avatar.png" alt=""></a>
+                                    <div class="message">
+                                        <div class="info"><a href="#" class="user-name">Member 1</a><span class="info">Aujourd'hui à 14:55</span></div>
+                                        <div>Lorem ipsum dolor sit amet</div>
+                                    </div>
+                                    <a href="#" class="menu-btn"></a>
+                                </div>
+                                <div class="message-container">
+                                    <a href="#" class="thumbnail user-avatar"><img src="../static/images/user-avatar.png" alt=""></a>
+                                    <div class="message">
+                                        <div class="info"><a href="#" class="user-name">Member 1</a><span class="info">Aujourd'hui à 14:55</span></div>
+                                        <div>Lorem ipsum dolor sit amet</div>
+                                    </div>
+                                    <a href="#" class="menu-btn"></a>
+                                </div>
+                            </div>
+                            <div class="day-divider">
+                                <span>Today</span>
+                            </div>
+                            <div class="day-messages">
+                                <div class="message-container">
+                                    <a href="#" class="thumbnail user-avatar"><img src="../static/images/user-avatar.png" alt=""></a>
+                                    <div class="message">
+                                        <div class="info"><a href="#" class="user-name">Member 1</a><span class="info">Aujourd'hui à 14:55</span></div>
+                                        <div>Lorem ipsum dolor sit amet</div>
+                                    </div>
+                                    <a href="#" class="menu-btn"></a>
+                                </div>
+                                <div class="message-container">
+                                    <a href="#" class="thumbnail user-avatar"><img src="../static/images/user-avatar.png" alt=""></a>
+                                    <div class="message">
+                                        <div class="info"><a href="#" class="user-name">Member 1</a><span class="info">Aujourd'hui à 14:55</span></div>
+                                        <div>
+                                            <div class="uploaded-file-wrapper">
+                                                <div class="flex-container">
+                                                    <a href="#" class="uploaded-file">
+                                                        <img src="../static/images/uploaded-img.png" alt="">
+                                                    </a>
+                                                    <div class="description">
+                                                        <div class="file-info">
+                                                            <a href="#" class="file-name">Informatique-Securite.jpg</a>
+                                                            <span class="file-size">1.43 MB</span>
+                                                        </div>
+                                                        <div class="user-description">
+                                                            <a href="#" class="user-name">arnauddsj</a>
+                                                            <span>Aug 31st at 3:38 PM</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <span class="file-description">Lorem ipsum dolor sit amet, <br>consectetur adipisicing elit.</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="chat-notifications">
+                                <div class="notification">
+                                    <div class="icon-container">
+                                        <span class="icon-pin"></span>
+                                    </div>
+                                    <div class="info-container">
+                                        <a href="#" class="user-name">Member 1</a>
+                                        <span>Pined a file on this channel.</span>
+                                        <a href="#" class="link">See pinned files.</a>
+                                        <span class="info">Aujourd'hui à 18:55</span>
+                                    </div>
+                                </div>
+                                <div class="notification">
+                                    <div class="icon-container">
+                                        <span class="icon-file"></span>
+                                    </div>
+                                    <div class="info-container">
+                                        <a href="#" class="link">#Informatique-Securite.jpg</a>
+                                        <span class="info">Aujourd'hui à 19:55</span>
+                                        <br>
+                                        <a href="#" class="user-name">Member 1</a>
+                                        <span>: Lorem ipsum dolor sit amet</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="messages_footer">
+                        <form id="chat-input" action="">
+                            <div class="form-group">
+                                <div id = "input-wrapper" class="input-wrapper">
+                                    <div class="icon-wrapper">
+                                        <span class="icon-paperclip"></span>
+                                    </div>
+                                    <textarea id="messageArea" class="form-control" rows="1" name="" id="" placeholder="Enter a message in #chatname" disabled></textarea>
+                                </div>
+                                <span class="input-description">@member  #channel  [app]  /Task ID</span>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <aside id="right_sidebar" class="sidebar right-sidebar">
+                <div class="scrollbar-section">
+                    <div class="sidebar-content info-section">
+                        <div class="sidebar-header">
+                            <span class="title">#Chatname</span>
+                            <span class="description">Created by <a href="#">member</a> on August 26th</span>
+                            <a href="#" class="close-panel-button"><span class="icon-close"></span></a>
+                        </div>
+                        <ul id="dragableList" class="list-unstyled">
+                            <li class="widget about">
+                                <div class="widget-header collapse-control" data-toggle="collapse" href="#collapseAbout" aria-expanded="true" aria-controls="collapseAbout">
+                                    <span class="icon-info"></span>
+                                    <span class="title">About</span>
+                                    <span class="collapse-icon icon-arrow-top"></span>
+                                </div>
+                                <div class="collapsible-section collapse in" id="collapseAbout">
+                                    <div class="widget-content">
+                                        <p>Lorem ipsum dolor sit amet</p>
+                                        <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit.</p>
+                                        <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit.</p>
+                                    </div>
+                                </div>
+                            </li>
+                            <li class="widget members">
+                                <div class="widget-header collapse-control" data-toggle="collapse" href="#collapseMembers" aria-expanded="true" aria-controls="collapseMembers">
+                                    <span class="icon-members"></span>
+                                    <span class="title">Members</span>
+                                    <a href="#"><span class="icon-plus"></span></a>
+                                    <span class="collapse-icon icon-arrow-top"></span>
+                                </div>
+                                <span class="description">En ligne (2/28)</span>
+                                <div class="collapsible-section collapse in" id="collapseMembers">
+                                    <div class="widget-content">
+                                        <ul class="users-list">
+                                            <li><a href="#" class="thumbnail user-avatar"><img src="../static/images/user-avatar.png" alt=""></a><span>Member 1</span></li>
+                                            <li><a href="#" class="thumbnail user-avatar"><img src="../static/images/user-avatar.png" alt=""></a><span>Member 2</span></li>
+                                            <li><a href="#" class="thumbnail user-avatar"><img src="../static/images/user-avatar.png" alt=""></a><span>Member 3</span></li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </li>
+                            <li class="widget shared-files">
+                                <div class="widget-header collapse-control" data-toggle="collapse" href="#collapseSharedFiles" aria-expanded="true" aria-controls="collapseSharedFiles">
+                                    <span class="icon-file"></span>
+                                    <span class="title">Shared Files</span>
+                                    <span class="collapse-icon icon-arrow-top"></span>
+                                </div>
+                                <div class="collapsible-section collapse in" id="collapseSharedFiles">
+                                    <div class="widget-content">
+                                        <div class="uploaded-file-wrapper">
+                                            <div class="flex-container">
+                                                <a href="#" class="uploaded-file">
+                                                    <img src="../static/images/uploaded-img.png" alt="">
+                                                </a>
+                                                <div class="description">
+                                                    <div class="file-info">
+                                                        <a href="#" class="file-name">Informatique-Securite.jpg</a>
+                                                        <span class="file-size">1.43 MB</span>
+                                                    </div>
+                                                    <div class="user-description">
+                                                        <a href="#" class="user-name">arnauddsj</a>
+                                                        <span>Aug 31st at 3:38 PM</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </li>
+                            <li class="widget pinned-items">
+                                <div class="widget-header collapse-control" data-toggle="collapse" href="#collapsePinnedItems" aria-expanded="true" aria-controls="collapsePinnedItems">
+                                    <span class="icon-pin"></span>
+                                    <span class="title">Pinned Items</span>
+                                    <span class="collapse-icon icon-arrow-top"></span>
+                                </div>
+                                <div class="collapsible-section collapse in" id="collapsePinnedItems">
+                                    <div class="widget-content">
+                                        <div class="pinned-item file-item">
+                                            <div class="icon-wrapper">
+                                                <span class="icon-blockqoute"></span>
+                                            </div>
+                                            <div>
+                                                <div class="message-info"><a class="user-name" href="#">Member 2</a><span class="date">Aujourd'hui à 14:55</span></div>
+                                                <div class="message-container">Lorem ipsum dolor sit amet</div>
+                                            </div>
+                                        </div>
+                                        <div class="pinned-item message-item">
+                                            <div class="icon-wrapper">
+                                                <span class="icon-image"></span>
+                                            </div>
+                                            <div class="uploaded-file-wrapper">
+                                                <div class="description">
+                                                    <div class="file-description">
+                                                        <a href="#" class="file-name">Informatique-Securite.jpg</a>
+                                                        <span class="file-description">1.43 MB</span>
+                                                    </div>
+                                                    <div class="user-description">
+                                                        <a href="#" class="user-name">arnauddsj</a>
+                                                        <span>Aug 31st at 3:38 PM</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </aside>
+        </div>
+    </div>
+</div>
+
+<!-- Scripts -->
+<script type="text/javascript" src="../static/js/jquery-3.1.1.min.js"></script>
+<script type="text/javascript" src="../static/js/jquery-ui.js"></script>
+<script type="text/javascript" src="../static/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="../static/js/jquery.mCustomScrollbar.concat.min.js"></script>
+<script type="text/javascript" src="../static/js/core.js"></script>
+<script type="text/javascript" src="../static/js/app.js"></script>
+</body>
 </html>

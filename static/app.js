@@ -18,7 +18,6 @@ function cookie(name) {
 $(document).ready(function() {
     if (!window.console) window.console = {};
     if (!window.console.log) window.console.log = function() {};
-
     // Bind the submit event of the form input to postMessage().
     $("#chat-input").submit(function() {
         postMessage($(this));
@@ -26,14 +25,15 @@ $(document).ready(function() {
     });
     $("#message-input").focus();
     $('html, body').animate({scrollTop: $(document).height()}, 800);
-    
+
     // Connection state should be reflacted in submit button.
     var disabled = $("form#chat-input").find("input");
     disabled.attr("disabled", "disabled");
 
     // Websocket callbacks:
     ws.onopen = function() {
-        console.log("Connected...");
+        //console.log("Connected...");
+        console.log("je demarre");
         disabled.removeAttr("disabled");
     };
     ws.onmessage = function(event) {
@@ -60,7 +60,7 @@ $(document).ready(function() {
  * Function to create a new message.
  */
 function postMessage(form) {
-    var value = form.find("input[type=text]").val();
+    var value = form.find("input[type=textaera]").val();
     var message = {body: value};
     message._xsrf = cookie("_xsrf");
     message.user = cookie("user");
@@ -68,7 +68,7 @@ function postMessage(form) {
     disabled.attr("disabled", "disabled");
     // Send message using websocket.
     ws.send(JSON.stringify(message));
-    // @todo: A response if successful would be nice. 
+    // @todo: A response if successful would be nice.
     console.log("Created message (successfuly)");
     $("#message-input").val("").select();
     disabled.removeAttr("disabled");
@@ -97,6 +97,7 @@ showMessage = function(message) {
     console.log("Show Message");
     var existing = $("#m" + message._id);
     if (existing.length > 0) return;
+    console.log("je ne suis pas egal a zero");
     $("#messsages").append('<div style="display: none;" class="message" id="' + message._id + '"><b>' + message.from + ': </b>' + message.body + '</div>');
     $('#messsages').find(".message:last").slideDown("fast", function(){
         $('html, body').animate({scrollTop: $(document).height()}, 400);

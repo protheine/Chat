@@ -51,7 +51,7 @@ class BaseHandler(tornado.web.RequestHandler):
         kwargs['user'] = self._current_user
         kwargs['path'] = self.request.path;
         if hasattr(self, 'room'):
-            kwargs['room'] = int(self.room)
+            kwargs['room'] = self.room
         else: kwargs['room'] = None
         kwargs['apptitle'] = self.application.settings['apptitle']
 

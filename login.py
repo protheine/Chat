@@ -11,7 +11,7 @@ from base2 import BaseHandler
 # General modules.
 import logging
 
-class LoginHandler(BaseHandler, tornado.auth.GoogleMixin):
+class LoginHandler(BaseHandler):
 	"""
 	Handler for logins with Google Open ID / OAuth
 	http://www.tornadoweb.org/documentation/auth.html#google
