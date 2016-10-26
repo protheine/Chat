@@ -32,14 +32,14 @@ $(document).ready(function() {
     $('html, body, div').animate({scrollTop: dimension})//, 400);
     });
     // Connection state should be reflacted in submit button.
-    //var disabled = $("form#chat-input").find("textaera");
-    //disabled.attr("disabled", "disabled");
+    var disabled = $("form#chat-input").find("textaera");
+    disabled.attr("disabled", "disabled");
 
     // Websocket callbacks:
     ws.onopen = function() {
         console.log("Connected...");
         //disabled.removeAttr("disabled");
-        $( "#messageArea" ).prop( "disabled", false );
+        $( "#messageArea" ).attr( "disabled", false );
         //$( "div.message" ).scrollTop( 1000 );
         //$( "div.content-container" ).scrollTop( 1000 );
         var dimension = $('#daymessages').height()
@@ -51,7 +51,7 @@ $(document).ready(function() {
         data = JSON.parse(event.data);
         if(data.textStatus && data.textStatus == "unauthorized") {
             alert("unauthorized");
-            disabled.attr("disabled", "disabled");
+            $( "#messageArea" ).attr( "disabled", true );
         }
         else if(data.error && data.textStatus) {
             alert(data.textStatus);
@@ -65,7 +65,7 @@ $(document).ready(function() {
     ws.onclose = function() {
         // @todo: Implement reconnect.
         console.log("Closed!");
-        disabled.attr("disabled", "disabled");
+        $( "#messageArea" ).attr( "disabled", true );
     };
 });
 
