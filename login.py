@@ -1,6 +1,6 @@
 # coding=UTF-8
 from MySQLdb import *
-import settings
+import settings as config
 # Tornado modules.
 import tornado.web
 import tornado.escape
@@ -145,6 +145,16 @@ class LoginHandler(BaseHandler):
             self.render_default("index.html", content=content)
 class LogoutHandler(BaseHandler):
     def get(self):
+        db = connect(host=config.SQLSERVER, user=config.SQLUSER, passwd=config.SQLPASS, db=config.SQLDB)
+        cursor = db.cursor()
+        # domain = self.request.host
+        # domain = domain.split('.')
+        # domain = domain[1] + '.' + domain[2]
+        BroswerSessionID = self.get_secure_cookie('SessionID')
         self.clear_cookie('user')
         self.clear_cookie('SessionID')
+        sql = "UPDATE Users SET SessionID = '' WHERE SessionID = %s", [BroswerSessionID]
+        cursor.execute(*sql)
+        db.commit()
+        db.close()
         self.redirect("http://admin.exaltia.org/login")
