@@ -1,3 +1,4 @@
+#
 # coding=UTF-8
 
 # Tornado modules.
@@ -20,22 +21,26 @@ class LoginHandler(BaseHandler, tornado.auth.GoogleMixin):
     @tornado.web.asynchronous
     def get(self):
             if not user["email"] or not user["name"]
+                print "pourquoi ca?"
 				self.redirect("/login") # TODO: Make this hard coded value fecthable from db for flexible configuration
             # All data given. Log user in!
             else:
                 self._on_auth(user)
     def _on_auth(self, user):
+        print "onauth_auth.py"
 		db = connect (host = settings.SQLSERVER, user = settings.SQLUSER, passwd = settings.SQLPASS, db = settings.SQLDB)
 		cursor = db.cursor ()
         """
         Callback for third party authentication (last step).
         """
         if not user:
+            print "plouf"
 			self.redirect("/login") # TODO: Make this hard coded value fecthable from db for flexible configuration
 		else:
 			try:
 				print "est ce que je passe par la?"
 				username = str(user["email"])
+                print 'usernamefromemail', username
 				sql = ("SELECT UserID FROM Users_info WHERE UserName = '%s'") % username
 				cursor.execute(sql)
 				useridresult = cursor.fetchone()
@@ -60,6 +65,7 @@ class LoginHandler(BaseHandler, tornado.auth.GoogleMixin):
             #@todo: We should check if email is given even though we can assume.
 			print "on_user_find"
             if result == "null" or not result:
+                print "est ce lie?"
                 # If user does not exist, create a new entry.
                 self.application.client.set("user:" + user["email"], tornado.escape.json_encode(user))
             else:

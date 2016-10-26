@@ -2,7 +2,7 @@
 # coding=UTF-8
 # General modules.
 from MySQLdb import *
-import settings
+import settings as config
 import os, os.path
 import logging
 import sys
@@ -22,9 +22,9 @@ import time
 import brukva
 # Import application modules.
 from base import BaseHandler
-from login import LoginHandler
+#from login import LoginHandler
 from login import LogoutHandler
-import settings as config
+#import settings as config
 # Define port from command line parameter.
 tornado.options.define("port", default=8888, help="run on the given port", type=int)
 #ioloop.IOLoop.instance().start()
@@ -118,6 +118,7 @@ class MainHandler(BaseHandler):
 
     @tornado.web.asynchronous
     def get(self, room=None):
+        print "repere 1"
         if not room:
             self.redirect("/room/1")
             return
@@ -128,18 +129,20 @@ class MainHandler(BaseHandler):
 
 
     def on_auth(self, user):
+        print 'onauthapppy', user
         # print "je passe dans MainHandler au lieu de LoginHandler ??"
         #if not user:
             # Redirect to login if not authenticated.
             # self.redirect("/login")
             # return
         # Load 50 latest messages from this chat room.
-        db = connect (host = settings.SQLSERVER, user = settings.SQLUSER, passwd = settings.SQLPASS, db = settings.SQLDB)
+        db = connect (host = config.SQLSERVER, user = config.SQLUSER, passwd = config.SQLPASS, db = config.SQLDB)
         cursor = db.cursor ()
         """
         Callback for third party authentication (last step).
         """
         if not user:
+            print "user est tu la inside app?", user
             self.redirect("/login") # TODO: Make this hard coded value fecthable from db for flexible configuration
         else:
             #try:
@@ -150,7 +153,9 @@ class MainHandler(BaseHandler):
             sql = ("SELECT UserID FROM Users_info WHERE UserName = '%s'") % user
             cursor.execute(sql)
             useridresult = cursor.fetchone()
-            cursor.execute ("SELECT SessionID FROM Users WHERE UserID = %s", (useridresult))
+            sql = "SELECT SessionID FROM Users WHERE UserID = %s", [useridresult]
+            print sql
+            cursor.execute(*sql)
             SQLSessionID = cursor.fetchone()
             BroswerSessionID = self.get_secure_cookie('SessionID')
             print SQLSessionID[0]

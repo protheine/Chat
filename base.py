@@ -19,28 +19,42 @@ class BaseHandler(tornado.web.RequestHandler):
 
 
     def _get_current_user(self, callback):
+        print callback.__doc__
         """
         An async method to load the current user object.
-        The callback  function will receive the current user object or None
+        The callback function will receive the current user object or None
         as the parameter 'user'.
         """
         # Get the user_id by cookie.
         user_id = self.get_secure_cookie("user")
+        print "user_id est tu la?", user_id
+        #print 'result', result
         if not user_id:
             logging.warning("Cookie not found")
             callback(user=None)
+            print "je passe par la", user_id
             return
         # Define a callback for the db query.
         def query_callback(result):
-            if result == "null" or not result:
-                logging.warning("User not found")
-                user = {}
-            else:
-                user = tornado.escape.json_decode(result)
-            self._current_user = user
+            # #result = user_id
+            # print 'resultcallback', result
+            # print "puis je vais ici"
+            # print result, 'userid', user_id
+            # if result == "null" or not result:
+            #     logging.warning("User not found")
+            #     user = {}
+            # else:
+            #     print "resultforjson", result
+            #     #user = tornado.escape.json_decode(result)
+            # self._current_user = user
+            # print 'selfuser', user
+            user = user_id #Shortcircuiting...
             callback(user=user)
         # Load user object and pass query_callback as callback.
-        self.application.client.get("user:" + user_id, query_callback)
+        print 'lost in user_id', user_id
+        print self.application.client.get("user:" + user_id, query_callback)
+        print user_id
+        print "d'abord par la"
         return
 
 
