@@ -78,6 +78,7 @@ function postMessage(form) {
     //var value = form.find("textaera[type=textaera]").val();
     var value = jQuery("textarea#messageArea").val();
     var message = {body: value};
+    message.date = {date: value};
     message._xsrf = cookie("_xsrf");
     message.user = cookie("user");
     var disabled = form.find("input");
@@ -119,7 +120,7 @@ showMessage = function(message) {
     $("#daymessages").append('<div id = "9876543210" class="message-container"> \
     <a href="#" class="thumbnail user-avatar"><img src="../static/images/user-avatar.png" alt=""></a> \
     <div class="message"> \
-    <div class="info"><a href="#" class="user-name">' + message.from + '</a><span class="info">Aujourdhui à 14:55</span></div> \
+    <div class="info"><a href="#" class="user-name">' + message.from + '</a><span class="info">' + message.date + '</span></div> \
     <div id="mymessage">' + message.body + '</div> \
     </div> \
     <a href="#" class="menu-btn"></a> \

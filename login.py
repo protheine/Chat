@@ -152,7 +152,7 @@ class LogoutHandler(BaseHandler):
         # domain = domain[1] + '.' + domain[2]
         BroswerSessionID = self.get_secure_cookie('SessionID')
         self.clear_cookie('user')
-        self.clear_cookie('SessionID')
+        self.clear_cookie('SessionID') # Looks like it do nothing, cookies are still there
         sql = "UPDATE Users SET SessionID = '' WHERE SessionID = %s", [BroswerSessionID]
         cursor.execute(*sql)
         db.commit()

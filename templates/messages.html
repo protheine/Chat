@@ -2,7 +2,7 @@
 <div id = "mymessagecontainer" class="message-container">
     <a href="#" class="thumbnail user-avatar"><img src="../static/images/user-avatar.png" alt=""></a>
     <div class="message">
-        <div class="info"><a href="#" class="user-name">{{ message["from"] }}:</a><span class="info">Aujourd'hui à 14:55</span></div>
+        <div class="info"><a href="#" class="user-name">{{ message["from"] }}:</a><span class="info">{% if message.get("date") %}{{ message["date"] }}{% end %}</span></div>
             <div id="mymessage">{% module Template("message.html", message=message) %}</div>
     </div>
     <a href="#" class="menu-btn"></a>

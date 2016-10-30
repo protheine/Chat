@@ -278,6 +278,7 @@ class ChatSocketHandler(tornado.websocket.WebSocketHandler):
             print rightdatadecoded
             message = {
                 '_id': ''.join(random.choice(string.ascii_uppercase) for i in range(12)),
+                'date': time.strftime("%d-%m-%Y %H:%M:%S"),
                 #'from': self.get_secure_cookie('user', str(datadecoded['user'])), # datadecoding keeps a #unwanted quotation mark, bug report TODO
                 'from': self.get_secure_cookie('user', rightdatadecoded),
                 'body': tornado.escape.linkify(datadecoded["body"]),

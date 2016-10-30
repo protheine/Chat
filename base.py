@@ -36,6 +36,8 @@ class BaseHandler(tornado.web.RequestHandler):
             return
         # Define a callback for the db query.
         def query_callback(result):
+            #DO NOT REMOVE THOSE COMMENTS FROM THERE
+            # , we don't know why it was done like that, but there is a reason. function shorted atm
             # #result = user_id
             # print 'resultcallback', result
             # print "puis je vais ici"
@@ -47,7 +49,8 @@ class BaseHandler(tornado.web.RequestHandler):
             #     print "resultforjson", result
             #     #user = tornado.escape.json_decode(result)
             # self._current_user = user
-            # print 'selfuser', user
+            # print 'selfuser', user #
+            # DO NOT REMOVE, TO THERE
             user = user_id #Shortcircuiting...
             callback(user=user)
         # Load user object and pass query_callback as callback.
