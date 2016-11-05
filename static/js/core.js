@@ -4,6 +4,7 @@ $(function(){
     });
 
     $('.right-sidebar-show-btn').on('click', rightSidebarOpenToggle);
+    $('.notification-sidebar-show-btn').on('click', notificationSidebarOpenToggle);
     $('.close-panel-button').on('click', rightSidebarOpenToggle);
     $('.app-menu-show-btn').on('click', leftSidebarShowToggle);
 
@@ -70,6 +71,10 @@ function leftSidebarShowToggle(){
 }
 
 function rightSidebarOpenToggle(){
+    $('#right_sidebar').toggleClass('hidden');
+}
+function notificationSidebarOpenToggle(){
+    $('#notification_sidebar').toggleClass('hidden');
     $('#right_sidebar').toggleClass('hidden');
 }
 

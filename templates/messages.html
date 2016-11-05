@@ -1,5 +1,5 @@
 {% for message in messages %}
-<div id = "mymessagecontainer" class="message-container">
+<div class="message-container">
     <a href="#" class="thumbnail user-avatar"><img src="../static/images/user-avatar.png" alt=""></a>
     <div class="message">
         <div class="info"><a href="#" class="user-name">{{ message["from"] }}:</a><span class="info">{% if message.get("date") %}{{ message["date"] }}{% end %}</span></div>

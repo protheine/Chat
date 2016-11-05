@@ -61,7 +61,7 @@
                 <li><a href="#" class="menu-btn pull-left"><span class="icon-comments"></span></a></li>
                 <li><a href="#" class="menu-btn pull-left"><span class="icon-pin"></span></a></li>
                 <li><a href="#" class="menu-btn pull-left"><span class="icon-support"></span></a><span class="badge">2</span></li>
-                <li><a href="#" class="menu-btn pull-left"><span class="icon-notification"></span></a><span class="badge">16</span></li>
+                <li><a href="#" class="menu-btn pull-left notification-sidebar-show-btn"><span class="icon-notification"></span></a><span class="badge">16</span></li>
             </ul>
         </nav>
 
@@ -138,114 +138,25 @@
                 </div>
             </aside>
             <div class="content_container">
-                <div id="messages_container" class="messages_container">
+                <div id="messages_container" class="messages_container" style="padding-bottom: 87px;">
                     <div class="scrollbar-section">
                         <div class="messages_wrapper">
                             <div class="day-divider">
                                 <span>1 Septembre 2016</span>
                             </div>
-                            <div id="daymessages" class="day-messages">
+                            <div id = "daymessages" class="day-messages">
                                 {% raw content %}
-
-                                <div class="message-container">
-                                    <a href="#" class="thumbnail user-avatar"><img src="../static/images/user-avatar.png" alt=""></a>
-                                    <div class="message">
-                                        <div class="info"><a href="#" class="user-name">Member 1</a><span class="info">Aujourd'hui à 14:55</span></div>
-                                        <div>Lorem ipsum dolor sit amet</div>
-                                    </div>
-                                    <a href="#" class="menu-btn"></a>
-                                </div>
-                                <div class="message-container">
-                                    <a href="#" class="thumbnail user-avatar"><img src="../static/images/user-avatar.png" alt=""></a>
-                                    <div class="message">
-                                        <div class="info"><a href="#" class="user-name">Member 1</a><span class="info">Aujourd'hui à 14:55</span></div>
-                                        <div>Lorem ipsum dolor sit amet</div>
-                                    </div>
-                                    <a href="#" class="menu-btn"></a>
-                                </div>
-                                <div class="message-container">
-                                    <a href="#" class="thumbnail user-avatar"><img src="../static/images/user-avatar.png" alt=""></a>
-                                    <div class="message">
-                                        <div class="info"><a href="#" class="user-name">Member 1</a><span class="info">Aujourd'hui à 14:55</span></div>
-                                        <div>Lorem ipsum dolor sit amet</div>
-                                    </div>
-                                    <a href="#" class="menu-btn"></a>
-                                </div>
-                            </div>
-                            <div class="day-divider">
-                                <span>Today</span>
-                            </div>
-                            <div class="day-messages">
-                                <div class="message-container">
-                                    <a href="#" class="thumbnail user-avatar"><img src="../static/images/user-avatar.png" alt=""></a>
-                                    <div class="message">
-                                        <div class="info"><a href="#" class="user-name">Member 1</a><span class="info">Aujourd'hui à 14:55</span></div>
-                                        <div>Lorem ipsum dolor sit amet</div>
-                                    </div>
-                                    <a href="#" class="menu-btn"></a>
-                                </div>
-                                <div class="message-container">
-                                    <a href="#" class="thumbnail user-avatar"><img src="../static/images/user-avatar.png" alt=""></a>
-                                    <div class="message">
-                                        <div class="info"><a href="#" class="user-name">Member 1</a><span class="info">Aujourd'hui à 14:55</span></div>
-                                        <div>
-                                            <div class="uploaded-file-wrapper">
-                                                <div class="flex-container">
-                                                    <a href="#" class="uploaded-file">
-                                                        <img src="../static/images/uploaded-img.png" alt="">
-                                                    </a>
-                                                    <div class="description">
-                                                        <div class="file-info">
-                                                            <a href="#" class="file-name">Informatique-Securite.jpg</a>
-                                                            <span class="file-size">1.43 MB</span>
-                                                        </div>
-                                                        <div class="user-description">
-                                                            <a href="#" class="user-name">arnauddsj</a>
-                                                            <span>Aug 31st at 3:38 PM</span>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <span class="file-description">Lorem ipsum dolor sit amet, <br>consectetur adipisicing elit.</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="chat-notifications">
-                                <div class="notification">
-                                    <div class="icon-container">
-                                        <span class="icon-pin"></span>
-                                    </div>
-                                    <div class="info-container">
-                                        <a href="#" class="user-name">Member 1</a>
-                                        <span>Pined a file on this channel.</span>
-                                        <a href="#" class="link">See pinned files.</a>
-                                        <span class="info">Aujourd'hui à 18:55</span>
-                                    </div>
-                                </div>
-                                <div class="notification">
-                                    <div class="icon-container">
-                                        <span class="icon-file"></span>
-                                    </div>
-                                    <div class="info-container">
-                                        <a href="#" class="link">#Informatique-Securite.jpg</a>
-                                        <span class="info">Aujourd'hui à 19:55</span>
-                                        <br>
-                                        <a href="#" class="user-name">Member 1</a>
-                                        <span>: Lorem ipsum dolor sit amet</span>
-                                    </div>
-                                </div>
                             </div>
                         </div>
                     </div>
                     <div class="messages_footer">
-                        <form id="chat-input" action="">
+                        <form id = "chat-input" action="">
                             <div class="form-group">
-                                <div id = "input-wrapper" class="input-wrapper">
+                                <div class="input-wrapper">
                                     <div class="icon-wrapper">
                                         <span class="icon-paperclip"></span>
                                     </div>
-                                    <textarea id="messageArea" class="form-control" rows="1" name="" id="" placeholder="Enter a message in #chatname" disabled></textarea>
+                                    <textarea id="messageArea" class="form-control" rows="1" name="" id="" placeholder="Enter a message in #chatname"></textarea>
                                 </div>
                                 <span class="input-description">@member  #channel  [app]  /Task ID</span>
                             </div>
@@ -353,9 +264,6 @@
                                                         <a href="#" class="user-name">arnauddsj</a>
                                                         <span>Aug 31st at 3:38 PM</span>
                                                     </div>
-                                                    <div>
-                                                    <span class="message-container">Version 0.0.1</span>
-                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
@@ -377,5 +285,6 @@
 <script type="text/javascript" src="../static/js/jquery.mCustomScrollbar.concat.min.js"></script>
 <script type="text/javascript" src="../static/js/core.js"></script>
 <script type="text/javascript" src="../static/js/app.js"></script>
+
 </body>
 </html>

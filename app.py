@@ -1,4 +1,4 @@
-##
+#
 # coding=UTF-8
 # General modules.
 from MySQLdb import *
@@ -243,7 +243,6 @@ class ChatSocketHandler(tornado.websocket.WebSocketHandler):
             m = tornado.escape.json_decode(message.body)
             # Send messages to other clients and finish connection.
             self.write_message(dict(messages=[m]))
-            time.sleep(1)
             print "gone in on_messages_published"
             print message
             print m

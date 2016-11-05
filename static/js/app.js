@@ -27,10 +27,10 @@ $(document).ready(function() {
     $("#message-input").focus();
     //$('html, body').animate({scrollTop: $(document).height()}, 800);
     //$( "div.message" ).scrollTop( 1000 );
-    var dimension = $('#daymessages').height()
-    $('#daymessages').find(".message:last").slideDown("fast", function(){
-    $('html, body, div').animate({scrollTop: dimension})//, 400);
-    });
+    //var dimension = $('#daymessages').height()
+    //$('#daymessages').find(".message:last").slideDown("fast", function(){
+    //$('html, body, div').animate({scrollTop: dimension})//, 400);
+
     // Connection state should be reflacted in submit button.
     var disabled = $("form#chat-input").find("textaera");
     disabled.attr("disabled", "disabled");
@@ -42,10 +42,13 @@ $(document).ready(function() {
         $( "#messageArea" ).attr( "disabled", false );
         //$( "div.message" ).scrollTop( 1000 );
         //$( "div.content-container" ).scrollTop( 1000 );
-        var dimension = $('#daymessages').height()
-        $('#daymessages').find(".message:last").slideDown("fast", function(){
-        $('html, body, div').animate({scrollTop: dimension})//, 400);
-    });
+        var dimension = $('#mCSB_3_container').height() - $('#mCSB_3_scrollbar_vertical').height();
+        $('#mCSB_3_container').attr({style: 'position: relative; top: -' + dimension + 'px; left: 0px;'});
+        // console.log("j'ai bidouillé mon div")
+        // console.log($('#daymessages').height())
+        console.log('dimension is' + dimension)
+        //$('#daymessages').find(".message:last").slideDown("fast", function(){
+        //$('html, body, div').animate({scrollTop: dimension})//, 400);
     };
     ws.onmessage = function(event) {
         data = JSON.parse(event.data);
@@ -101,6 +104,7 @@ function postMessage(form) {
 updater = {}
 newMessages = function (data) {
     var messages = data.messages;
+    console.log('je passe dans newMessages')
     if(messages.length == 0) return;
     updater.cursor = messages[messages.length - 1]._id;
     console.log(messages.length + "new messages, cursor: " + updater.cursor);
@@ -115,9 +119,14 @@ newMessages = function (data) {
  */
 showMessage = function(message) {
     console.log("Show Message");
+    var dimension = $('#mCSB_3_container').height() - $('#mCSB_3_scrollbar_vertical').height();
+        stylecraft = 'position: relative; top: -' + dimension +'px; left: 0px;';
+    currentpos =  $(mCSB_3_container).attr('style');
+    console.log('currentpos is' + currentpos);
+    console.log('stylecraft is' + stylecraft);
     var existing = $("#m" + message._id);
     if (existing.length > 0) console.log("probleme");//return;
-    $("#daymessages").append('<div id = "9876543210" class="message-container"> \
+    $("#daymessages").append('<div class="message-container"> \
     <a href="#" class="thumbnail user-avatar"><img src="../static/images/user-avatar.png" alt=""></a> \
     <div class="message"> \
     <div class="info"><a href="#" class="user-name">' + message.from + '</a><span class="info">' + message.date + '</span></div> \
@@ -125,16 +134,14 @@ showMessage = function(message) {
     </div> \
     <a href="#" class="menu-btn"></a> \
     </div>');
-    //$("#daymessages").append('<div id="9876543210" class="message-container" id="' + message._id + '"><b>' + message.from + ': </b>' + message.body + '</div>');
-    //$.find(".message:last").slideDown("fast", function(){$('html, body').animate({scrollTop: $(document).height()}, 400)});
-    //});
-    //$("html, body").animate({$( "div.message:last" ).scrollTop( 1000 )};
-    //var d = $('#message');
-    //console.log(d)
-    //d.scrollTop(d.prop("scrollHeight"));
-    var dimension = $('#daymessages').height()
-    $('#daymessages').find(".message:last").slideDown("fast", function(){
-    $('html, body, div').animate({scrollTop: dimension})//, 4000);
-    });
+    currentpos =  $(mCSB_3_container).attr('style');
+    console.log('currentpos is' + currentpos);
+    console.log('stylecraft is' + stylecraft);
+    if (currentpos !== stylecraft) return;
+    else {
+        var dimension = $('#mCSB_3_container').height() - $('#mCSB_3_scrollbar_vertical').height();
+        $('#mCSB_3_container').attr({style: 'position: relative; top: -' + dimension + 'px; left: 0px;'});
+    }
+
 
 };
