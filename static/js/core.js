@@ -71,11 +71,13 @@ function leftSidebarShowToggle(){
 }
 
 function rightSidebarOpenToggle(){
+    $('#notification_sidebar').attr({class: 'sidebar notification-sidebar hidden'})
     $('#right_sidebar').toggleClass('hidden');
 }
 function notificationSidebarOpenToggle(){
+    // $('#right_sidebar').toggleClass('hidden');
+    $('#right_sidebar').attr({class: 'sidebar right-sidebar hidden'})
     $('#notification_sidebar').toggleClass('hidden');
-    $('#right_sidebar').toggleClass('hidden');
 }
 
 function bodyResize(){

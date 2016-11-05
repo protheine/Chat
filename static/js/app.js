@@ -95,6 +95,8 @@ function postMessage(form) {
     $("#messageArea").val("").select();
     //disabled.removeAttr("disabled");
     $( "#messageArea" ).prop( "disabled", false );
+    var dimension = $('#mCSB_3_container').height() - $('#mCSB_3_scrollbar_vertical').height();
+        $('#mCSB_3_container').attr({style: 'position: relative; top: -' + dimension + 'px; left: 0px;'});
 }
 
 
@@ -140,7 +142,7 @@ showMessage = function(message) {
     if (currentpos !== stylecraft) return;
     else {
         var dimension = $('#mCSB_3_container').height() - $('#mCSB_3_scrollbar_vertical').height();
-        $('#mCSB_3_container').attr({style: 'position: relative; top: -' + dimension + 'px; left: 0px;'});
+        $('#mCSB_3_container').attr({style: 'position: relative; top: -' + parseInt(dimension) + 'px; left: 0px;'});
     }
 
 
