@@ -122,7 +122,7 @@ newMessages = function (data) {
 showMessage = function(message) {
     console.log("Show Message");
     var dimension = $('#mCSB_3_container').height() - $('#mCSB_3_scrollbar_vertical').height();
-        stylecraft = 'position: relative; top: -' + dimension +'px; left: 0px;';
+        stylecraft = 'position: relative; top: -' + dimension.toFixed(2) +'px; left: 0px;';
     currentpos =  $(mCSB_3_container).attr('style');
     console.log('currentpos is' + currentpos);
     console.log('stylecraft is' + stylecraft);
@@ -142,7 +142,7 @@ showMessage = function(message) {
     if (currentpos !== stylecraft) return;
     else {
         var dimension = $('#mCSB_3_container').height() - $('#mCSB_3_scrollbar_vertical').height();
-        $('#mCSB_3_container').attr({style: 'position: relative; top: -' + parseInt(dimension) + 'px; left: 0px;'});
+        $('#mCSB_3_container').attr({style: 'position: relative; top: -' + dimension.toFixed(2) + 'px; left: 0px;'});
     }
 
 
