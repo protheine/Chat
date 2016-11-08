@@ -78,6 +78,7 @@ function notificationSidebarOpenToggle(){
     // $('#right_sidebar').toggleClass('hidden');
     $('#right_sidebar').attr({class: 'sidebar right-sidebar hidden'})
     $('#notification_sidebar').toggleClass('hidden');
+    $("#notif-badge").text('');
 }
 
 function bodyResize(){

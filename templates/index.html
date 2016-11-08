@@ -61,7 +61,7 @@
                 <li><a href="#" class="menu-btn pull-left"><span class="icon-comments"></span></a></li>
                 <li><a href="#" class="menu-btn pull-left"><span class="icon-pin"></span></a></li>
                 <li><a href="#" class="menu-btn pull-left"><span class="icon-support"></span></a><span class="badge">2</span></li>
-                <li><a href="#" class="menu-btn pull-left notification-sidebar-show-btn"><span class="icon-notification"></span></a><span class="badge">16</span></li>
+                <li><a href="#" class="menu-btn pull-left notification-sidebar-show-btn"><span class="icon-notification"></span></a><span id="notif-badge" class="badge"></span></li>
             </ul>
         </nav>
 
@@ -274,116 +274,7 @@
                     </div>
                 </div>
             </div>
-            <div id="notification_sidebar" class="sidebar notification-sidebar hidden">
-                <div class="scrollbar-section">
-                    <div class="sidebar-content info-section">
-                        <div class="sidebar-header">
-                            <span class="title"># not the same Chatname</span>
-                            <span class="description">Created by <a href="#">member</a> on August 26th</span>
-                            <a href="#" class="close-panel-button"><span class="icon-close"></span></a>
-                        </div>
-                        <ul id="dragableList" class="list-unstyled">
-                            <li class="widget about">
-                                <div class="widget-header collapse-control" data-toggle="collapse" href="#collapseAbout" aria-expanded="true" aria-controls="collapseAbout">
-                                    <span class="icon-info"></span>
-                                    <span class="title">About</span>
-                                    <span class="collapse-icon icon-arrow-top"></span>
-                                </div>
-                                <div class="collapsible-section collapse in" id="collapseAbout">
-                                    <div class="widget-content">
-                                        <p>Lorem ipsum dolor sit amet</p>
-                                        <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit.</p>
-                                        <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit.</p>
-                                    </div>
-                                </div>
-                            </li>
-                            <li class="widget members">
-                                <div class="widget-header collapse-control" data-toggle="collapse" href="#collapseMembers" aria-expanded="true" aria-controls="collapseMembers">
-                                    <span class="icon-members"></span>
-                                    <span class="title">Members</span>
-                                    <a href="#"><span class="icon-plus"></span></a>
-                                    <span class="collapse-icon icon-arrow-top"></span>
-                                </div>
-                                <span class="description">En ligne (2/28)</span>
-                                <div class="collapsible-section collapse in" id="collapseMembers">
-                                    <div class="widget-content">
-                                        <ul class="users-list">
-                                            <li><a href="#" class="thumbnail user-avatar"><img src="../static/images/user-avatar.png" alt=""></a><span>Member 1</span></li>
-                                            <li><a href="#" class="thumbnail user-avatar"><img src="../static/images/user-avatar.png" alt=""></a><span>Member 2</span></li>
-                                            <li><a href="#" class="thumbnail user-avatar"><img src="../static/images/user-avatar.png" alt=""></a><span>Member 3</span></li>
-                                        </ul>
-                                    </div>
-                                </div>
-                            </li>
-                            <li class="widget shared-files">
-                                <div class="widget-header collapse-control" data-toggle="collapse" href="#collapseSharedFiles" aria-expanded="true" aria-controls="collapseSharedFiles">
-                                    <span class="icon-file"></span>
-                                    <span class="title">Shared Files</span>
-                                    <span class="collapse-icon icon-arrow-top"></span>
-                                </div>
-                                <div class="collapsible-section collapse in" id="collapseSharedFiles">
-                                    <div class="widget-content">
-                                        <div class="uploaded-file-wrapper">
-                                            <div class="flex-container">
-                                                <a href="#" class="uploaded-file">
-                                                    <img src="../static/images/uploaded-img.png" alt="">
-                                                </a>
-                                                <div class="description">
-                                                    <div class="file-info">
-                                                        <a href="#" class="file-name">Informatique-Securite.jpg</a>
-                                                        <span class="file-size">1.43 MB</span>
-                                                    </div>
-                                                    <div class="user-description">
-                                                        <a href="#" class="user-name">arnauddsj</a>
-                                                        <span>Aug 31st at 3:38 PM</span>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </li>
-                            <li class="widget pinned-items">
-                                <div class="widget-header collapse-control" data-toggle="collapse" href="#collapsePinnedItems" aria-expanded="true" aria-controls="collapsePinnedItems">
-                                    <span class="icon-pin"></span>
-                                    <span class="title">Pinned Items</span>
-                                    <span class="collapse-icon icon-arrow-top"></span>
-                                </div>
-                                <div class="collapsible-section collapse in" id="collapsePinnedItems">
-                                    <div class="widget-content">
-                                        <div class="pinned-item file-item">
-                                            <div class="icon-wrapper">
-                                                <span class="icon-blockqoute"></span>
-                                            </div>
-                                            <div>
-                                                <div class="message-info"><a class="user-name" href="#">Member 2</a><span class="date">Aujourd'hui à 14:55</span></div>
-                                                <div class="message-container">Lorem ipsum dolor sit amet</div>
-                                            </div>
-                                        </div>
-                                        <div class="pinned-item message-item">
-                                            <div class="icon-wrapper">
-                                                <span class="icon-image"></span>
-                                            </div>
-                                            <div class="uploaded-file-wrapper">
-                                                <div class="description">
-                                                    <div class="file-description">
-                                                        <a href="#" class="file-name">Informatique-Securite.jpg</a>
-                                                        <span class="file-description">1.43 MB</span>
-                                                    </div>
-                                                    <div class="user-description">
-                                                        <a href="#" class="user-name">arnauddsj</a>
-                                                        <span>Aug 31st at 3:38 PM</span>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
+            {% raw notifcontent %}
         </div>
     </div>
 </div>

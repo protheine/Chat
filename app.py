@@ -115,15 +115,46 @@ class MainHandler(BaseHandler):
     """
     Main request handler for the root path and for chat rooms.
     """
+    def post(self, RoomName):
+        print 'je poste'
+        db = connect(host=config.SQLSERVER, user=config.SQLUSER, passwd=config.SQLPASS, db=config.SQLDB)
+        cursor = db.cursor()
+        uri = self.request.uri
+        url = uri.split('/')
+        RoomName = url[2]
+        sql = 'SELECT RoomID FROM abcd_un WHERE RoomName = %s', [RoomName]
+        cursor.execute(*sql)
+        RoomID = cursor.fetchone()
+        print 'RoomID', type(RoomID)
+        RoomID = str(RoomID[0])
+        RoomID = RoomID.decode()
+        fullurl = 'ws://' + self.request.host + '/socket/' + RoomID
 
+        #print uri
+        db.close()
+        wsurl = {
+            'url': fullurl,
+        }
+        wsurl_encoded = tornado.escape.json_encode(wsurl)
+        print wsurl_encoded
+        self.write(wsurl_encoded)
     @tornado.web.asynchronous
     def get(self, room=None):
+        url = self.request.uri
+        url = url.split('/')
+        RoomName = url[2]
+        db = connect(host=config.SQLSERVER, user=config.SQLUSER, passwd=config.SQLPASS, db=config.SQLDB)
+        cursor = db.cursor()
+        sql = 'SELECT RoomID FROM abcd_un WHERE RoomName = %s', [RoomName]
+        cursor.execute(*sql)
+        RoomID = cursor.fetchone()
         print "repere 1"
         if not room:
-            self.redirect("/room/1")
+            #self.redirect("/room/1")
+            print 'error, no rooms'
             return
         # Set chat room as instance var (should be validated).
-        self.room = str(room)
+        self.room = RoomID
         # Get the current user.
         self._get_current_user(callback=self.on_auth)
 
@@ -161,9 +192,24 @@ class MainHandler(BaseHandler):
             print SQLSessionID[0]
             print 'SQLSessionID is ' + str(SQLSessionID) + ' and BroswerSessionID is ' + BroswerSessionID
             if SQLSessionID[0] == BroswerSessionID:
+                uri = self.request.uri
+                url = uri.split('/')
+                RoomName = url[2]
+                RoomName = RoomName.strip('?')
+                print RoomName
+                sql = 'SELECT RoomID FROM abcd_un WHERE RoomName = %s', [RoomName]
+                cursor.execute(*sql)
+                RoomID = cursor.fetchone()
+                print 'RoomID', type(RoomID)
+                RoomID = str(RoomID[0])
+                RoomID = RoomID.decode()
+                self.room = RoomID
                 print "je check la session"
                 #self.redirect("/room/1") # TODO: Make this hard coded value fecthable from db for flexible configuration
-                self.application.client.lrange(self.room, -50, -1, self.on_conversation_found)
+                print 'my room is', type(self.room)
+                self.application.client.lrange(self.room, -50, -1, self.stocka)
+                self.application.client.lrange(user, -5, -1, self.stockb)
+                print "ok1"
             else:
                 self.redirect("/login") # TODO: Make this hard coded value fecthable from db for flexible configuration
             #except:
@@ -173,7 +219,23 @@ class MainHandler(BaseHandler):
             # print(exc_type, fname, exc_tb.tb_lineno)
             # self.redirect("/login")
             #self.redirect("/login") # TODO: Make this hard coded value fecthable from db for flexible configuration
-    def on_conversation_found(self, result):
+    def stocka(self, result):
+        global messages
+        messages = []
+        messages = result
+    def stockb(self, result):
+        global notifications
+        notifications = []
+        notifications = result
+        self.on_conversation_found()
+    def on_conversation_found(self):
+        i = 0
+        #     if 'notification' in result:
+        #         print "j'ai une notif"
+        global messages
+        global notifications
+        mix = messages + notifications
+        print len(mix)
         db = connect(host=config.SQLSERVER, user=config.SQLUSER, passwd=config.SQLPASS, db=config.SQLDB)
         cursor = db.cursor()
         AppID = '1'
@@ -181,20 +243,37 @@ class MainHandler(BaseHandler):
         sql = "SELECT RoomID FROM abcd_un WHERE RoomNumber = %s AND AppID = %s", [RoomNumber, AppID]
         cursor.execute(*sql)
         RoomIDS = cursor.fetchall()
-        if isinstance(result, Exception):
-            raise tornado.web.HTTPError(500)
+        # if isinstance(result, Exception):
+        #     raise tornado.web.HTTPError(500)
         # JSON-decode messages.
+        #global temp
+        temp = []
         messages = []
-        for message in result:
-            messages.append(tornado.escape.json_decode(message))
-        # Render template and deliver website.
-        content = self.render_string("messages.html", messages=messages)
-        #print content
-        self.render_default("index.html", content=content, chat=1)
-        db.close()
-
-
-
+        notifications = []
+        print "je viens d'ecraser notifications comme un encule"
+        for message in mix:
+            try:
+                temp.append(tornado.escape.json_decode(message))
+            except:
+                print 'faulty message: ', message
+                i += 1 #if a message is bad, added to number of bad messages
+                pass
+            if len(temp) == len(mix) - i: # number of bad messages soustracted to total messages received to get correct total before processing
+                try:
+                    for message in temp:
+                        if message['type'] == 'notification':
+                            notifications.append(message)
+                        elif message['type'] is not 'notification':
+                            messages.append(message)
+                except:
+                    print 'faulty message: ', message
+                    pass
+        self.pagerender(messages, notifications)
+    def pagerender(self, messages, notifications):#Renderding pages
+        content = self.render_string("messages.html",  messages=messages)
+        notifcontent = self.render_string("notifications.html", notifications=notifications)
+        self.render_default("index.html", notifcontent=notifcontent, content=content, chat=1)
+        #db.close()
 class ChatSocketHandler(tornado.websocket.WebSocketHandler):
     """
     Handler for dealing with websockets. It receives, stores and distributes new messages.
@@ -228,6 +307,21 @@ class ChatSocketHandler(tornado.websocket.WebSocketHandler):
         self.client = redis_connect()
         # Subscribe to the given chat room.
         self.client.subscribe(self.room)
+        self.subscribed = True
+        self.client.listen(self.on_messages_published)
+        BroswerSessionID = self.get_secure_cookie('SessionID')
+        db = connect(host=config.SQLSERVER, user=config.SQLUSER, passwd=config.SQLPASS, db=config.SQLDB)
+        cursor = db.cursor()
+        sql = "SELECT UserID From Users WHERE SessionID = %s", [BroswerSessionID]
+        cursor.execute(*sql)
+        UserID = cursor.fetchone()
+        sql = "SELECT UserName FROM Users_info WHERE UserID = %s", [UserID]
+        cursor.execute(*sql)
+        #global UserName
+        UserName = cursor.fetchone()
+        print 'UserName', UserName[0]
+        if UserName[0] == 'Exaltia':
+            self.client.subscribe('exaltia')
         self.subscribed = True
         self.client.listen(self.on_messages_published)
         logging.info('New user connected to chat room ' + room)
@@ -275,13 +369,37 @@ class ChatSocketHandler(tornado.websocket.WebSocketHandler):
             #                          ^There
             #coded(JSON) example message is : #{"body":"222","_xsrf":"b8f28cd1a8184afeb9296d48bb943d0a","user":"\"ZXhhbHRpYQ==|1473424358|015b#c4923b6db19a0a7c084cdc60b81952868c12"} wich seems right
             print rightdatadecoded
+            messagetype = 'not_implemented'
             message = {
                 '_id': ''.join(random.choice(string.ascii_uppercase) for i in range(12)),
                 'date': time.strftime("%d-%m-%Y %H:%M:%S"),
+                'type': messagetype,
                 #'from': self.get_secure_cookie('user', str(datadecoded['user'])), # datadecoding keeps a #unwanted quotation mark, bug report TODO
                 'from': self.get_secure_cookie('user', rightdatadecoded),
                 'body': tornado.escape.linkify(datadecoded["body"]),
             }
+            print 'message body is', message['body']
+            if message['body'].startswith('@exaltia'):
+                print "oui, c'est vrai"
+                message2 = {
+                    '_id': ''.join(random.choice(string.ascii_uppercase) for i in range(12)),
+                    'date': time.strftime("%d-%m-%Y %H:%M:%S"),
+                    'type': 'notification',
+                    # 'from': self.get_secure_cookie('user', str(datadecoded['user'])), # datadecoding keeps a #unwanted quotation mark, bug report TODO
+                    'from': self.get_secure_cookie('user', rightdatadecoded),
+                    'body': 'You were directly mentionned',
+                }
+                message2_encoded = tornado.escape.json_encode(message2)
+                self.write_message(message2_encoded)
+                # Persistently store message in Redis.
+                self.application.client.rpush('exaltia', message2_encoded)
+                # Publish message in Redis channel.
+                self.application.client.publish('exaltia', message2_encoded)
+                # except:
+                #     err = str(sys.exc_info()[0])
+                #     # Send an error back to client.
+                #     self.write_message({'error': 1, 'textStatus': 'Error writing to database: ' + str(err)})
+                #     return
             if not message['from']:
                 logging.warning("Error: Authentication missing")
                 message['from'] = 'Guest'
@@ -299,18 +417,15 @@ class ChatSocketHandler(tornado.websocket.WebSocketHandler):
             self.application.client.rpush(self.room, message_encoded)
             # Publish message in Redis channel.
             self.application.client.publish(self.room, message_encoded)
-            print message_encoded
+            print 'message_encoded is', message_encoded
         except Exception, err:
-            e = str(sys.exc_info()[0])
+            err = str(sys.exc_info()[0])
             # Send an error back to client.
             self.write_message({'error': 1, 'textStatus': 'Error writing to database: ' + str(err)})
             return
-
         # Send message through the socket to indicate a successful operation.
         self.write_message(message)
         return
-
-
     def on_close(self):
         """
         Callback when the socket is closed. Frees up resource related to this socket.
