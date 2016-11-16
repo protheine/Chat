@@ -16,10 +16,12 @@
 
     <!-- Fonts -->
     <link href="https://fonts.googleapis.com/css?family=Open+Sans:400,400i,600,600i,700,700i" rel="stylesheet">
+    <link rel="stylesheet" href="../static/css/font-awesome.min.css">
 
     <link rel="stylesheet" href="../static/css/normalize.css">
     <link rel="stylesheet" href="../static/css/bootstrap.min.css">
     <link rel="stylesheet" href="../static/css/jquery.mCustomScrollbar.min.css">
+    <link rel="stylesheet" href="../static/css/emojionearea.min.css">
     <link rel="stylesheet" href="../static/css/styles.css">
 
     <!-- Media styles -->
@@ -61,7 +63,7 @@
                 <li><a href="#" class="menu-btn pull-left"><span class="icon-comments"></span></a></li>
                 <li><a href="#" class="menu-btn pull-left"><span class="icon-pin"></span></a></li>
                 <li><a href="#" class="menu-btn pull-left"><span class="icon-support"></span></a><span class="badge">2</span></li>
-                <li><a href="#" class="menu-btn pull-left notification-sidebar-show-btn"><span class="icon-notification"></span></a><span id="notif-badge" class="badge"></span></li>
+                <li><a href="#" class="menu-btn pull-left"><span class="icon-notification"></span></a><span class="badge">16</span></li>
             </ul>
         </nav>
 
@@ -117,12 +119,14 @@
                                 <span>Chat</span>
                                 <span class="badge">999 <span class="plus">+</span></span>
                             </div>
-                            <div class="info"><span>Channel</span><span class="channels-count">(5)</span><a href="#"><span class="icon-plus"></span></a></div>
-                            <ul class="channels-list">
-                                <li><a href="#">#Mission 0</a></li>
-                                <li><a href="#">#Chatname</a></li>
-                                <li><a href="#">#Mission 1</a></li>
-                            </ul>
+                            <div class="widget-content">
+                                <div class="info"><span>Channel</span><span class="channels-count">(5)</span><a href="#"><span class="icon-plus"></span></a></div>
+                                <ul class="channels-list">
+                                    <li><a href="#">#Mission 0</a></li>
+                                    <li><a href="#">#Chatname</a></li>
+                                    <li><a href="#">#Mission 1</a></li>
+                                </ul>
+                            </div>
                         </div>
                         <div class="dates-widget">
                             <div class="title">
@@ -138,20 +142,21 @@
                 </div>
             </aside>
             <div class="content_container">
-                <div id="messages_container" class="messages_container" style="padding-bottom: 87px;">
+                <div id="messages_container" class="messages_container">
                     <div class="scrollbar-section">
                         <div class="messages_wrapper">
                             <div class="day-divider">
                                 <span>1 Septembre 2016</span>
                             </div>
-                            <div id = "daymessages" class="day-messages">
+                            <div class="day-messages">
                                 {% raw content %}
                             </div>
+
                         </div>
                     </div>
                     <div class="messages_footer">
                         <form id = "chat-input" action="">
-                            <div class="form-group">
+                            <!--<div class="form-group">
                                 <div class="input-wrapper">
                                     <div class="icon-wrapper">
                                         <span class="icon-paperclip"></span>
@@ -159,16 +164,31 @@
                                     <textarea id="messageArea" class="form-control" rows="1" name="" id="" placeholder="Enter a message in #chatname"></textarea>
                                 </div>
                                 <span class="input-description">@member  #channel  [app]  /Task ID</span>
+                            </div>-->
+                            <div class="form-group">
+                                <div class="input-group">
+                                    <span class="input-group-addon" id="basic-addon1">
+                                        <span class="btn-group dropup">
+                                            <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="icon-paperclip"></i></a>
+                                            <ul class="dropdown-menu">
+                                                <li><a href id ="upload-btn" value="#">Upload File</a></li>
+                                                <li><a href="#">Attach File</a></li>
+                                            </ul>
+                                        </span>
+                                    </span>
+                                    <textarea id="messageArea" class="form-control disabled" rows="1" placeholder="Enter a message in #chatname" aria-describedby="basic-addon1"></textarea>
+                                </div>
+                                <span class="input-description">@member  #channel  [app]  /Task ID</span>
                             </div>
                         </form>
                     </div>
                 </div>
             </div>
-            <div id="right_sidebar" class="sidebar right-sidebar hidden">
+            <aside id="right_sidebar" class="sidebar right-sidebar">
                 <div class="scrollbar-section">
                     <div class="sidebar-content info-section">
                         <div class="sidebar-header">
-                            <span class="title">#Chatname</span>
+                            <h3 class="title">#Chatname <a href="#"><span class="icon-notification"></span></a></h3>
                             <span class="description">Created by <a href="#">member</a> on August 26th</span>
                             <a href="#" class="close-panel-button"><span class="icon-close"></span></a>
                         </div>
@@ -191,7 +211,85 @@
                                 <div class="widget-header collapse-control" data-toggle="collapse" href="#collapseMembers" aria-expanded="true" aria-controls="collapseMembers">
                                     <span class="icon-members"></span>
                                     <span class="title">Members</span>
-                                    <a href="#"><span class="icon-plus"></span></a>
+                                    <div class="dropdown btn-group">
+                                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span class="icon-plus"></span></a>
+                                        <div class="dropdown-menu users-checklist-dropdown">
+                                            <div class="title clearfix"><span class="pull-left">33 members selected</span><a class="dropdown-close-btn pull-right"><span class="icon-close"></span></a></div>
+                                            <div class="search-group"><i class="fa fa-search" aria-hidden="true"></i><input type="search" id="sidebar-user-search" /></div>
+                                            <div class="users-list">
+                                                <div class="scrollbar-section">
+                                                    <ul>
+                                                        <li>
+                                                            <label for="checkbox-user-1" class="clearfix">
+                                                                <span class="styled-checkbox">
+                                                                    <input id="checkbox-user-1" type="checkbox" class="checkbox-user-1" />
+                                                                    <span class="icon-check"></span>
+                                                                </span>
+                                                                <span class="thumbnail user-avatar "><img src="../static/images/user-avatar.png" alt=""></span>
+                                                                <span class="user-name">User 1</span>
+                                                                <span class="user-status online"></span>
+                                                            </label>
+                                                        </li>
+                                                        <li>
+                                                            <label for="checkbox-user-2" class="clearfix">
+                                                                <span class="styled-checkbox">
+                                                                    <input id="checkbox-user-2" type="checkbox" class="checkbox-user-2" />
+                                                                    <span class="icon-check"></span>
+                                                                </span>
+                                                                <span class="thumbnail user-avatar "><img src="../static/images/user-avatar.png" alt=""></span>
+                                                                <span class="user-name">User 2</span>
+                                                                <span class="user-status"></span>
+                                                            </label>
+                                                        </li>
+                                                        <li>
+                                                            <label for="checkbox-user-3" class="clearfix">
+                                                                <span class="styled-checkbox">
+                                                                    <input id="checkbox-user-3" type="checkbox" class="checkbox-user-3" />
+                                                                    <span class="icon-check"></span>
+                                                                </span>
+                                                                <span class="thumbnail user-avatar "><img src="../static/images/user-avatar.png" alt=""></span>
+                                                                <span class="user-name">User 3</span>
+                                                                <span class="user-status online"></span>
+                                                            </label>
+                                                        </li>
+                                                        <li>
+                                                            <label for="checkbox-user-4" class="clearfix">
+                                                                <span class="styled-checkbox">
+                                                                    <input id="checkbox-user-4" type="checkbox" class="checkbox-user-4" />
+                                                                    <span class="icon-check"></span>
+                                                                </span>
+                                                                <span class="thumbnail user-avatar "><img src="../static/images/user-avatar.png" alt=""></span>
+                                                                <span class="user-name">User 4</span>
+                                                                <span class="user-status"></span>
+                                                            </label>
+                                                        </li>
+                                                        <li>
+                                                            <label for="checkbox-user-5" class="clearfix">
+                                                                <span class="styled-checkbox">
+                                                                    <input id="checkbox-user-5" type="checkbox" class="checkbox-user-5" />
+                                                                    <span class="icon-check"></span>
+                                                                </span>
+                                                                <span class="thumbnail user-avatar "><img src="../static/images/user-avatar.png" alt=""></span>
+                                                                <span class="user-name">User 5</span>
+                                                                <span class="user-status online"></span>
+                                                            </label>
+                                                        </li>
+                                                        <li>
+                                                            <label for="checkbox-user-6" class="clearfix">
+                                                                <span class="styled-checkbox">
+                                                                    <input id="checkbox-user-6" type="checkbox" class="checkbox-user-6" />
+                                                                    <span class="icon-check"></span>
+                                                                </span>
+                                                                <span class="thumbnail user-avatar "><img src="../static/images/user-avatar.png" alt=""></span>
+                                                                <span class="user-name">User 6</span>
+                                                                <span class="user-status online"></span>
+                                                            </label>
+                                                        </li>
+                                                    </ul>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
                                     <span class="collapse-icon icon-arrow-top"></span>
                                 </div>
                                 <span class="description">En ligne (2/28)</span>
@@ -213,20 +311,31 @@
                                 </div>
                                 <div class="collapsible-section collapse in" id="collapseSharedFiles">
                                     <div class="widget-content">
-                                        <div class="uploaded-file-wrapper">
-                                            <div class="flex-container">
-                                                <a href="#" class="uploaded-file">
-                                                    <img src="../static/images/uploaded-img.png" alt="">
-                                                </a>
-                                                <div class="description">
-                                                    <div class="file-info">
-                                                        <a href="#" class="file-name">Informatique-Securite.jpg</a>
-                                                        <span class="file-size">1.43 MB</span>
-                                                    </div>
-                                                    <div class="user-description">
-                                                        <a href="#" class="user-name">arnauddsj</a>
-                                                        <span>Aug 31st at 3:38 PM</span>
-                                                    </div>
+                                        <div class="widget-item uploaded-file-wrapper">
+                                            <a href="#" class="uploaded-file">
+                                                <img src="../static/images/uploaded-img.png" alt="">
+                                            </a>
+                                            <div class="description">
+                                                <div class="file-info">
+                                                    <a href="#" class="file-name">Informatique-Securite.jpg</a>
+                                                    <span class="file-size">1.43 MB</span>
+                                                </div>
+                                                <div class="user-description">
+                                                    <a href="#" class="user-name">arnauddsj</a>
+                                                    <span>Aug 31st at 3:38 PM</span>
+                                                </div>
+                                            </div>
+                                            <div class="widget-item-menu">
+                                                <div class="dropdown btn-group">
+                                                    <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="fa fa-ellipsis-h"></i></a>
+                                                    <ul class="dropdown-menu users-checklist-dropdown dropdown-menu-right">
+                                                        <li class="menu-visibility-option"><a href="#">Hide/Show #fileroom <i class="fa fa-eye" aria-hidden="true"></i><i class="fa fa-eye-slash" aria-hidden="true"></i></a></li>
+                                                        <li role="separator" class="divider"></li>
+                                                        <li><a href="#">Un-attache the file</a></li>
+                                                        <li><a href="#">Open a #fileroom</a></li>
+                                                        <li><a href="#">Download file</a></li>
+                                                        <li><a href="#">Add to filemanager</a></li>
+                                                    </ul>
                                                 </div>
                                             </div>
                                         </div>
@@ -241,29 +350,96 @@
                                 </div>
                                 <div class="collapsible-section collapse in" id="collapsePinnedItems">
                                     <div class="widget-content">
-                                        <div class="pinned-item file-item">
+                                        <div class="widget-item file-item">
                                             <div class="icon-wrapper">
                                                 <span class="icon-blockqoute"></span>
                                             </div>
-                                            <div>
+                                            <div class="description">
                                                 <div class="message-info"><a class="user-name" href="#">Member 2</a><span class="date">Aujourd'hui à 14:55</span></div>
                                                 <div class="message-container">Lorem ipsum dolor sit amet</div>
                                             </div>
+                                            <div class="widget-item-menu">
+                                                <div class="dropdown btn-group">
+                                                    <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="fa fa-ellipsis-h"></i></a>
+                                                    <ul class="dropdown-menu users-checklist-dropdown dropdown-menu-right">
+                                                        <li class="menu-visibility-option"><a href="#">Hide/Show #fileroom <i class="fa fa-eye" aria-hidden="true"></i><i class="fa fa-eye-slash" aria-hidden="true"></i></a></li>
+                                                        <li role="separator" class="divider"></li>
+                                                        <li><a href="#">Un-attache the file</a></li>
+                                                        <li><a href="#">Open a #fileroom</a></li>
+                                                        <li><a href="#">Download file</a></li>
+                                                        <li><a href="#">Add to filemanager</a></li>
+                                                    </ul>
+                                                </div>
+                                            </div>
                                         </div>
-                                        <div class="pinned-item message-item">
+                                        <div class="widget-item message-item">
                                             <div class="icon-wrapper">
                                                 <span class="icon-image"></span>
                                             </div>
-                                            <div class="uploaded-file-wrapper">
-                                                <div class="description">
-                                                    <div class="file-description">
-                                                        <a href="#" class="file-name">Informatique-Securite.jpg</a>
-                                                        <span class="file-description">1.43 MB</span>
-                                                    </div>
-                                                    <div class="user-description">
-                                                        <a href="#" class="user-name">arnauddsj</a>
-                                                        <span>Aug 31st at 3:38 PM</span>
-                                                    </div>
+                                            <div class="uploaded-file-wrapper description">
+                                                <div class="file-description">
+                                                    <a href="#" class="file-name">Informatique-Securite.jpg</a>
+                                                    <span class="file-description">1.43 MB</span>
+                                                </div>
+                                                <div class="user-description">
+                                                    <a href="#" class="user-name">arnauddsj</a>
+                                                    <span>Aug 31st at 3:38 PM</span>
+                                                </div>
+                                            </div>
+                                            <div class="widget-item-menu">
+                                                <div class="dropdown btn-group">
+                                                    <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="fa fa-ellipsis-h"></i></a>
+                                                    <ul class="dropdown-menu users-checklist-dropdown dropdown-menu-right">
+                                                        <li class="menu-visibility-option"><a href="#">Hide/Show #fileroom <i class="fa fa-eye" aria-hidden="true"></i><i class="fa fa-eye-slash" aria-hidden="true"></i></a></li>
+                                                        <li role="separator" class="divider"></li>
+                                                        <li><a href="#">Un-attache the file</a></li>
+                                                        <li><a href="#">Open a #fileroom</a></li>
+                                                        <li><a href="#">Download file</a></li>
+                                                        <li><a href="#">Add to filemanager</a></li>
+                                                    </ul>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </li>
+                            <li class="widget links">
+                                <div class="widget-header collapse-control" data-toggle="collapse" href="#collapseLinks" aria-expanded="true" aria-controls="collapseLinks">
+                                    <span class="icon-pin"></span>
+                                    <span class="title">Links</span>
+                                    <span class="collapse-icon icon-arrow-top"></span>
+                                </div>
+                                <div class="collapsible-section collapse in" id="collapseLinks">
+                                    <div class="widget-content">
+                                        <div class="widget-item link-item">
+                                            <a href="#" class="link-preview uploaded-file">
+                                                <img src="../static/images/uploaded-img.png" alt="">
+                                            </a>
+                                            <div class="description">
+                                                <div class="title"><a href="#">Test du kit Bluetens : l’objet con Test du kit Bluetens</a></div>
+                                                <p>Les objets connectés dont nous avons le plus parlé dans nos colonnes sont essentiellement des équipements pour la maison et des accessoires de mesure de soi (montre...</p>
+                                                <div class="info"><span>Shared by: <a href="#">arnauddsj</a><span class="date">Aug 31st at 3:38 PM</span></span></div>
+                                            </div>
+                                            <div class="widget-item-menu">
+                                                <div class="dropdown btn-group">
+                                                    <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="fa fa-ellipsis-h"></i></a>
+                                                    <ul class="dropdown-menu users-checklist-dropdown dropdown-menu-right">
+                                                        <li class="menu-visibility-option"><a href="#">Hide/Show #fileroom <i class="fa fa-eye" aria-hidden="true"></i><i class="fa fa-eye-slash" aria-hidden="true"></i></a></li>
+                                                        <li role="separator" class="divider"></li>
+                                                        <li><a href="#">Un-attache the file</a></li>
+                                                        <li><a href="#">Open a #fileroom</a></li>
+                                                        <li><a href="#">Download file</a></li>
+                                                        <li><a href="#">Add to filemanager</a></li>
+                                                    </ul>
+                                                </div>
+                                                <div class="dropdown btn-group">
+                                                    <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="fa fa-link"></i></a>
+                                                    <ul class="dropdown-menu users-checklist-dropdown dropdown-menu-right">
+                                                        <li class="menu-visibility-option"><a href="#">Hide/Show #fileroom <i class="fa fa-eye" aria-hidden="true"></i><i class="fa fa-eye-slash" aria-hidden="true"></i></a></li>
+                                                        <li role="separator" class="divider"></li>
+                                                        <li><a href="#">Detailed view</a></li>
+                                                        <li><a href="#">Simple view</a></li>
+                                                    </ul>
                                                 </div>
                                             </div>
                                         </div>
@@ -273,8 +449,7 @@
                         </ul>
                     </div>
                 </div>
-            </div>
-            {% raw notifcontent %}
+            </aside>
         </div>
     </div>
 </div>
@@ -284,6 +459,12 @@
 <script type="text/javascript" src="../static/js/jquery-ui.js"></script>
 <script type="text/javascript" src="../static/js/bootstrap.min.js"></script>
 <script type="text/javascript" src="../static/js/jquery.mCustomScrollbar.concat.min.js"></script>
+<script type="text/javascript" src="../static/js/emojionearea.min.js"></script>
+<script type="text/javascript" src="../static/js/jquery.dataTables.min.js"></script>
+<script type="text/javascript" src="../static/js/dataTables.bootstrap.min.js"></script>
+<script type="text/javascript" src="../static/js/bootstrap-select.min.js"></script>
+<script type="text/javascript" src="../static/js/bootstrap-colorpicker.min.js"></script>
+<script type="text/javascript" src="../static/js/table-filter.js"></script>
 <script type="text/javascript" src="../static/js/core.js"></script>
 <script type="text/javascript" src="../static/js/app.js"></script>
 
