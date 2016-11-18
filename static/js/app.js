@@ -31,27 +31,9 @@ function cookie(name) {
     var r = document.cookie.match("\\b" + name + "=([^;]*)\\b");
     return r ? r[1] : undefined;
 }
-//var bidule = 'chouette'
-//var host = location.origin.replace(/^http/, 'ws')
-
 /**
  * Helper function to get the value of a cookie.
  */
-
-//var ws = new WebSocket(response);
-
-//console.log('machin2' + machin.responseText)
-// console.log('machin is' + machin);
-// alert(machin.toSource)
-//
-
-
-//truc
-//ws.onopen()
-// function cookie(name) {
-//     var r = document.cookie.match("\\b" + name + "=([^;]*)\\b");
-//     return r ? r[1] : undefined;
-// }
 
 $(document).ready(function() {
     if (!window.console) window.console = {};
@@ -59,28 +41,15 @@ $(document).ready(function() {
     };
 
     $.post("/room/testroom", function (data) {
-        truc = JSON.parse(data); // John
-        //console.log('test url is' + data[0]);
-        // var ws = data
-        // console.log(ws)
+        truc = JSON.parse(data);
         ws = new WebSocket(truc.url);
-        //console.log( data.time ); // 2pm
         // Websocket callbacks:
         ws.onopen = function () {
             console.log("Connected...");
-            //disabled.removeAttr("disabled");
             $(".emojionearea-editor").attr("disabled", false);
-            //$( "div.message" ).scrollTop( 1000 );
-            //$( "div.content-container" ).scrollTop( 1000 );
-            // var dimension = $('#mCSB_3_container').height() - $('#mCSB_3_scrollbar_vertical').height();
-            // $('#mCSB_3_container').attr({style: 'position: relative; top: -' + dimension.toFixed(0) + 'px; left: 0px;'}); // Can't handle Internet explorer like that because style output ins not the same order
             var dimension = $('.day-messages').height();
             $('html,body, div').animate({ scrollTop: dimension }, 1);
-            // console.log("j'ai bidouillé mon div")
-            // console.log($('#daymessages').height())
             console.log('dimension is' + dimension)
-            //$('#daymessages').find(".message:last").slideDown("fast", function(){
-            //$('html, body, div').animate({scrollTop: dimension})//, 400);
         };
         $("#chat-input").submit(function () {
             //e.default();
@@ -110,15 +79,12 @@ $(document).ready(function() {
             console.log("Closed!");
             $(".emojionearea-editor").attr("disabled", true);
         };
-//});
-
 
         /**
          * Function to create a new message.
          */
         function postMessage(form) {
             console.log('je suis deja dans postmessage')
-            //var value = form.find("textaera[type=textaera]").val();
             var value = $(".emojionearea-editor").html();
             console.log(value);
             var message = {body: value};
@@ -127,19 +93,14 @@ $(document).ready(function() {
             message._xsrf = cookie("_xsrf");
             message.user = cookie("user");
             var disabled = form.find("input");
-            //disabled.attr("disabled", "disabled");
             $(".emojionearea-editor").prop("disabled");
             // Send message using websocket.
             ws.send(JSON.stringify(message));
             console.log(message)
             // @todo: A response if successful would be nice.
             console.log("Created message (successfuly)");
-            //$("#messageArea").val("").select();
             $(".emojionearea-editor").html("")
-            //disabled.removeAttr("disabled");
             $(".emojionearea-editor").prop("disabled", false);
-            // var dimension = $('#mCSB_3_container').height() - $('#mCSB_3_scrollbar_vertical').height();
-            // $('#mCSB_3_container').attr({style: 'position: relative; top: -' + dimension + 'px; left: 0px;'});
             var dimension = $('.day-messages').height();
             $('html,body, div').animate({ scrollTop: dimension }, 1);
         }
@@ -196,14 +157,6 @@ $(document).ready(function() {
                     </ul> \
                 </div> \
             </div>');
-                //currentpos = $(mCSB_3_container).attr('style');
-                //console.log('currentpos is' + currentpos);
-                //console.log('stylecraft is' + stylecraft);
-                //if (currentpos !== stylecraft) return;
-                //else {
-                //    var dimension = $('#mCSB_3_container').height() - $('#mCSB_3_scrollbar_vertical').height();
-                //    $('#mCSB_3_container').attr({style: 'position: relative; top: -' + dimension + 'px; left: 0px;'});
-                //}
                 var dimension = $('.day-messages').height();
                 $('html,body, div').animate({ scrollTop: dimension }, 1);
             }
@@ -235,11 +188,6 @@ $(document).ready(function() {
                         </ul> \
                     </div> \
                 </div>');
-                // if (currentpos !== stylecraft) return;
-                // else {
-                //     var dimension = $('#mCSB_3_container').height() - $('#mCSB_3_scrollbar_vertical').height();
-                //     $('#mCSB_3_container').attr({style: 'position: relative; top: -' + dimension + 'px; left: 0px;'});
-                // }
                 var dimension = $('.day-messages').height();
                 $('html,body, div').animate({ scrollTop: dimension }, 1);
                 return
@@ -250,33 +198,9 @@ $(document).ready(function() {
                 currentpos = $(mCSB_3_container).attr('style');
                 console.log('currentpos is' + currentpos);
                 console.log('stylecraft is' + stylecraft);
-                // if (currentpos !== stylecraft) return;
-                // else {
-                //     var dimension = $('#mCSB_3_container').height() - $('#mCSB_3_scrollbar_vertical').height();
-                //     $('#mCSB_3_container').attr({style: 'position: relative; top: -' + dimension + 'px; left: 0px;'});
-                // }
                 var dimension = $('.day-messages').height();
                 $('html,body, div').animate({ scrollTop: dimension }, 1);
             }
         };
     });
 });
-
-//     //console.log('machin truc' + url);
-//     // Bind the submit event of the form input to postMessage().
-//     $("#chat-input").submit(function () {
-//         postMessage($(this));
-//         return false;
-//     });
-//
-//     //$('html, body').animate({scrollTop: $(document).height()}, 800);
-//     //$( "div.message" ).scrollTop( 1000 );
-//     //var dimension = $('#daymessages').height()
-//     //$('#daymessages').find(".message:last").slideDown("fast", function(){
-//     //$('html, body, div').animate({scrollTop: dimension})//, 400);
-//
-//     // Connection state should be reflacted in submit button.
-//     var disabled = $("form#chat-input").find("textaera");
-//     disabled.attr("disabled", "disabled");
-//
-

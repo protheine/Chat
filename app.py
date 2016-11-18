@@ -28,8 +28,6 @@ from login import LogoutHandler
 #import settings as config
 # Define port from command line parameter.
 tornado.options.define("port", default=8888, help="run on the given port", type=int)
-#ioloop.IOLoop.instance().start()
-#Image.LOAD_TRUNCATED_IMAGES = True
 class ChatEdit(tornado.web.RequestHandler):
     def post(self):
         print "Placeholder"
@@ -38,26 +36,19 @@ class UploadHandler(tornado.web.RequestHandler):#tornado.web.RequestHandler):
         db = connect(host=config.SQLSERVER, user=config.SQLUSER, passwd=config.SQLPASS, db=config.SQLDB)
         cursor = db.cursor()
         uri = self.request.uri
-        print 'uri', uri
         url = uri.split('/')
         RoomName = url[3]
-        print 'Roomname', RoomName
         sql = 'SELECT RoomID FROM abcd_un WHERE RoomName = %s', [RoomName]
         cursor.execute(*sql)
         RoomID = cursor.fetchone()
-        print 'RoomID', RoomID
         RoomID = str(RoomID[0])
         RoomID = RoomID.decode()
-        print "post!"
         origin = self.request.protocol + "://" + self.request.host + '/' + url[2] + '/' + url[3]
         file1 = self.request.files['file1'][0]
         original_fname = file1['filename']
         try: # TODO : Better use mime type!
             current_location2 = self.request.protocol + "://" + self.request.host + "/static/uploads/" + 'resized-' + original_fname
-            print "i'm trying fname_tuple"
             fname_tuple = original_fname.rsplit('.', 1)
-            print type(fname_tuple)
-            print fname_tuple
             if fname_tuple[1] == 'jpg':
                 file_url2 = "<img src ='" + current_location2 + "'/>"
                 message2 = {
@@ -85,22 +76,17 @@ class UploadHandler(tornado.web.RequestHandler):#tornado.web.RequestHandler):
                 message2 = {"body": file_url2,
                 "_id": ''.join(random.choice(string.ascii_uppercase) for i in range(12)),	"from": "Guest"}
             else:
-                print "j'ai tout cassé"
                 file_url2 = ''
                 message2 = ''
             output_file = open("static/uploads/" + original_fname, 'wb')
             output_file.write(file1['body'])
             size = 128, 128
-            print "tentative thumbnail"
             output_file.close()
-            #outfile = os.path.splitext(original_fname) + ".thumbnail"
-            #print 'outfile', outfile
-
             thumbwidhtsize, thumbheightsize = 128, 128
             size = thumbwidhtsize, thumbheightsize
             img = Image.open(os.path.join("static/uploads/", original_fname))
             width, height = img.size
-            if width > height:
+            if width > height: #Ratio calculation, depending on wich side is the longuest one
                 ratio = width / thumbwidhtsize
                 finalsize = width / ratio, height / ratio
                 print finalsize
@@ -108,13 +94,11 @@ class UploadHandler(tornado.web.RequestHandler):#tornado.web.RequestHandler):
             else:
                 ratio = height / thumbheightsize
                 finalsize = width / ratio, height / ratio
-                print finalsize
                 img = img.resize((finalsize), Image.BILINEAR)
 
             img.save(os.path.join("static/uploads/", 'resized-' + original_fname))
 
             redistogo_url = os.getenv('REDISTOGO_URL', None)
-            print "i'm in redistogo"
             REDIS_HOST = 'localhost'
             REDIS_PORT = 6379
             REDIS_PWD = None
@@ -122,13 +106,8 @@ class UploadHandler(tornado.web.RequestHandler):#tornado.web.RequestHandler):
             client = brukva.Client(host=REDIS_HOST, port=int(REDIS_PORT), password=REDIS_PWD)
             client.connect()
             client.listen(self)
-            #current_location = "<a href=" + self.request.protocol + "://" + self.request.host + self.request.uri + "s/" + original_fname + "></a>"
             current_location = self.request.protocol + '://' + self.request.host + "/static/uploads/" + original_fname
-            print current_location
             file_url = 'file ' + original_fname + ' has been uploaded to ' + tornado.escape.linkify(current_location)
-            #file_url2 = '<img src ="' + current_location2 + '" width="50%" height="50%"/>'
-            #message = {"body": file_url,
-            #"_id": ''.join(random.choice(string.ascii_uppercase) for i in range(12)),	"from": "Guest"}
             message = {
                 '_id': ''.join(random.choice(string.ascii_uppercase) for i in range(12)),
                 'date': time.strftime("%H:%M:%S"),
@@ -138,19 +117,12 @@ class UploadHandler(tornado.web.RequestHandler):#tornado.web.RequestHandler):
             }
             message_encoded = tornado.escape.json_encode(message)
             room = RoomID #FIXME : message will land in room 1 for all upload in all rooms
-            print "1"
             logging.info('New user for upload connected to chat room ' + room)
-            print 'message1', message_encoded
             client.rpush(room, message_encoded)
             #Publish message in Redis channel
             client.publish(room, message_encoded)
-            print message2
             if message2 is not '':
-                print "je balance la sauce"
-                # message2 = {"body": file_url2,
-                # "_id": ''.join(random.choice(string.ascii_uppercase) for i in range(12)),	"from": "Guest"}
                 message_encoded = tornado.escape.json_encode(message2)
-                print 'message2', message_encoded
                 client.rpush(room, message_encoded)
                 #Publish message in Redis channel.
                 client.publish(room, message_encoded)
@@ -160,7 +132,6 @@ class UploadHandler(tornado.web.RequestHandler):#tornado.web.RequestHandler):
             t = Timer(0.1, client.disconnect)
             t.start()
             db.close()
-            print 'currentloc', current_location
             self.redirect(origin)
             # self.finish('pouet')
         except:
@@ -171,7 +142,6 @@ class MainHandler(BaseHandler):
     Main request handler for the root path and for chat rooms.
     """
     def post(self, RoomName):
-        print 'je poste'
         db = connect(host=config.SQLSERVER, user=config.SQLUSER, passwd=config.SQLPASS, db=config.SQLDB)
         cursor = db.cursor()
         uri = self.request.uri
@@ -180,7 +150,6 @@ class MainHandler(BaseHandler):
         sql = 'SELECT RoomID FROM abcd_un WHERE RoomName = %s', [RoomName]
         cursor.execute(*sql)
         RoomID = cursor.fetchone()
-        print 'RoomID', type(RoomID)
         RoomID = str(RoomID[0])
         RoomID = RoomID.decode()
         fullurl = 'ws://' + self.request.host + '/socket/' + RoomID
@@ -191,11 +160,10 @@ class MainHandler(BaseHandler):
             'url': fullurl,
         }
         wsurl_encoded = tornado.escape.json_encode(wsurl)
-        print wsurl_encoded
         self.write(wsurl_encoded)
     @tornado.web.asynchronous
     def get(self, room=None):
-        print 'xsrf token', self.xsrf_token #Hm.... ok, well..; doing that is enough to set the xsrf cookie, required by javascript to post
+        print 'xsrf token', self.xsrf_token #DO NOT REMOVE doing that is enough to set the xsrf cookie, required by javascript to post, strange, i know
         url = self.request.uri
         url = url.split('/')
         RoomName = url[2]
@@ -205,7 +173,6 @@ class MainHandler(BaseHandler):
         sql = 'SELECT RoomID FROM abcd_un WHERE RoomName = %s', [RoomName]
         cursor.execute(*sql)
         RoomID = cursor.fetchone()
-        print "repere 1"
         if not room:
             #self.redirect("/room/1")
             print 'error, no rooms'
@@ -217,12 +184,6 @@ class MainHandler(BaseHandler):
 
 
     def on_auth(self, user):
-        print 'onauthapppy', user
-        # print "je passe dans MainHandler au lieu de LoginHandler ??"
-        #if not user:
-            # Redirect to login if not authenticated.
-            # self.redirect("/login")
-            # return
         # Load 50 latest messages from this chat room.
         db = connect (host = config.SQLSERVER, user = config.SQLUSER, passwd = config.SQLPASS, db = config.SQLDB)
         cursor = db.cursor ()
@@ -230,59 +191,36 @@ class MainHandler(BaseHandler):
         Callback for third party authentication (last step).
         """
         if not user:
-            print "user est tu la inside app?", user
             self.redirect("/login") # TODO: Make this hard coded value fecthable from db for flexible configuration
         else:
-            #try:
-            print "est ce que je passe par la? edition 2"
-            # username = str(user["email"])
-            # print username
-            print user
             sql = ("SELECT UserID FROM Users_info WHERE UserName = '%s'") % user
             cursor.execute(sql)
             useridresult = cursor.fetchone()
             sql = "SELECT SessionID FROM Users WHERE UserID = %s", [useridresult]
-            print sql
             cursor.execute(*sql)
             SQLSessionID = cursor.fetchone()
             BroswerSessionID = self.get_secure_cookie('SessionID')
-            print SQLSessionID[0]
-            print 'SQLSessionID is ' + str(SQLSessionID) + ' and BroswerSessionID is ' + BroswerSessionID #Session check
             if SQLSessionID[0] == BroswerSessionID:
                 uri = self.request.uri
                 url = uri.split('/')
                 RoomName = url[2]
                 RoomName = RoomName.strip('?')
-                print RoomName
                 sql = 'SELECT RoomID FROM abcd_un WHERE RoomName = %s', [RoomName]
                 cursor.execute(*sql)
                 RoomID = cursor.fetchone()
-                print 'RoomID', type(RoomID)
                 RoomID = str(RoomID[0])
                 RoomID = RoomID.decode()
                 if not 'userlist' in globals():
-                    print 'ca existais pas'
                     global userlist
                     userlist = []
                 global userlist
                 if user not in userlist:
                     userlist.append(user)
                 self.room = RoomID
-                print "je check la session"
-                #self.redirect("/room/1") # TODO: Make this hard coded value fecthable from db for flexible configuration
-                print 'my room is', type(self.room)
                 self.application.client.lrange(self.room, -50, -1, self.stocka)
                 self.application.client.lrange(user, -5, -1, self.stockb)
-                print "ok1"
             else:
                 self.redirect("/login") # TODO: Make this hard coded value fecthable from db for flexible configuration
-            #except:
-            # print 'a eu un schisme'
-            # exc_type, exc_obj, exc_tb = sys.exc_info()
-            # fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
-            # print(exc_type, fname, exc_tb.tb_lineno)
-            # self.redirect("/login")
-            #self.redirect("/login") # TODO: Make this hard coded value fecthable from db for flexible configuration
     def stocka(self, result):
         global messages
         messages = []
@@ -294,8 +232,6 @@ class MainHandler(BaseHandler):
         self.on_conversation_found()
     def on_conversation_found(self):
         i = 0
-        #     if 'notification' in result:
-        #         print "j'ai une notif"
         global messages
         global notifications
         mix = messages + notifications
@@ -303,18 +239,13 @@ class MainHandler(BaseHandler):
         db = connect(host=config.SQLSERVER, user=config.SQLUSER, passwd=config.SQLPASS, db=config.SQLDB)
         cursor = db.cursor()
         AppID = '1'
-        RoomNumber = '1'
+        RoomNumber = '1' #Todo : Change that to non hardcoded values
         sql = "SELECT RoomID FROM abcd_un WHERE RoomNumber = %s AND AppID = %s", [RoomNumber, AppID]
         cursor.execute(*sql)
         RoomIDS = cursor.fetchall()
-        # if isinstance(result, Exception):
-        #     raise tornado.web.HTTPError(500)
-        # JSON-decode messages.
-        #global temp
         temp = []
         messages = []
         notifications = []
-        print "je viens d'ecraser notifications comme un encule"
         for message in mix:
             try:
                 temp.append(tornado.escape.json_decode(message))
@@ -329,21 +260,15 @@ class MainHandler(BaseHandler):
                             notifications.append(message)
                         elif message['type'] is not 'notification':
                             if 'username' not in locals():
-                                print 'variable username not found'
                                 username = ''
                             if 'lastusername' not in locals():
-                                print 'variable lastusername not found'
                                 lastusername = ''
                             if message['from'] == lastusername:
                                 message['from'] = ''
-                                print 'sameusername'
                                 #time.sleep(0.2)
                             else:
                                 print 'username', message['from']
-                                print 'lastusername', lastusername
                                 lastusername = message['from']
-                                print 'notsameusername'
-                                #time.sleep(0.2)
                             messages.append(message)
                 except:
                     print 'faulty message: ', message
@@ -355,26 +280,19 @@ class MainHandler(BaseHandler):
         cursor = db.cursor()
         BroswerSessionID = self.get_secure_cookie('SessionID')
         sql = "SELECT UserID FROM Users WHERE SessionID = %s", [BroswerSessionID]
-        print sql
         cursor.execute(*sql)
         UserID = cursor.fetchone()
         sql = "SELECT UserGroupID, CompanyID FROM Users_info WHERE UserID = %s", [UserID]
-        print sql
         cursor.execute(*sql)
         GroupandOwnerID = cursor.fetchone()
-        print 'GroupandOwnerID', GroupandOwnerID
         sql = "SELECT AppID, Tableprefix, AppName FROM GroupApps WHERE GroupID = %s AND OwnerID = %s", [GroupandOwnerID[0],
                                                                                                         GroupandOwnerID[1]]
         cursor.execute(*sql)
         AppID = cursor.fetchone()
         Tablename = AppID[1] + AppID[2]
-        print Tablename
         sql = "SELECT RoomName FROM " + Tablename + " WHERE AppID = %s", [AppID[0]]
-        print sql
         cursor.execute(*sql)
         RoomName = cursor.fetchall()
-        print 'Rooms', RoomName
-        print 'Userlist', userlist
         content = self.render_string("messages.html",  messages=messages)
         notifcontent = self.render_string("notifications.html", notifications=notifications)
         self.render_default("index.html", userlist=userlist, RoomName=RoomName, notifcontent=notifcontent, content=content, chat=1)
@@ -423,9 +341,7 @@ class ChatSocketHandler(tornado.websocket.WebSocketHandler):
         UserID = cursor.fetchone()
         sql = "SELECT UserName FROM Users_info WHERE UserID = %s", [UserID]
         cursor.execute(*sql)
-        #global UserName
         UserName = cursor.fetchone()
-        #print 'UserName', UserName[0]
         self.client.subscribe(user)
         self.subscribed = True
         self.client.listen(self.on_messages_published)
@@ -442,67 +358,43 @@ class ChatSocketHandler(tornado.websocket.WebSocketHandler):
             m = tornado.escape.json_decode(message.body)
             # Send messages to other clients and finish connection.
             self.write_message(dict(messages=[m]))
-            print "gone in on_messages_published"
-            print message
-            print m
         except :
             self.on_close()
             print 'Hey, something went wrong in section on_messages_published!', sys.exc_info()
 
     def on_message(self, data):
-        # truc = user.get("email")
-        # machin = user.get("name")
-        # chouette = user.get(user["email"])
-        # print "truc: " + truc + ", machin: " + machin + ", chouette: " + chouette
         """
         Callback when new message received vie the socket.
         """
-        # print "var message is " + trouveunvrainomdevariable(fileflag)
-        # if trouveunvrainomdevariable.fileflag == 'fileinfo':
-            # self.fileinfo()
-        #if UploadHandler.message == 'fileinfo':
-            #self.fileinfo()
         logging.info('Received new message %r', data)
         try:
             # Parse input to message dict.
-            print "Data is" + data
             datadecoded = tornado.escape.json_decode(data)
             what = str(datadecoded['user'])
-            print 'what', what
 
             rightdatadecoded = what.split('"', 1)
             rightdatadecoded = str(rightdatadecoded[1]) # Workaround because #tornado.escape.json_decode(data) keeps an unwanted leading " : [W 160909 14:32:41 web:2659] #Invalid cookie signature '"ZXhhbHRpYQ==|1473424358|015bc4923b6db19a0a7c084cdc60b81952868c12'
             #                          ^There
             #coded(JSON) example message is : #{"body":"222","_xsrf":"b8f28cd1a8184afeb9296d48bb943d0a","user":"\"ZXhhbHRpYQ==|1473424358|015b#c4923b6db19a0a7c084cdc60b81952868c12"} wich seems right
-            print rightdatadecoded
             messagetype = 'regular'
             myuser = self.get_secure_cookie('user', rightdatadecoded)
-            print 'myuser', myuser
             message = {
                 '_id': ''.join(random.choice(string.ascii_uppercase) for i in range(12)),
                 'date': time.strftime("%H:%M:%S"),
                 'type': messagetype,
-                #'from': self.get_secure_cookie('user', str(datadecoded['user'])), # datadecoding keeps a #unwanted quotation mark, bug report TODO
                 'from': self.get_secure_cookie('user', rightdatadecoded),
                 'body': tornado.escape.linkify(datadecoded["body"]),
             }
-            print 'message is', message
-            print 'message body is', message['body']
             notificationcheck = message['body'].split(' ')[0]
             notificationcheck = notificationcheck.split('@')
             print notificationcheck
-            if message['body'].startswith('@' + notificationcheck[1]):
-                print 'je commence par @'
+            if message['body'].startswith('@' + notificationcheck[0]):
                 listmessagebody = message['body'].split(' ')[0]
                 listmessagebody = listmessagebody.split('@')
-                print 'listmessagbody', listmessagebody
-                print 'myuser', myuser
-                print "oui, c'est vrai"
                 message2 = {
                     '_id': ''.join(random.choice(string.ascii_uppercase) for i in range(12)),
                     'date': time.strftime("%H:%M:%S"),
                     'type': 'notification',
-                    # 'from': self.get_secure_cookie('user', str(datadecoded['user'])), # datadecoding keeps a #unwanted quotation mark, bug report TODO
                     'from': self.get_secure_cookie('user', rightdatadecoded),
                     'body': 'You were directly mentionned',
                 }
@@ -512,17 +404,13 @@ class ChatSocketHandler(tornado.websocket.WebSocketHandler):
                 self.application.client.rpush(str(listmessagebody[1]), message2_encoded)
                 # Publish message in Redis channel.
                 self.application.client.publish(str(listmessagebody[1]), message2_encoded)
-                # except:
-                #     err = str(sys.exc_info()[0])
-                #     # Send an error back to client.
-                #     self.write_message({'error': 1, 'textStatus': 'Error writing to database: ' + str(err)})
-                #     return
             if not message['from']:
                 logging.warning("Error: Authentication missing")
                 message['from'] = 'Guest'
         except Exception, err:
             # Send an error back to client.
             self.write_message({'error': 1, 'textStatus': 'Bad input data ... ' + str(err) + data})
+            print sys.exc_info()
             return
 
         # Save message and publish in Redis.
@@ -534,7 +422,6 @@ class ChatSocketHandler(tornado.websocket.WebSocketHandler):
             self.application.client.rpush(self.room, message_encoded)
             # Publish message in Redis channel.
             self.application.client.publish(self.room, message_encoded)
-            print 'message_encoded is', message_encoded
         except Exception, err:
             err = str(sys.exc_info()[0])
             # Send an error back to client.
@@ -643,7 +530,4 @@ def main():
     tornado.ioloop.IOLoop.instance().start()
 
 if __name__ == "__main__":
-    # global fileflag
-    # trouveunvrainomdevariable = UploadHandler
-
     main()
