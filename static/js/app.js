@@ -88,17 +88,10 @@ $(document).ready(function() {
             console.log('chat-input');
             return false;
         });
-        // $("#message-input").focus();
-        var uploader = new ss.SimpleUpload({
-            button: 'upload-btn', // HTML element used as upload button
-            url: '/upload?' + window.location.pathname, // URL of server-side upload handler
-            name: 'file1', // Parameter name of the uploaded file
-            customHeaders: {'X-XSRFToken': cookie("_xsrf")}
-
-        });
         console.log(cookie("_xsrf"))
         ws.onmessage = function (event) {
             data = JSON.parse(event.data);
+            console.log('data is' + data)
             if (data.textStatus && data.textStatus == "unauthorized") {
                 alert("unauthorized");
                 $(".emojionearea-editor").attr("disabled", true);
@@ -189,11 +182,20 @@ $(document).ready(function() {
                 $(".messages_container").append('<div class="message-container"> \
                 <a href="#" class="thumbnail user-avatar"><img src="../static/images/user-avatar.png" alt=""></a> \
                 <div class="message"> \
-                <div class="info"><a href="#" class="user-name">' + message.from + '</a><span class="info">' + message.date + '</span></div> \
-                <div id="mymessage">' + message.body + '</div> \
+                    <h6 id="username" hidden>' + message.from + '</a><span class="info">' + message.date + '</span></div> \
+               </div> \
+                <div class="dropdown btn-group"> \
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="fa fa-ellipsis-h"></i></a> \
+                    <ul class="dropdown-menu users-checklist-dropdown dropdown-menu-right"> \
+                        <li class="menu-visibility-option"><a href="#">Hide/Show #fileroom <i class="fa fa-eye" aria-hidden="true"></i><i class="fa fa-eye-slash" aria-hidden="true"></i></a></li> \
+                        <li role="separator" class="divider"></li> \
+                        <li><a href="#">Un-attache the file</a></li> \
+                        <li><a href="#">Open a #fileroom</a></li> \
+                        <li><a href="#">Download file</a></li> \
+                        <li><a href="#">Add to filemanager</a></li> \
+                    </ul> \
                 </div> \
-                <a href="#" class="menu-btn"></a> \
-                </div>');
+            </div>');
                 //currentpos = $(mCSB_3_container).attr('style');
                 //console.log('currentpos is' + currentpos);
                 //console.log('stylecraft is' + stylecraft);
@@ -213,6 +215,7 @@ $(document).ready(function() {
                 $("#notif-badge").text(notifcount = +notifcount + 1);
             }
             if (message.type == 'regular' && $('.message:last').find('#username:last').html() != message.from) {
+                console.log('regular');
                 $(".day-messages").append('<div class="message-container"> \
                     <a href="#" class="thumbnail user-avatar"><img src="../static/images/user-avatar.png" alt=""></a> \
                     <div class="message"> \
@@ -232,9 +235,6 @@ $(document).ready(function() {
                         </ul> \
                     </div> \
                 </div>');
-                currentpos = $(mCSB_3_container).attr('style');
-                console.log('currentpos is' + currentpos);
-                console.log('stylecraft is' + stylecraft);
                 // if (currentpos !== stylecraft) return;
                 // else {
                 //     var dimension = $('#mCSB_3_container').height() - $('#mCSB_3_scrollbar_vertical').height();
@@ -245,6 +245,7 @@ $(document).ready(function() {
                 return
             }
             if (message.type == 'regular' && $('.message:last').find('#username:last').html() == message.from) {
+                console.log('completement')
                 $(".day-messages").find('.messagefollow:last').append(message.body + '<br>');
                 currentpos = $(mCSB_3_container).attr('style');
                 console.log('currentpos is' + currentpos);
@@ -257,7 +258,6 @@ $(document).ready(function() {
                 var dimension = $('.day-messages').height();
                 $('html,body, div').animate({ scrollTop: dimension }, 1);
             }
-
         };
     });
 });

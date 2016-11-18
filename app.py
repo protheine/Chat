@@ -486,9 +486,13 @@ class ChatSocketHandler(tornado.websocket.WebSocketHandler):
                 'from': self.get_secure_cookie('user', rightdatadecoded),
                 'body': tornado.escape.linkify(datadecoded["body"]),
             }
+            print 'message is', message
             print 'message body is', message['body']
-
-            if message['body'].startswith('@' + message['body'].split(' ')[0]):
+            notificationcheck = message['body'].split(' ')[0]
+            notificationcheck = notificationcheck.split('@')
+            print notificationcheck
+            if message['body'].startswith('@' + notificationcheck[1]):
+                print 'je commence par @'
                 listmessagebody = message['body'].split(' ')[0]
                 listmessagebody = listmessagebody.split('@')
                 print 'listmessagbody', listmessagebody
