@@ -276,6 +276,7 @@ class MainHandler(BaseHandler):
         self.pagerender(messages, notifications)
         db.close()
     def pagerender(self, messages, notifications):#Renderding pages
+        GroupID = '1'
         db = connect(host=config.SQLSERVER, user=config.SQLUSER, passwd=config.SQLPASS, db=config.SQLDB)
         cursor = db.cursor()
         BroswerSessionID = self.get_secure_cookie('SessionID')
@@ -293,9 +294,18 @@ class MainHandler(BaseHandler):
         sql = "SELECT RoomName FROM " + Tablename + " WHERE AppID = %s", [AppID[0]]
         cursor.execute(*sql)
         RoomName = cursor.fetchall()
+        print 'appid is:', AppID
+        sql = "SELECT Csspath FROM Templates WHERE AppID = %s  AND GroupID = %s AND IsActive = '1'", (
+            AppID[0], GroupID)
+        cursor.execute(*sql)
+        draftcsspath = cursor.fetchall()
+        draftcsspath = draftcsspath[0][0].split('css', 1)
+        draftcsspath = '../static/css' + draftcsspath[1]
+        print 'draftcsspath is:', draftcsspath
         content = self.render_string("messages.html",  messages=messages)
         notifcontent = self.render_string("notifications.html", notifications=notifications)
-        self.render_default("index.html", userlist=userlist, RoomName=RoomName, notifcontent=notifcontent, content=content, chat=1)
+        self.render_default("index.html", draftcsspath=draftcsspath, userlist=userlist, RoomName=RoomName, notifcontent=notifcontent, content=content, chat=1)
+        print "je pagerender"
         db.close()
 class ChatSocketHandler(tornado.websocket.WebSocketHandler):
     """
