@@ -280,17 +280,22 @@ class MainHandler(BaseHandler):
         db = connect(host=config.SQLSERVER, user=config.SQLUSER, passwd=config.SQLPASS, db=config.SQLDB)
         cursor = db.cursor()
         BroswerSessionID = self.get_secure_cookie('SessionID')
+        print 'BroswerSessionID', BroswerSessionID
         sql = "SELECT UserID FROM Users WHERE SessionID = %s", [BroswerSessionID]
         cursor.execute(*sql)
         UserID = cursor.fetchone()
+        print 'Userid', UserID
         sql = "SELECT UserGroupID, CompanyID FROM Users_info WHERE UserID = %s", [UserID]
         cursor.execute(*sql)
         GroupandOwnerID = cursor.fetchone()
+        print 'GroupandOwnerID', GroupandOwnerID
         sql = "SELECT AppID, Tableprefix, AppName FROM GroupApps WHERE GroupID = %s AND OwnerID = %s", [GroupandOwnerID[0],
                                                                                                         GroupandOwnerID[1]]
         cursor.execute(*sql)
         AppID = cursor.fetchone()
+        print 'AppID', AppID
         Tablename = AppID[1] + AppID[2]
+        print 'Tablename', Tablename
         sql = "SELECT RoomName FROM " + Tablename + " WHERE AppID = %s", [AppID[0]]
         cursor.execute(*sql)
         RoomName = cursor.fetchall()
