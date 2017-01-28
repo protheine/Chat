@@ -222,19 +222,22 @@ class MainHandler(BaseHandler):
             else:
                 self.redirect("/login") # TODO: Make this hard coded value fecthable from db for flexible configuration
     def stocka(self, result):
+        print 'result type: ', type(result)
         global messages
         messages = []
         messages = result
+        print 'messagesresultare :', messages
     def stockb(self, result):
         global notifications
         notifications = []
         notifications = result
+        print 'notifresult is:', result
         self.on_conversation_found()
     def on_conversation_found(self):
         i = 0
         global messages
         global notifications
-        mix = messages + notifications
+        mix = messages# + notifications
         print len(mix)
         db = connect(host=config.SQLSERVER, user=config.SQLUSER, passwd=config.SQLPASS, db=config.SQLDB)
         cursor = db.cursor()
@@ -246,33 +249,53 @@ class MainHandler(BaseHandler):
         temp = []
         messages = []
         notifications = []
-        for message in mix:
-            try:
-                temp.append(tornado.escape.json_decode(message))
-            except:
-                print 'faulty message: ', message
-                i += 1 #if a message is bad, added to number of bad messages
-                pass
-            if len(temp) == len(mix) - i: # number of bad messages soustracted to total messages received to get correct total before processing
+        print 'mix is: ', type(mix), mix
+        checktypevariable = str(type(mix))
+        #checktypevariable = str(checktypevariable)
+        print 'checkcontent', checktypevariable
+        if checktypevariable == "<type 'tuple'>":
+            print 'bing...'
+            # messages={}
+            messages =  'Error, you are using a non functional version of brukva, please use the one from evilkost<br><H1>Program terminated</H1>'
+            self.render("test.html", messages=messages)
+            sys.exit(1)
+        elif checktypevariable == "<type 'list'>":
+            for message in mix:
+                print "je m'en fout"
+               #checkvartype = "<type 'tuple'>"
+                print 'typemessage', type(messages)
                 try:
-                    for message in temp:
-                        if message['type'] == 'notification':
-                            notifications.append(message)
-                        elif message['type'] is not 'notification':
-                            if 'username' not in locals():
-                                username = ''
-                            if 'lastusername' not in locals():
-                                lastusername = ''
-                            if message['from'] == lastusername:
-                                message['from'] = ''
-                                #time.sleep(0.2)
-                            else:
-                                print 'username', message['from']
-                                lastusername = message['from']
-                            messages.append(message)
+                    #print 'message type is: ', type(message), 'len is: ', len(message), 'and content[0] is: ', message
+                    temp.append(tornado.escape.json_decode(message))
+                    print "yep, it's a message"
                 except:
                     print 'faulty message: ', message
+                    i += 1 #if a message is bad, added to number of bad messages
+                    print 'Hey, something went wrong in message sorting!', sys.exc_info()
                     pass
+                if len(temp) == len(mix) - i: # number of bad messages soustracted to total messages received to get correct total before processing
+                    try:
+                        for message in temp:
+                            if message['type'] == 'notification':
+                                notifications.append(message)
+                            elif message['type'] is not 'notification':
+                                if 'username' not in locals():
+                                    username = ''
+                                if 'lastusername' not in locals():
+                                    lastusername = ''
+                                if message['from'] == lastusername:
+                                    message['from'] = ''
+                                    #time.sleep(0.2)
+                                else:
+                                    print 'username', message['from']
+                                    lastusername = message['from']
+                                messages.append(message)
+                    except:
+                        print 'faulty message: ', message
+                        pass
+        else:
+            logging.error('Something really wrong happened')
+            sys.exit(1)
         self.pagerender(messages, notifications)
         db.close()
     def pagerender(self, messages, notifications):#Renderding pages
@@ -370,10 +393,15 @@ class ChatSocketHandler(tornado.websocket.WebSocketHandler):
         """
         try:
             # Decode message
-            m = tornado.escape.json_decode(message.body)
-            # Send messages to other clients and finish connection.
-            self.write_message(dict(messages=[m]))
+            print 'message lenght is: ', len(message), 'and content is: ', message
+            print 'message index: ', message.index
+            if 'body' in dir(message):
+                m = tornado.escape.json_decode(message.body)
+                # Send messages to other clients and finish connection.
+                self.write_message(dict(messages=[m]))
         except :
+            print 'message is:', dir(message)
+            print message.__doc__
             self.on_close()
             print 'Hey, something went wrong in section on_messages_published!', sys.exc_info()
 
@@ -526,7 +554,7 @@ def redis_connect():
         REDIS_USER, redis_url = redis_url.split(':', 1)
         REDIS_PWD, redis_url = redis_url.split('@', 1)
         REDIS_HOST, REDIS_PORT = redis_url.split(':', 1)
-    client = brukva.Client(host=REDIS_HOST, port=int(REDIS_PORT), password=REDIS_PWD)
+    client = brukva.Client(host=REDIS_HOST, port=int(REDIS_PORT))#, password=REDIS_PWD)
     client.connect()
     return client
 
