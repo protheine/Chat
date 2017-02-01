@@ -393,8 +393,8 @@ class ChatSocketHandler(tornado.websocket.WebSocketHandler):
         """
         try:
             # Decode message
-            print 'message lenght is: ', len(message), 'and content is: ', message
-            print 'message index: ', message.index
+            #print 'message lenght is: ', len(message), 'and content is: ', message
+            #print 'message index: ', message.index
             if 'body' in dir(message):
                 m = tornado.escape.json_decode(message.body)
                 # Send messages to other clients and finish connection.
