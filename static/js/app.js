@@ -174,7 +174,7 @@ $(document).ready(function() {
                     <div class="message"> \
                     <h6 id="username" hidden>{' + message.from + '</h6> \
                 <div class="info"><a href="#" class="user-name">' + message.from + '</a><span class="info">' + message.date + '</span></div> \
-                <div id="mymessage">' + message.body + '</div> \
+                <div class="content-message">' + message.body + '</div> \
                 </div> \
                 <div class="dropdown btn-group"> \
                 <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="fa fa-ellipsis-h"></i></a> \

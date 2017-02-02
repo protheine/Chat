@@ -108,13 +108,15 @@ $.fn.pageMe = function ( opts ) {
 $(
     function () {
 
-        var inputMessage = $( '#messageArea' );
-        var footerHeight = $( '.messages_footer' ).height();
+        $('#chat-input').on('keydown', '.emojionearea-editor', function (e) {
+            var height = $('.messages_footer').height() + 9;
+            $('#messages_container .scrollbar-section').css('height', 'calc(100% - '+ height +'px)');
+        });
 
-        $( '#messages_container' ).css( { 'padding-bottom': footerHeight + 'px' } );
+        var inputMessage = $( '#messageArea' );
 
         // Smiles init
-        inputMessage.emojioneArea(
+        var smiles = inputMessage.emojioneArea(
             {
                 pickerPosition  : "top",
                 filtersPosition : "top",
@@ -125,9 +127,19 @@ $(
             }
         );
 
+        $(document).click(function(event) {
+            if($(event.target).closest('.emojionearea-wrapper').length <= 0) {
+                if($('.emojionearea-button').hasClass('active')) {
+                    $('.emojionearea-button').toggleClass('active');
+                }
+            }
+        });
+
+
         $( ".scrollbar-section" ).mCustomScrollbar(
             {
-                alwaysShowScrollbar: 0
+                alwaysShowScrollbar: 0,
+                //scrollInertia: 100
             }
         );
 
@@ -141,11 +153,11 @@ $(
         $( '.close-panel-button' ).on( 'click', rightSidebarOpenToggle );
         $( '.app-menu-show-btn' ).on( 'click', leftSidebarShowToggle );
 
-        contentWidth( '.content_container, #messages_container', '#left_sidebar', '#right_sidebar' );
+        //contentWidth( '.content_container, #messages_container', '#left_sidebar', '#right_sidebar' );
 
-        bodyResize();
+        //bodyResize();
 
-        $( window ).on( 'resize', bodyResize );
+        //$( window ).on( 'resize', bodyResize );
 
         // Drag and drop
         var panelList = $( '#dragableList' );
@@ -181,7 +193,7 @@ $(
         var countVisibleRows = 4;
         var shiftKeyEvent    = false;
 
-        $( ".dropdown-toggle" ).click(
+        /*$( ".dropdown-toggle" ).click(
             function () {
                 var widget   = $( this ).closest( '.widget-content' ),
                     dropdown = $( this ).next();
@@ -191,7 +203,7 @@ $(
 
 
             }
-        );
+        );*/
         $( '.widget-content' ).click(
             function ( e ) {
                 var dropdown = $( this ).find( 'ul' );
@@ -229,50 +241,11 @@ $(
                             }
                         }
                         footerHeight = $( '.messages_footer' ).outerHeight();
-                        $( "#messages_container" ).css( 'padding-bottom', footerHeight )
+                        //$( "#messages_container" ).css( 'padding-bottom', footerHeight )
                     }
                 );
             }, 1000
         );
-
-        /*var emojiareaField = inputMessage.siblings('.emojionearea').find('.emojionearea-editor');
-         inputMessage.val('');
-         emojiareaField.keydown(function(event){
-         var footerHeight = $('.messages_footer').height();
-         var rowCount = getRowsCount(inputMessage);
-
-         if(event.shiftKey) shiftKeyEvent = true;
-
-         if (event.keyCode == 13 && shiftKeyEvent){
-         if(rowCount <= countVisibleRows){
-         console.log(rowCount);
-         inputMessage.prop('rows', rowCount + 1).css({'overflow-y': 'hidden'});
-         $('#messages_container').css({'padding-bottom': (footerHeight + 20) + 'px' });
-         }else {
-         inputMessage.css({ 'overflow-y': 'scroll' });
-         }
-
-         var content = this.value;
-         var caret = getCaret(this);
-         event.stopPropagation();
-         } else if(event.keyCode == 13) {
-         event.preventDefault();
-         $('form').submit();
-         }
-         });
-         emojiareaField.keyup(function(event){
-         var rowCount = getRowsCount(inputMessage);
-         var footerHeight = $('.messages_footer').height();
-         if(event.shiftKey) shiftKeyEvent = false;
-
-         if(rowCount <= countVisibleRows && event.keyCode != 13){
-         inputMessage.prop('rows', rowCount).css({ 'overflow-y': 'hidden' });
-         $('#messages_container').css({'padding-bottom': (footerHeight + 20) + 'px'});
-         }else if (rowCount > countVisibleRows){
-         inputMessage.css({ 'overflow-y': 'scroll' });
-         }
-         });
-         */
 
 
         $( '.data-table' ).DataTable(
@@ -306,28 +279,19 @@ function contentWidth( contentWrapper, leftSidebar, rightSidebar ) {
 }
 
 function leftSidebarShowToggle() {
-    $( '.left-sidebar' ).toggleClass( 'min' );
-    contentWidth( '.content_container, #messages_container', '#left_sidebar', '#right_sidebar' );
+    $('.left-sidebar').toggleClass('min');
+    $('.content_container').toggleClass('app-menu-hidden');
+    //contentWidth( '.content_container, #messages_container', '#left_sidebar', '#right_sidebar' );
 }
 
 function rightSidebarOpenToggle() {
-    $( '#right_sidebar' ).toggleClass( 'hidden' );
-    contentWidth( '.content_container, #messages_container', '#left_sidebar', '#right_sidebar' );
+    $( '#right_sidebar' ).toggleClass('hidden');
+    $( '.content_container' ).toggleClass('rightbar-hidden');
+    //contentWidth( '.content_container, #messages_container', '#left_sidebar', '#right_sidebar' );
 }
 
 function bodyResize() {
-    var headerHeight = $( '.top-bar' ).height();
-    var windowHeight = $( window ).height();
-    var footerHeight = $( 'footer' ).height() || 0;
-    var editmodeBar  = $( '.editmode-bar' ).height() || 0;
-    var resultHeight = windowHeight - headerHeight - 20 - footerHeight - editmodeBar;
 
-    $( '#left_sidebar' ).css( { 'height': resultHeight + 'px' } );
-    $( '.content_container' ).css( { 'height': resultHeight + 'px' } );
-    $( '#right_sidebar' ).css( { 'height': resultHeight + 'px' } );
-
-
-    contentWidth( '.content_container, #messages_container', '#left_sidebar', '#right_sidebar' );
 }
 
 function getCaret( el ) {

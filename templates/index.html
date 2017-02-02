@@ -86,7 +86,7 @@
 
 <div class="container-fluid">
     <div class="row">
-        <div class="content-container">
+        <div class="app-container">
             <aside id="left_sidebar" class="sidebar left-sidebar">
                 <div class="space-menu">
                     <div class="scrollbar-section">
@@ -113,40 +113,40 @@
                         <a href="#" class="icon-wrapper"><span class="icon-plus"></span></a>
                     </div>
                 </div>
-                <div class="app-menu">
-                    <div class="scrollbar-section">
-                        <div class="channels-widget">
-                            <div class="title">
-                                <span class="icon-comment"></span>
-                                <span>Chat</span>
-                                <span class="badge">999 <span class="plus">+</span></span>
-                            </div>
-                            <div class="widget-content">
-                                <div class="info"><span>Channel</span><span class="channels-count">(5)</span><a href="#"><span class="icon-plus"></span></a></div>
-                                <ul class="channels-list">
-                                    <li><a href="#">#Mission 0</a></li>
-                                    <li><a href="#">#Chatname</a></li>
-                                    <li><a href="#">#Mission 1</a></li>
-                                </ul>
-                            </div>
+            </aside>
+            <aside class="app-menu">
+                <div class="scrollbar-section">
+                    <div class="channels-widget">
+                        <div class="title">
+                            <span class="icon-comment"></span>
+                            <span>Chat</span>
+                            <span class="badge">999 <span class="plus">+</span></span>
                         </div>
-                        <div class="dates-widget">
-                            <div class="title">
-                                <span class="icon-calendar"></span>
-                                <span>Agenda</span>
-                            </div>
-                            <ul class="dates-list">
-                                <li><a href="#"><span class="icon-check"></span><span>Liste 1</span></a></li>
-                                <li><a href="#"><span class="icon-check"></span><span>Liste 2</span></a></li>
+                        <div class="widget-content">
+                            <div class="info"><span>Channel</span><span class="channels-count">(5)</span><a href="#"><span class="icon-plus"></span></a></div>
+                            <ul class="channels-list">
+                                <li><a href="#">#Mission 0</a></li>
+                                <li><a href="#">#Chatname</a></li>
+                                <li><a href="#">#Mission 1</a></li>
                             </ul>
                         </div>
+                    </div>
+                    <div class="dates-widget">
+                        <div class="title">
+                            <span class="icon-calendar"></span>
+                            <span>Agenda</span>
+                        </div>
+                        <ul class="dates-list">
+                            <li><a href="#"><span class="icon-check"></span><span>Liste 1</span></a></li>
+                            <li><a href="#"><span class="icon-check"></span><span>Liste 2</span></a></li>
+                        </ul>
                     </div>
                 </div>
             </aside>
             <div class="content_container">
                 <div id="messages_container" class="messages_container">
-                    <div class="scrollbar-section">
-                        <div class="messages_wrapper">
+                    <div class="messages_subcontainer">
+                        <div class="messages_wrapper scrollbar-section">
                             <div class="day-divider">
                                 <span>1 Septembre 2016</span>
                             </div>
@@ -157,7 +157,7 @@
                         </div>
                     </div>
                     <div class="messages_footer">
-                        <form id = "chat-input" action="">
+                        <form id="chat-input" action="">
                             <div class="form-group">
                                 <div class="input-group">
                                     <span class="input-group-addon" id="basic-addon1">
