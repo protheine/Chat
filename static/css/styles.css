@@ -1512,6 +1512,12 @@ a.remove-btn {
 .messages_container .message-container .dropdown {
     align-self: center;
     margin-left: auto;
+    padding: 0 10px;
+    border-radius: 4px;
+    position: absolute;
+    right: 10px;
+    top: 1px;
+    background: #CCC;
     display: none;
 }
 

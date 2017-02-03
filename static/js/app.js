@@ -101,8 +101,7 @@ $(document).ready(function() {
             console.log("Created message (successfuly)");
             $(".emojionearea-editor").html("")
             $(".emojionearea-editor").prop("disabled", false);
-            var dimension = $('.day-messages').height();
-            $('html,body, div').animate({ scrollTop: dimension }, 1);
+            scrollToBottom($('.messages_container .messages_wrapper'));
         }
 
 
@@ -130,11 +129,11 @@ $(document).ready(function() {
             console.log("Show Message");
             console.log('message type' + message.type);
             previoususer =  message.from
-            var dimension = $('#mCSB_3_container').height() - $('#mCSB_3_scrollbar_vertical').height();
-            stylecraft = 'position: relative; top: -' + dimension + 'px; left: 0px;'; // Todo: Do special handling for ie , who need rouding of values to 2 digits
-            currentpos = $(mCSB_3_container).attr('style');
-            console.log('currentpos is' + currentpos);
-            console.log('stylecraft is' + stylecraft);
+            //var dimension = $('#mCSB_3_container').height() - $('#mCSB_3_scrollbar_vertical').height();
+            //stylecraft = 'position: relative; top: -' + dimension + 'px; left: 0px;'; // Todo: Do special handling for ie , who need rouding of values to 2 digits
+            //currentpos = $(mCSB_3_container).attr('style');
+            //console.log('currentpos is' + currentpos);
+            //console.log('stylecraft is' + stylecraft);
             var existing = $("#m" + message._id);
             console.log('existing' + existing);
             if (existing.length > 0) console.log("probleme");//return;
@@ -157,8 +156,9 @@ $(document).ready(function() {
                     </ul> \
                 </div> \
             </div>');
-                var dimension = $('.day-messages').height();
-                $('html,body, div').animate({ scrollTop: dimension }, 1);
+                //var dimension = $('.day-messages').height();
+                //$('html,body, div').animate({ scrollTop: dimension }, 1);
+                scrollToBottom($('.messages_container .messages_wrapper'));
             }
             if (message.type == 'notification') {
                 console.log("c'est une belle notif!");
@@ -188,18 +188,21 @@ $(document).ready(function() {
                         </ul> \
                     </div> \
                 </div>');
-                var dimension = $('.day-messages').height();
-                $('html,body, div').animate({ scrollTop: dimension }, 1);
+                //var dimension = $('.day-messages').height();
+                //$('html,body, div').animate({ scrollTop: dimension }, 1);
+                scrollToBottom($('.messages_container .messages_wrapper'));
                 return
             }
             if (message.type == 'regular' && $('.message:last').find('#username:last').html() == message.from) {
                 console.log('completement')
                 $(".day-messages").find('.messagefollow:last').append(message.body + '<br>');
-                currentpos = $(mCSB_3_container).attr('style');
-                console.log('currentpos is' + currentpos);
-                console.log('stylecraft is' + stylecraft);
-                var dimension = $('.day-messages').height();
-                $('html,body, div').animate({ scrollTop: dimension }, 1);
+
+                scrollToBottom($('.messages_container .messages_wrapper'));
+                //currentpos = $(mCSB_3_container).attr('style');
+                //console.log('currentpos is' + currentpos);
+                //console.log('stylecraft is' + stylecraft);
+                //var dimension = $('.day-messages').height();
+                //$('html,body, div').animate({ scrollTop: dimension }, 1);
             }
         };
     });

@@ -109,8 +109,7 @@ $(
     function () {
 
         $('#chat-input').on('keydown', '.emojionearea-editor', function (e) {
-            var height = $('.messages_footer').height() + 9;
-            $('#messages_container .scrollbar-section').css('height', 'calc(100% - '+ height +'px)');
+            resizeHeightMessages();
         });
 
         var inputMessage = $( '#messageArea' );
@@ -135,13 +134,13 @@ $(
             }
         });
 
-
+/*
         $( ".scrollbar-section" ).mCustomScrollbar(
             {
                 alwaysShowScrollbar: 0,
                 //scrollInertia: 100
             }
-        );
+        );*/
 
         $( '.menu-visibility-option' ).on(
             'click', function () {
@@ -189,21 +188,6 @@ $(
 
         $( '.colorpicker-component' ).colorpicker();
 
-        // Input message
-        var countVisibleRows = 4;
-        var shiftKeyEvent    = false;
-
-        /*$( ".dropdown-toggle" ).click(
-            function () {
-                var widget   = $( this ).closest( '.widget-content' ),
-                    dropdown = $( this ).next();
-                //dropdown.outerHeight()
-                widget.css( 'height', "auto" )
-                widget.css( 'height', !dropdown.is( ":visible" ) ? widget.outerHeight() + dropdown.outerHeight() : "auto" )
-
-
-            }
-        );*/
         $( '.widget-content' ).click(
             function ( e ) {
                 var dropdown = $( this ).find( 'ul' );
@@ -264,6 +248,8 @@ $(
             }
         );
 
+        onload();
+
         //$('#userTable').pageMe({pagerSelector:'#myPager',showPrevNext:true,hidePageNumbers:false,perPage:4});
 
     }
@@ -288,10 +274,6 @@ function rightSidebarOpenToggle() {
     $( '#right_sidebar' ).toggleClass('hidden');
     $( '.content_container' ).toggleClass('rightbar-hidden');
     //contentWidth( '.content_container, #messages_container', '#left_sidebar', '#right_sidebar' );
-}
-
-function bodyResize() {
-
 }
 
 function getCaret( el ) {
@@ -329,5 +311,29 @@ function checkForChanges() {
     }
 
     setTimeout( checkForChanges, 500 );
+}
+
+function resizeHeightMessages() {
+    var height = $('.messages_footer').height() + 9;
+    $('#messages_container .messages_subcontainer').css('height', 'calc(100% - '+ height +'px)');
+}
+
+function scrollToBottom(elem) {
+    var height = elem[0].scrollHeight;
+    elem.scrollTop(height);
+}
+
+function isScrolledToBottom(elem) {
+    return (elem[0].scrollHeight - elem.scrollTop() <= elem.outerHeight());
+}
+
+function scrollIfOnBottom(elem) {
+    if (isScrolledToBottom(elem)) {
+        scrollToBottom(elem);
+    }
+}
+
+function onload() {
+    //resizeHeightMessages();
 }
 
