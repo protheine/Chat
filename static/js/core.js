@@ -256,6 +256,9 @@ $(
                                 event.stopPropagation();
                                 event.preventDefault();
                                 console.log('enter pressed');
+                                if ($('.emojionearea-button').hasClass('active')) {
+                                    $('.emojionearea-button').click();
+                                }
                                 $('#chat-input').submit()
                             }
                         }
