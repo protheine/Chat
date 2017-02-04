@@ -171,7 +171,10 @@ a:hover {
     top: 7px;
     right: 1px;
     transform: rotate(0);
-    transition: all .5s 0s;
+}
+
+.collapse-control.collapsed .collapse-icon {
+    transform: rotate(180deg);
 }
 
 .content_container {
@@ -885,6 +888,7 @@ a.dropdown-toggle {
     height: 100%;
     float: left;
     position: relative;
+    border-right: 1px solid #d8d8d8;
 }
 
 .left-sidebar.min {
@@ -1423,14 +1427,14 @@ a.remove-btn {
 
 .messages_container .message-container {
     display: flex;
-    padding: 18px 22px 0px 22px;
+    padding: 10px 22px 8px 22px;
     position: relative;
 }
 
 .messages_container .message-container .thumbnail{
     position: absolute;
     left: 18px;
-    top: 18px;
+    top: 9px;
     width: 40px;
     height: 40px;
 }
@@ -1439,18 +1443,19 @@ a.remove-btn {
     width: calc(100% - 50px);
     margin: 0;
     position: relative;
-    min-height: 40px;
+    min-height: 39px;
     margin-left: 50px;
 }
 
 .messages_container .message-container .message .content-message{
     word-wrap: break-word;
     word-break: break-word;
-    padding: 0 5px;
 }
 
 .messages_container .message-container.messagefollow {
-    padding: 0 22px;
+    margin-top: 0;
+    padding-top: 0;
+    padding-bottom: 0;
 }
 
 .messages_container .message-container.messagefollow .message{
@@ -1514,12 +1519,14 @@ a.remove-btn {
     align-self: center;
     margin-left: auto;
     padding: 0 10px;
-    border-radius: 4px;
     position: absolute;
-    right: 10px;
-    top: 0;
-    background: #CCC;
+    right: 0;
+    top: 10px;
     display: none;
+}
+
+.messages_container .message-container.messagefollow .dropdown {
+    top: 0;
 }
 
 .dropdown.top .dropdown-menu {
@@ -1664,7 +1671,6 @@ a.remove-btn {
     height: 100%;
     position: relative;
     float: left;
-    border-left: 1px solid #d8d8d8;
     border-right: 1px solid #d8d8d8;
 }
 
