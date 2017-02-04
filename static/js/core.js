@@ -303,8 +303,8 @@ function contentWidth( contentWrapper, leftSidebar, rightSidebar ) {
 }
 
 function leftSidebarShowToggle() {
-    $('.left-sidebar').toggleClass('min');
-    //$('.content_container').toggleClass('app-menu-hidden');
+    $('.app-menu').toggleClass('hidden');
+    $('.content_container').toggleClass('app-menu-hidden');
     //contentWidth( '.content_container, #messages_container', '#left_sidebar', '#right_sidebar' );
 }
 

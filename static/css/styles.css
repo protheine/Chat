@@ -887,11 +887,7 @@ a.dropdown-toggle {
     position: relative;
 }
 
-.left-sidebar.min .menu-list {
-    display: block;
-}
-
-.left-sidebar.min .app-menu {
+.left-sidebar.min {
     display: none;
 }
 
@@ -902,7 +898,7 @@ a.dropdown-toggle {
     background: #FFF;
 }
 
-.left-sidebar .app-menu.hidden,
+.app-menu.hidden,
 .right-sidebar.hidden {
     display: none;
 }
@@ -2051,4 +2047,13 @@ span#basic-addon1 {
 
 .modal .modal-dialog .form-group .bootstrap-select {
     width: 100%;
+}
+
+/*
+** to change
+*/
+.tootle-app-menu {
+    position: absolute;
+    left: 100%;
+    top: 0;
 }
