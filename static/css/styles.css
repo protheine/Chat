@@ -1381,6 +1381,7 @@ a.remove-btn {
 
 .messages_container {
     height: 100%;
+    position: relative;
 }
 
 .messages_subcontainer {
@@ -1479,11 +1480,13 @@ a.remove-btn {
 }
 
 .messages_container .message-container:hover,
+.messages_container .message-container.active,
 .messages_container .notification:hover {
     background-color: #F8F8F8;
 }
 
 .messages_container .message-container:hover .menu-btn,
+.messages_container .message-container.active .menu-btn,
 .messages_container .notification:hover .menu-btn {
     display: inline-block;
 }
@@ -1516,12 +1519,17 @@ a.remove-btn {
     border-radius: 4px;
     position: absolute;
     right: 10px;
-    top: 1px;
+    top: 0;
     background: #CCC;
     display: none;
 }
 
-.messages_container .message-container:hover .dropdown {
+.dropdown.top .dropdown-menu {
+    top: auto;
+    bottom: 100%;
+}
+.messages_container .message-container:hover .dropdown,
+.messages_container .message-container.active .dropdown {
     display: block;
 }
 
@@ -1575,6 +1583,10 @@ a.remove-btn {
     padding: 9px 10px 0;
     width: 100%;
     background-color: #F8F8F8;
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
 }
 
 .messages_footer .form-group {
@@ -1971,7 +1983,7 @@ footer .version {
 .emojionearea .emojionearea-editor {
     min-height: 2.3em;
     /*max-height: 2.3em;*/
-    max-height: 230px;
+    max-height: 180px;
     outline: none;
     padding: 6px 12px 6px 12px;
     word-wrap: break-word;
