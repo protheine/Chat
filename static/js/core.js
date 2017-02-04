@@ -134,30 +134,6 @@ $(
             }
         });
 
-
-        function isScrolledIntoView(elem)
-        {
-            console.log(elem);
-            var eTop = elem.offset().top;
-            var elemscroll = eTop - $(window).scrollTop();
-            var elemheight = elem.height();
-            var parent = elem.closest('.sidebar-content');
-            var dropdownmenu = elem.find('.dropdown-menu');
-
-            if (parent.length <= 0) {
-                console.log('scrollbar');
-                parent = elem.closest('.scrollbar-section');
-            }
-            if (dropdownmenu.length > 0) {
-                console.log('dropdown menu');
-                var elemheight = dropdownmenu.height();
-            }
-
-            console.log(elemscroll + ' + ' + elemheight + ' < ' + parent.height());
-            return ((elemscroll + elemheight) < parent.height())
-
-        }
-
         $(document).on('show.bs.dropdown', '.dropdown', function (e) {
             console.log('open');
             var container = $(this).closest('.message-container');
@@ -399,7 +375,25 @@ function scrollIfOnBottom(elem) {
     }
 }
 
-function onload() {
-    //resizeHeightMessages();
+
+
+
+function isScrolledIntoView(elem)
+{
+    console.log(elem);
+    var eTop = elem.offset().top;
+    var elemscroll = eTop - $(window).scrollTop();
+    var elemheight = elem.height();
+    var parent = elem.closest('.scrollbar-section');
+    var dropdownmenu = elem.find('.dropdown-menu');
+
+    if (dropdownmenu.length > 0) {
+        console.log('dropdown menu');
+        var elemheight = dropdownmenu.height();
+    }
+
+    console.log(elemscroll + ' + ' + elemheight + ' < ' + parent.height());
+    return ((elemscroll + elemheight) < parent.height())
+
 }
 

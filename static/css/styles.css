@@ -747,6 +747,8 @@ a.dropdown-toggle {
  *  Custom scrollbar styles
  */
 .scrollbar-section {
+    overflow-y: auto;
+    height: 100%;
 }
 
 .mCSB_inside > .mCSB_container {
