@@ -222,16 +222,16 @@ class MainHandler(BaseHandler):
             else:
                 self.redirect("/login") # TODO: Make this hard coded value fecthable from db for flexible configuration
     def stocka(self, result):
-        print 'result type: ', type(result)
+        #print 'result type: ', type(result)
         global messages
         messages = []
         messages = result
-        print 'messagesresultare :', messages
+        #print 'messagesresultare :', messages
     def stockb(self, result):
         global notifications
         notifications = []
         notifications = result
-        print 'notifresult is:', result
+        #print 'notifresult is:', result
         self.on_conversation_found()
     def on_conversation_found(self):
         i = 0
@@ -249,10 +249,10 @@ class MainHandler(BaseHandler):
         temp = []
         messages = []
         notifications = []
-        print 'mix is: ', type(mix), mix
+        #print 'mix is: ', type(mix), mix
         checktypevariable = str(type(mix))
         #checktypevariable = str(checktypevariable)
-        print 'checkcontent', checktypevariable
+        #print 'checkcontent', checktypevariable
         if checktypevariable == "<type 'tuple'>":
             print 'bing...'
             # messages={}
@@ -261,13 +261,13 @@ class MainHandler(BaseHandler):
             sys.exit(1)
         elif checktypevariable == "<type 'list'>":
             for message in mix:
-                print "je m'en fout"
+                #print "je m'en fout"
                #checkvartype = "<type 'tuple'>"
-                print 'typemessage', type(messages)
+                #print 'typemessage', type(messages)
                 try:
                     #print 'message type is: ', type(message), 'len is: ', len(message), 'and content[0] is: ', message
                     temp.append(tornado.escape.json_decode(message))
-                    print "yep, it's a message"
+                    #print "yep, it's a message"
                 except:
                     print 'faulty message: ', message
                     i += 1 #if a message is bad, added to number of bad messages
@@ -287,7 +287,7 @@ class MainHandler(BaseHandler):
                                     message['from'] = ''
                                     #time.sleep(0.2)
                                 else:
-                                    print 'username', message['from']
+                                    #print 'username', message['from']
                                     lastusername = message['from']
                                 messages.append(message)
                     except:
@@ -330,9 +330,19 @@ class MainHandler(BaseHandler):
         draftcsspath = draftcsspath[0][0].split('css', 1)
         draftcsspath = '../static/css' + draftcsspath[1]
         print 'draftcsspath is:', draftcsspath
+        url = self.request.uri
+        url = url.split('/')
+        CurrentRoomName = url[2]
+        sql = "SELECT UserID FROM User_Groups WHERE GroupID = %s", [GroupID]
+        cursor.execute(*sql)
+        UserIDS = cursor.fetchall()
+        sql = "SELECT UserName FROM Users_info WHERE UserID IN %s", [UserIDS]
+        cursor.execute(*sql)
+        members = cursor.fetchall()
+        widgetmembers = self.render_string("widget-members.html", members=members)
         content = self.render_string("messages.html",  messages=messages)
         notifcontent = self.render_string("notifications.html", notifications=notifications)
-        self.render_default("index.html", draftcsspath=draftcsspath, userlist=userlist, RoomName=RoomName, notifcontent=notifcontent, content=content, chat=1)
+        self.render_default("index.html", widgetmembers=widgetmembers, CurrentRoomName=CurrentRoomName, draftcsspath=draftcsspath, userlist=userlist, RoomName=RoomName, notifcontent=notifcontent, content=content, chat=1)
         print "je pagerender"
         db.close()
 class ChatSocketHandler(tornado.websocket.WebSocketHandler):
@@ -381,6 +391,7 @@ class ChatSocketHandler(tornado.websocket.WebSocketHandler):
         cursor.execute(*sql)
         UserName = cursor.fetchone()
         self.client.subscribe(user)
+        print 'user is', user
         self.subscribed = True
         self.client.listen(self.on_messages_published)
         logging.info('New user connected to chat room ' + room)
@@ -401,7 +412,7 @@ class ChatSocketHandler(tornado.websocket.WebSocketHandler):
                 self.write_message(dict(messages=[m]))
         except :
             print 'message is:', dir(message)
-            print message.__doc__
+            #print message.__doc__
             self.on_close()
             print 'Hey, something went wrong in section on_messages_published!', sys.exc_info()
 
@@ -429,9 +440,12 @@ class ChatSocketHandler(tornado.websocket.WebSocketHandler):
                 'body': tornado.escape.linkify(datadecoded["body"]),
             }
             notificationcheck = message['body'].split(' ')[0]
+            print "notifcheck step 1", notificationcheck
             notificationcheck = notificationcheck.split('@')
-            print notificationcheck
+            print "notifcheck step 2", notificationcheck
+            #print notificationcheck
             if message['body'].startswith('@' + notificationcheck[0]):
+                print "j'ai detecte la notif"
                 listmessagebody = message['body'].split(' ')[0]
                 listmessagebody = listmessagebody.split('@')
                 message2 = {
@@ -442,6 +456,7 @@ class ChatSocketHandler(tornado.websocket.WebSocketHandler):
                     'body': 'You were directly mentionned',
                 }
                 message2_encoded = tornado.escape.json_encode(message2)
+                #print 'message 2 is: ', message2
                 self.write_message(message2_encoded)
                 # Persistently store message in Redis.
                 self.application.client.rpush(str(listmessagebody[1]), message2_encoded)
@@ -458,6 +473,7 @@ class ChatSocketHandler(tornado.websocket.WebSocketHandler):
 
         # Save message and publish in Redis.
         try:
+            #pass
             # Convert to JSON-literal.
             message_encoded = tornado.escape.json_encode(message)
             self.write_message(message_encoded)

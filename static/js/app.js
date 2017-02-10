@@ -70,6 +70,8 @@ $(document).ready(function() {
             }
             console.log("New Message", data);
             if (data.messages) {
+                console.log('ok');
+                //console.log(data.messages);
                 newMessages(data);
 
             }
@@ -112,12 +114,11 @@ $(document).ready(function() {
         newMessages = function (data) {
             var messages = data.messages;
             console.log('je passe dans newMessages')
-            if (messages.length == 0) return;
+            if (messages.length == 0) console.log('length est 0');//return;
             updater.cursor = messages[messages.length - 1]._id;
             console.log(messages.length + "new messages, cursor: " + updater.cursor);
             for (var i = 0; i < messages.length; i++) {
-                showMessage(messages[i]);
-                console.log('message numero'[i]);
+            showMessage(messages[i]);
             }
         };
 
@@ -126,8 +127,8 @@ $(document).ready(function() {
          * Function to add a bunch of (new) messages to the inbox.
          */
         showMessage = function (message) {
-            console.log("Show Message");
-            console.log('message type' + message.type);
+            console.log("Show MMMMMessage");
+            console.log('mmmmmessage type ' + message.type);
             previoususer =  message.from
             //var dimension = $('#mCSB_3_container').height() - $('#mCSB_3_scrollbar_vertical').height();
             //stylecraft = 'position: relative; top: -' + dimension + 'px; left: 0px;'; // Todo: Do special handling for ie , who need rouding of values to 2 digits
@@ -135,7 +136,7 @@ $(document).ready(function() {
             //console.log('currentpos is' + currentpos);
             //console.log('stylecraft is' + stylecraft);
             var existing = $("#m" + message._id);
-            console.log('existing' + existing);
+            console.log('existing ' + existing);
             if (existing.length > 0) console.log("probleme");//return;
             if (message.type == 'file') {
                 console.log('je suis un fichier')
@@ -160,6 +161,7 @@ $(document).ready(function() {
                 //$('html,body, div').animate({ scrollTop: dimension }, 1);
                 scrollToBottom($('.messages_container .messages_wrapper'));
             }
+            console.log(message.type);
             if (message.type == 'notification') {
                 console.log("c'est une belle notif!");
                 var notifcount = $('#notif-badge').text();

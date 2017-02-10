@@ -1516,7 +1516,7 @@ a.remove-btn {
     border-radius: 4px;
     position: absolute;
     right: 10px;
-    top: 1px;
+    top: -5px; /* Changed from 1Px to -5 because otherwise the game between the button and the menu is enough to let the menu disapear while moving the mouse on the gap*/
     background: #CCC;
     display: none;
 }
