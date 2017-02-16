@@ -149,7 +149,6 @@ $(
         );
 
         $( '.right-sidebar-show-btn' ).on( 'click', rightSidebarOpenToggle );
-        $( '.notification-sidebar-show-btn' ).on( 'click', rightSidebarOpenToggle2 );
         $( '.close-panel-button' ).on( 'click', rightSidebarOpenToggle );
         $( '.app-menu-show-btn' ).on( 'click', leftSidebarShowToggle );
 
@@ -276,12 +275,7 @@ function rightSidebarOpenToggle() {
     $( '.content_container' ).toggleClass('rightbar-hidden');
     //contentWidth( '.content_container, #messages_container', '#left_sidebar', '#right_sidebar' );
 }
-function rightSidebarOpenToggle2() {
-    $( '#right_sidebar' ).toggleClass('hidden');
-    $( '#right_sidebar2' ).toggleClass('hidden');
-    //$( '.content_container' ).toggleClass('rightbar-hidden');
-    //contentWidth( '.content_container, #messages_container', '#left_sidebar', '#right_sidebar' );
-}
+
 function getCaret( el ) {
     if ( el.selectionStart ) {
         return el.selectionStart;
