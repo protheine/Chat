@@ -171,7 +171,10 @@ a:hover {
     top: 7px;
     right: 1px;
     transform: rotate(0);
-    transition: all .5s 0s;
+}
+
+.collapse-control.collapsed .collapse-icon {
+    transform: rotate(180deg);
 }
 
 .content_container {
@@ -747,6 +750,8 @@ a.dropdown-toggle {
  *  Custom scrollbar styles
  */
 .scrollbar-section {
+    overflow-y: auto;
+    height: 100%;
 }
 
 .mCSB_inside > .mCSB_container {
@@ -883,13 +888,10 @@ a.dropdown-toggle {
     height: 100%;
     float: left;
     position: relative;
+    border-right: 1px solid #d8d8d8;
 }
 
-.left-sidebar.min .menu-list {
-    display: block;
-}
-
-.left-sidebar.min .app-menu {
+.left-sidebar.min {
     display: none;
 }
 
@@ -900,7 +902,7 @@ a.dropdown-toggle {
     background: #FFF;
 }
 
-.left-sidebar .app-menu.hidden,
+.app-menu.hidden,
 .right-sidebar.hidden {
     display: none;
 }
@@ -1381,6 +1383,7 @@ a.remove-btn {
 
 .messages_container {
     height: 100%;
+    position: relative;
 }
 
 .messages_subcontainer {
@@ -1424,14 +1427,14 @@ a.remove-btn {
 
 .messages_container .message-container {
     display: flex;
-    padding: 18px 22px 0px 22px;
+    padding: 10px 22px 8px 22px;
     position: relative;
 }
 
 .messages_container .message-container .thumbnail{
     position: absolute;
     left: 18px;
-    top: 18px;
+    top: 9px;
     width: 40px;
     height: 40px;
 }
@@ -1440,18 +1443,19 @@ a.remove-btn {
     width: calc(100% - 50px);
     margin: 0;
     position: relative;
-    min-height: 40px;
+    min-height: 39px;
     margin-left: 50px;
 }
 
 .messages_container .message-container .message .content-message{
     word-wrap: break-word;
     word-break: break-word;
-    padding: 0 5px;
 }
 
 .messages_container .message-container.messagefollow {
-    padding: 0 22px;
+    margin-top: 0;
+    padding-top: 0;
+    padding-bottom: 0;
 }
 
 .messages_container .message-container.messagefollow .message{
@@ -1479,11 +1483,13 @@ a.remove-btn {
 }
 
 .messages_container .message-container:hover,
+.messages_container .message-container.active,
 .messages_container .notification:hover {
     background-color: #F8F8F8;
 }
 
 .messages_container .message-container:hover .menu-btn,
+.messages_container .message-container.active .menu-btn,
 .messages_container .notification:hover .menu-btn {
     display: inline-block;
 }
@@ -1513,15 +1519,22 @@ a.remove-btn {
     align-self: center;
     margin-left: auto;
     padding: 0 10px;
-    border-radius: 4px;
     position: absolute;
-    right: 10px;
-    top: 1px;
-    background: #CCC;
+    right: 0;
+    top: 10px;
     display: none;
 }
 
-.messages_container .message-container:hover .dropdown {
+.messages_container .message-container.messagefollow .dropdown {
+    top: 0;
+}
+
+.dropdown.top .dropdown-menu {
+    top: auto;
+    bottom: 100%;
+}
+.messages_container .message-container:hover .dropdown,
+.messages_container .message-container.active .dropdown {
     display: block;
 }
 
@@ -1575,6 +1588,10 @@ a.remove-btn {
     padding: 9px 10px 0;
     width: 100%;
     background-color: #F8F8F8;
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
 }
 
 .messages_footer .form-group {
@@ -1654,7 +1671,6 @@ a.remove-btn {
     height: 100%;
     position: relative;
     float: left;
-    border-left: 1px solid #d8d8d8;
     border-right: 1px solid #d8d8d8;
 }
 
@@ -1971,7 +1987,7 @@ footer .version {
 .emojionearea .emojionearea-editor {
     min-height: 2.3em;
     /*max-height: 2.3em;*/
-    max-height: 230px;
+    max-height: 180px;
     outline: none;
     padding: 6px 12px 6px 12px;
     word-wrap: break-word;
@@ -2037,4 +2053,13 @@ span#basic-addon1 {
 
 .modal .modal-dialog .form-group .bootstrap-select {
     width: 100%;
+}
+
+/*
+** to change
+*/
+.tootle-app-menu {
+    position: absolute;
+    left: 100%;
+    top: 0;
 }
