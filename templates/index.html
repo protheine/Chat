@@ -65,7 +65,7 @@
                 <li><a href="#" class="menu-btn pull-left"><span class="icon-comments"></span></a></li>
                 <li><a href="#" class="menu-btn pull-left"><span class="icon-pin"></span></a></li>
                 <li><a href="#" class="menu-btn pull-left"><span class="icon-support"></span></a><span class="badge">2</span></li>
-                <li><a href="#" class="menu-btn pull-left notification-sidebar-show-btn"><span class="icon-notification"></span></a><span name="notif-badge" class="badge"></span></li>
+                <li><a href="#" class="menu-btn pull-left"><span class="icon-notification"></span></a><span id ="notif-badge" class="badge"></span></li>
             </ul>
         </nav>
 
@@ -125,9 +125,6 @@
                         <div class="widget-content">
                             <div class="info"><span>Channel</span><span class="channels-count">(5)</span><a href="#"><span class="icon-plus"></span></a></div>
                             <ul class="channels-list">
-                                {% for row in RoomName %}
-                                <li><a href="/room/{{ row[0] }}">#{{ row[0] }}</a></li>
-                                {% end %}
                                 <li><a href="#">#Mission 0</a></li>
                                 <li><a href="#">#Chatname</a></li>
                                 <li><a href="#">#Mission 1</a></li>
@@ -146,7 +143,7 @@
                     </div>
                 </div>
             </aside>
-            <div class="content_container rightbar-hidden">
+            <div class="content_container">
                 <div id="messages_container" class="messages_container">
                     <div class="messages_subcontainer">
                         <div class="messages_wrapper scrollbar-section">
@@ -180,20 +177,11 @@
                     </div>
                 </div>
             </div>
-            <aside id="right_sidebar2" class="sidebar right-sidebar hidden">
+            <aside id="right_sidebar" class="sidebar right-sidebar">
                 <div class="scrollbar-section">
                     <div class="sidebar-content info-section">
                         <div class="sidebar-header">
-                    pouet
-                        </div>
-                    </div>
-                </div>
-            </aside>
-            <aside id="right_sidebar" class="sidebar right-sidebar hidden">
-                <div class="scrollbar-section">
-                    <div class="sidebar-content info-section">
-                        <div class="sidebar-header">
-                            <h3 class="title">{{ CurrentRoomName }} <a href="#"><span class="icon-notification"></span></a></h3>
+                            <h3 class="title">#Chatname <a href="#"><span class="icon-notification"></span></a></h3>
                             <span class="description">Created by <a href="#">member</a> on August 26th</span>
                             <a href="#" class="close-panel-button"><span class="icon-close"></span></a>
                         </div>
@@ -212,7 +200,102 @@
                                     </div>
                                 </div>
                             </li>
-                            {% raw widgetmembers %}
+                            <li class="widget members">
+                                <div class="widget-header collapse-control" data-toggle="collapse" href="#collapseMembers" aria-expanded="true" aria-controls="collapseMembers">
+                                    <span class="icon-members"></span>
+                                    <span class="title">Members</span>
+                                    <div class="dropdown btn-group">
+                                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span class="icon-plus"></span></a>
+                                        <div class="dropdown-menu users-checklist-dropdown">
+                                            <div class="title clearfix"><span class="pull-left">33 members selected</span><a class="dropdown-close-btn pull-right"><span class="icon-close"></span></a></div>
+                                            <div class="search-group"><i class="fa fa-search" aria-hidden="true"></i><input type="search" id="sidebar-user-search" /></div>
+                                            <div class="users-list">
+                                                <div class="scrollbar-section">
+                                                    <ul>
+                                                        <li>
+                                                            <label for="checkbox-user-1" class="clearfix">
+                                                                <span class="styled-checkbox">
+                                                                    <input id="checkbox-user-1" type="checkbox" class="checkbox-user-1" />
+                                                                    <span class="icon-check"></span>
+                                                                </span>
+                                                                <span class="thumbnail user-avatar "><img src="../static/images/user-avatar.png" alt=""></span>
+                                                                <span class="user-name">User 1</span>
+                                                                <span class="user-status online"></span>
+                                                            </label>
+                                                        </li>
+                                                        <li>
+                                                            <label for="checkbox-user-2" class="clearfix">
+                                                                <span class="styled-checkbox">
+                                                                    <input id="checkbox-user-2" type="checkbox" class="checkbox-user-2" />
+                                                                    <span class="icon-check"></span>
+                                                                </span>
+                                                                <span class="thumbnail user-avatar "><img src="../static/images/user-avatar.png" alt=""></span>
+                                                                <span class="user-name">User 2</span>
+                                                                <span class="user-status"></span>
+                                                            </label>
+                                                        </li>
+                                                        <li>
+                                                            <label for="checkbox-user-3" class="clearfix">
+                                                                <span class="styled-checkbox">
+                                                                    <input id="checkbox-user-3" type="checkbox" class="checkbox-user-3" />
+                                                                    <span class="icon-check"></span>
+                                                                </span>
+                                                                <span class="thumbnail user-avatar "><img src="../static/images/user-avatar.png" alt=""></span>
+                                                                <span class="user-name">User 3</span>
+                                                                <span class="user-status online"></span>
+                                                            </label>
+                                                        </li>
+                                                        <li>
+                                                            <label for="checkbox-user-4" class="clearfix">
+                                                                <span class="styled-checkbox">
+                                                                    <input id="checkbox-user-4" type="checkbox" class="checkbox-user-4" />
+                                                                    <span class="icon-check"></span>
+                                                                </span>
+                                                                <span class="thumbnail user-avatar "><img src="../static/images/user-avatar.png" alt=""></span>
+                                                                <span class="user-name">User 4</span>
+                                                                <span class="user-status"></span>
+                                                            </label>
+                                                        </li>
+                                                        <li>
+                                                            <label for="checkbox-user-5" class="clearfix">
+                                                                <span class="styled-checkbox">
+                                                                    <input id="checkbox-user-5" type="checkbox" class="checkbox-user-5" />
+                                                                    <span class="icon-check"></span>
+                                                                </span>
+                                                                <span class="thumbnail user-avatar "><img src="../static/images/user-avatar.png" alt=""></span>
+                                                                <span class="user-name">User 5</span>
+                                                                <span class="user-status online"></span>
+                                                            </label>
+                                                        </li>
+                                                        <li>
+                                                            <label for="checkbox-user-6" class="clearfix">
+                                                                <span class="styled-checkbox">
+                                                                    <input id="checkbox-user-6" type="checkbox" class="checkbox-user-6" />
+                                                                    <span class="icon-check"></span>
+                                                                </span>
+                                                                <span class="thumbnail user-avatar "><img src="../static/images/user-avatar.png" alt=""></span>
+                                                                <span class="user-name">User 6</span>
+                                                                <span class="user-status online"></span>
+                                                            </label>
+                                                        </li>
+                                                    </ul>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <span class="collapse-icon icon-arrow-top"></span>
+                                </div>
+                                <span class="description">En ligne (2/28)</span>
+                                <div class="collapsible-section collapse in" id="collapseMembers">
+                                    <div class="widget-content">
+                                        <ul class="users-list">
+                                            <li><a href="#" class="thumbnail user-avatar"><img src="../static/images/user-avatar.png" alt=""></a><span>Member 1</span></li>
+                                            <li><a href="#" class="thumbnail user-avatar"><img src="../static/images/user-avatar.png" alt=""></a><span>Member 2</span></li>
+                                            <li><a href="#" class="thumbnail user-avatar"><img src="../static/images/user-avatar.png" alt=""></a><span>Member 3</span></li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </li>
                             <li class="widget shared-files">
                                 <div class="widget-header collapse-control" data-toggle="collapse" href="#collapseSharedFiles" aria-expanded="true" aria-controls="collapseSharedFiles">
                                     <span class="icon-file"></span>
