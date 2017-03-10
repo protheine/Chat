@@ -428,9 +428,19 @@ class ChatSocketHandler(tornado.websocket.WebSocketHandler):
                 'from': self.get_secure_cookie('user', rightdatadecoded),
                 'body': tornado.escape.linkify(datadecoded["body"]),
             }
+            if 'emojioneemoji' in message['body']:
+                print "c'est un emote"
+                message = {
+                    '_id': ''.join(random.choice(string.ascii_uppercase) for i in range(12)),
+                    'date': time.strftime("%H:%M:%S"),
+                    'type': messagetype,
+                    'from': self.get_secure_cookie('user', rightdatadecoded),
+                    'body': datadecoded["body"],
+                }
             notificationcheck = message['body'].split(' ')[0]
             notificationcheck = notificationcheck.split('@')
             print notificationcheck
+
             if message['body'].startswith('@' + notificationcheck[0]):
                 listmessagebody = message['body'].split(' ')[0]
                 listmessagebody = listmessagebody.split('@')
