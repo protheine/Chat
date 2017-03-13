@@ -172,7 +172,7 @@ $(document).ready(function() {
                 $(".day-messages").append('<div class="message-container"> \
                     <a href="#" class="thumbnail user-avatar"><img src="../static/images/user-avatar.png" alt=""></a> \
                     <div class="message"> \
-                    <h6 id="username" hidden>{' + message.from + '</h6> \
+                    <h6 id="username" hidden>' + message.from + '</h6> \
                 <div class="info"><a href="#" class="user-name">' + message.from + '</a><span class="info">' + message.date + '</span></div> \
                 <div class="content-message">' + message.body + '</div> \
                 </div> \
@@ -195,7 +195,24 @@ $(document).ready(function() {
             }
             if (message.type == 'regular' && $('.message:last').find('#username:last').html() == message.from) {
                 console.log('completement')
-                $(".day-messages").find('.messagefollow:last').append(message.body + '<br>');
+                $(".day-messages").append('<div class="message-container messagefollow"> \
+                    <div class="message"> \
+                    <h6 id="username" hidden>' + message.from + '</h6> \
+                <div class="info"><a href="#" class="user-name">' + message.from + '</a><span class="info">' + message.date + '</span></div> \
+                <div class="content-message">' + message.body + '</div> \
+                </div> \
+                <div class="dropdown btn-group"> \
+                <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="fa fa-ellipsis-h"></i></a> \
+                <ul class="dropdown-menu users-checklist-dropdown dropdown-menu-right"> \
+                    <li class="menu-visibility-option"><a href="#">Hide/Show #fileroom <i class="fa fa-eye" aria-hidden="true"></i><i class="fa fa-eye-slash" aria-hidden="true"></i></a></li> \
+                    <li role="separator" class="divider"></li> \
+                    <li><a href="#">Un-attache the file</a></li> \
+                    <li><a href="#">Open a #fileroom</a></li> \
+                    <li><a href="#">Download file</a></li> \
+                    <li><a href="#">Add to filemanager</a></li> \
+                        </ul> \
+                    </div> \
+                </div>');
 
                 scrollToBottom($('.messages_container .messages_wrapper'));
                 //currentpos = $(mCSB_3_container).attr('style');
