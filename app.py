@@ -222,23 +222,19 @@ class MainHandler(BaseHandler):
             else:
                 self.redirect("/login") # TODO: Make this hard coded value fecthable from db for flexible configuration
     def stocka(self, result):
-        print 'result type: ', type(result)
         global messages
         messages = []
         messages = result
-        print 'messagesresultare :', messages
     def stockb(self, result):
         global notifications
         notifications = []
         notifications = result
-        print 'notifresult is:', result
         self.on_conversation_found()
     def on_conversation_found(self):
         i = 0
         global messages
         global notifications
         mix = messages# + notifications
-        print len(mix)
         db = connect(host=config.SQLSERVER, user=config.SQLUSER, passwd=config.SQLPASS, db=config.SQLDB)
         cursor = db.cursor()
         AppID = '1'
@@ -249,7 +245,6 @@ class MainHandler(BaseHandler):
         temp = []
         messages = []
         notifications = []
-        print 'mix is: ', type(mix), mix
         checktypevariable = str(type(mix))
         #checktypevariable = str(checktypevariable)
         print 'checkcontent', checktypevariable
@@ -261,13 +256,10 @@ class MainHandler(BaseHandler):
             sys.exit(1)
         elif checktypevariable == "<type 'list'>":
             for message in mix:
-                print "je m'en fout"
                #checkvartype = "<type 'tuple'>"
-                print 'typemessage', type(messages)
                 try:
                     #print 'message type is: ', type(message), 'len is: ', len(message), 'and content[0] is: ', message
                     temp.append(tornado.escape.json_decode(message))
-                    print "yep, it's a message"
                 except:
                     print 'faulty message: ', message
                     i += 1 #if a message is bad, added to number of bad messages
@@ -287,7 +279,6 @@ class MainHandler(BaseHandler):
                                     message['from'] = ''
                                     #time.sleep(0.2)
                                 else:
-                                    print 'username', message['from']
                                     lastusername = message['from']
                                 messages.append(message)
                     except:
