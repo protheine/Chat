@@ -32,12 +32,17 @@ class ChatEdit(tornado.web.RequestHandler):
     def post(self):
         print "Placeholder"
 class UploadHandler(tornado.web.RequestHandler):#tornado.web.RequestHandler):
-    def post(self, url):
+    def post(self):#, url):
+        print "c'est parti pour l'upload"
         db = connect(host=config.SQLSERVER, user=config.SQLUSER, passwd=config.SQLPASS, db=config.SQLDB)
         cursor = db.cursor()
         uri = self.request.uri
-        url = uri.split('/')
-        RoomName = url[3]
+        print uri
+        url = uri.split('?')
+        print len(url)
+        print url
+        RoomName = url[1]
+        print RoomName
         sql = 'SELECT RoomID FROM abcd_un WHERE RoomName = %s', [RoomName]
         cursor.execute(*sql)
         RoomID = cursor.fetchone()
@@ -320,6 +325,7 @@ class MainHandler(BaseHandler):
         draftcsspath = cursor.fetchall()
         draftcsspath = draftcsspath[0][0].split('css', 1)
         draftcsspath = '../static/css' + draftcsspath[1]
+        print str(RoomName[0][0])
         print 'draftcsspath is:', draftcsspath
         content = self.render_string("messages.html",  messages=messages)
         notifcontent = self.render_string("notifications.html", notifications=notifications)
@@ -506,7 +512,8 @@ class Application(tornado.web.Application):
             (r"/logout", LogoutHandler),
             (r"/socket", ChatSocketHandler),
             (r"/socket/([a-zA-Z0-9]*)$", ChatSocketHandler),
-            (r"/upload?([^/]+)", UploadHandler),
+            #(r"/upload?([^/]+)", UploadHandler),
+            (r"/upload", UploadHandler),
             (r"/uploads", MainHandler),
             (r"/save", ChatEdit),
         ]
