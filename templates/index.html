@@ -157,6 +157,9 @@
                         </div>
                     </div>
                     <div class="messages_footer">
+                        <form action="/upload?{{RoomName[0][0]}}" method="POST" enctype="MULTIPART/FORM-DATA" id="testtt">
+                            {% raw xsrf_form_html() %}
+                        </form>
                         <form id="chat-input" action="">
                             <div class="form-group">
                                 <div class="input-group">
@@ -164,7 +167,10 @@
                                         <span class="btn-group dropup">
                                             <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="icon-paperclip"></i></a>
                                             <ul class="dropdown-menu">
-                                                <li><a href id ="upload-btn" value="#">Upload File</a></li>
+
+                                                <li><input  type="file" name="fichier" form="testtt" value="blabla"></li>
+                                                    <li><input class="btn btn-link" type="submit" form="testtt">Upload File</input></li>
+                                                </form>
                                                 <li><a href="#">Attach File</a></li>
                                             </ul>
                                         </span>
