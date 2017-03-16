@@ -52,10 +52,13 @@ class UploadHandler(tornado.web.RequestHandler):#tornado.web.RequestHandler):
         file1 = self.request.files['file1'][0]
         original_fname = file1['filename']
         try: # TODO : Better use mime type!
-            current_location2 = self.request.protocol + "://" + self.request.host + "/static/uploads/" + 'resized-' + original_fname
+            encoded_fname = tornado.escape.url_escape(original_fname, plus=False) #Filename must be %20 and not +
+            current_location2 = self.request.protocol + "://" + self.request.host + "/static/uploads/" + 'resized-' + encoded_fname
             fname_tuple = original_fname.rsplit('.', 1)
+
             if fname_tuple[1] == 'png':
                 file_url2 = "<img src ='" + current_location2 + "'/>"
+
                 message2 = {
                 '_id': ''.join(random.choice(string.ascii_uppercase) for i in range(12)),
                 'date': time.strftime("%H:%M:%S"),
@@ -114,8 +117,8 @@ class UploadHandler(tornado.web.RequestHandler):#tornado.web.RequestHandler):
             client = brukva.Client(host=REDIS_HOST, port=int(REDIS_PORT), password=REDIS_PWD)
             client.connect()
             client.listen(self)
-            current_location = self.request.protocol + '://' + self.request.host + "/static/uploads/" + original_fname
-            file_url = 'file ' + original_fname + ' has been uploaded to ' + tornado.escape.linkify(current_location)
+            current_location = self.request.protocol + '://' + self.request.host + "/static/uploads/" + encoded_fname
+            file_url = 'file ' + encoded_fname + ' has been uploaded to ' + tornado.escape.linkify(current_location)
             message = {
                 '_id': ''.join(random.choice(string.ascii_uppercase) for i in range(12)),
                 'date': time.strftime("%H:%M:%S"),
