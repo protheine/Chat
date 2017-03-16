@@ -48,27 +48,30 @@ class UploadHandler(tornado.web.RequestHandler):#tornado.web.RequestHandler):
         RoomID = cursor.fetchone()
         RoomID = str(RoomID[0])
         RoomID = RoomID.decode()
-        origin = self.request.protocol + "://" + self.request.host + '/' + url[2] + '/' + url[3]
+        origin = self.request.protocol + "://" + self.request.host + '/room/' + url[1]# + '/' + url[3]
         file1 = self.request.files['file1'][0]
         original_fname = file1['filename']
         try: # TODO : Better use mime type!
             current_location2 = self.request.protocol + "://" + self.request.host + "/static/uploads/" + 'resized-' + original_fname
             fname_tuple = original_fname.rsplit('.', 1)
-            if fname_tuple[1] == 'jpg':
+            if fname_tuple[1] == 'png':
                 file_url2 = "<img src ='" + current_location2 + "'/>"
                 message2 = {
                 '_id': ''.join(random.choice(string.ascii_uppercase) for i in range(12)),
                 'date': time.strftime("%H:%M:%S"),
-                'type': 'regular',
+                'type': 'file',
                 'from': 'Guest',
                 'body': file_url2,
                 }
             elif fname_tuple[1] == 'gif':
                 print "It's a JIF!"
                 file_url2 = '<img src ="' + current_location2 + '" >'
-                message2 = {"body": file_url2,
+                message2 = {
+                    'date': time.strftime("%H:%M:%S"),
+                    'type': 'file',
+                    "body": file_url2,
                 "_id": ''.join(random.choice(string.ascii_uppercase) for i in range(12)),	"from": "Guest"}
-            elif fname_tuple[1] == 'png':
+            elif fname_tuple[1] == 'jpg':
                 file_url2 = '<img src ="' + current_location2 + '" width="50%" height="50%"/>'
                 message2 = {"body": file_url2,
                 "_id": ''.join(random.choice(string.ascii_uppercase) for i in range(12)),	"from": "Guest"}
@@ -273,7 +276,10 @@ class MainHandler(BaseHandler):
                 if len(temp) == len(mix) - i: # number of bad messages soustracted to total messages received to get correct total before processing
                     try:
                         for message in temp:
-                            if message['type'] == 'notification':
+                            if not 'type' in message.keys():
+                                print 'no message type for', message
+                                message['type'] = 'file'
+                            elif message['type'] == 'notification':
                                 notifications.append(message)
                             elif message['type'] is not 'notification':
                                 if 'username' not in locals():
@@ -287,6 +293,7 @@ class MainHandler(BaseHandler):
                                     lastusername = message['from']
                                 messages.append(message)
                     except:
+                        print 'error is', sys.exc_info()
                         print 'faulty message: ', message
                         pass
         else:
