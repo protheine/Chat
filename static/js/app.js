@@ -143,6 +143,7 @@ $(document).ready(function() {
                 <a href="#" class="thumbnail user-avatar"><img src="../static/images/user-avatar.png" alt=""></a> \
                 <div class="message"> \
                     <h6 id="username" hidden>' + message.from + '</a><span class="info">' + message.date + '</span></div> \
+               <div class="content-message">' + message.body + '</div> \
                </div> \
                 <div class="dropdown btn-group"> \
                     <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="fa fa-ellipsis-h"></i></a> \
