@@ -77,7 +77,7 @@ class UploadHandler(tornado.web.RequestHandler):#tornado.web.RequestHandler):
                     'body': file_url2,
                     }
             elif fname_tuple[1] == 'jpg':
-                file_url2 = '<img src ="' + current_location2 + '" width="50%" height="50%"/>'
+                file_url2 = '<img src ="' + current_location2 + '" />'
                 message2 = {
                     '_id': ''.join(random.choice(string.ascii_uppercase) for i in range(12)),
                     'date': time.strftime("%H:%M:%S"),
@@ -86,7 +86,7 @@ class UploadHandler(tornado.web.RequestHandler):#tornado.web.RequestHandler):
                     'body': file_url2,
                     }
             elif fname_tuple[1] == 'bmp':
-                file_url2 = '<img src ="' + current_location2 + '" width="50%" height="50%"/>'
+                file_url2 = '<img src ="' + current_location2 + '"/>'
                 message2 = {
                     '_id': ''.join(random.choice(string.ascii_uppercase) for i in range(12)),
                     'date': time.strftime("%H:%M:%S"),
