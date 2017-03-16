@@ -70,22 +70,39 @@ class UploadHandler(tornado.web.RequestHandler):#tornado.web.RequestHandler):
                 print "It's a JIF!"
                 file_url2 = '<img src ="' + current_location2 + '" >'
                 message2 = {
+                    '_id': ''.join(random.choice(string.ascii_uppercase) for i in range(12)),
                     'date': time.strftime("%H:%M:%S"),
                     'type': 'file',
-                    "body": file_url2,
-                "_id": ''.join(random.choice(string.ascii_uppercase) for i in range(12)),	"from": "Guest"}
+                    'from': 'Guest',
+                    'body': file_url2,
+                    }
             elif fname_tuple[1] == 'jpg':
                 file_url2 = '<img src ="' + current_location2 + '" width="50%" height="50%"/>'
-                message2 = {"body": file_url2,
-                "_id": ''.join(random.choice(string.ascii_uppercase) for i in range(12)),	"from": "Guest"}
+                message2 = {
+                    '_id': ''.join(random.choice(string.ascii_uppercase) for i in range(12)),
+                    'date': time.strftime("%H:%M:%S"),
+                    'type': 'file',
+                    'from': 'Guest',
+                    'body': file_url2,
+                    }
             elif fname_tuple[1] == 'bmp':
                 file_url2 = '<img src ="' + current_location2 + '" width="50%" height="50%"/>'
-                message2 = {"body": file_url2,
-                "_id": ''.join(random.choice(string.ascii_uppercase) for i in range(12)),	"from": "Guest"}
+                message2 = {
+                    '_id': ''.join(random.choice(string.ascii_uppercase) for i in range(12)),
+                    'date': time.strftime("%H:%M:%S"),
+                    'type': 'file',
+                    'from': 'Guest',
+                    'body': file_url2,
+                }
             elif fname_tuple[1] == 'mp4':
                 file_url2 = '<video width="320" height="240" controls="controls">' + '<source src="'+ current_location2 + '" type="video/mp4" />' + '</video>'
-                message2 = {"body": file_url2,
-                "_id": ''.join(random.choice(string.ascii_uppercase) for i in range(12)),	"from": "Guest"}
+                message2 = {
+                    '_id': ''.join(random.choice(string.ascii_uppercase) for i in range(12)),
+                    'date': time.strftime("%H:%M:%S"),
+                    'type': 'file',
+                    'from': 'Guest',
+                    'body': file_url2,
+                }
             else:
                 file_url2 = ''
                 message2 = ''
