@@ -436,6 +436,7 @@ class ChatSocketHandler(tornado.websocket.WebSocketHandler):
         logging.info('Received new message %r', data)
         try:
             # Parse input to message dict.
+            print "raw data", data
             datadecoded = tornado.escape.json_decode(data)
             what = str(datadecoded['user'])
 
@@ -444,6 +445,8 @@ class ChatSocketHandler(tornado.websocket.WebSocketHandler):
             #                          ^There
             #coded(JSON) example message is : #{"body":"222","_xsrf":"b8f28cd1a8184afeb9296d48bb943d0a","user":"\"ZXhhbHRpYQ==|1473424358|015b#c4923b6db19a0a7c084cdc60b81952868c12"} wich seems right
             messagetype = 'regular'
+            print 'datadecoded body', datadecoded['body']
+            print 'datadecoded len', len(datadecoded['body'])
             myuser = self.get_secure_cookie('user', rightdatadecoded)
             message = {
                 '_id': ''.join(random.choice(string.ascii_uppercase) for i in range(12)),
@@ -454,18 +457,36 @@ class ChatSocketHandler(tornado.websocket.WebSocketHandler):
             }
             if 'emojioneemoji' in message['body']:
                 print "c'est un emote"
-                message = {
-                    '_id': ''.join(random.choice(string.ascii_uppercase) for i in range(12)),
-                    'date': time.strftime("%H:%M:%S"),
-                    'type': messagetype,
-                    'from': self.get_secure_cookie('user', rightdatadecoded),
-                    'body': datadecoded["body"],
-                }
+                if not datadecoded['body'].startswith("<img alt") or not datadecoded['body'].endswith('">'):
+                    print 'pouet'
+                    print message['body']
+                    pos = datadecoded['body'].find('>')
+                    print pos
+                    textandsmyley = datadecoded['body'][:pos] + 'width="32" ' + datadecoded['body'][pos:]
+                    print message['body']
+                    message = {
+                        '_id': ''.join(random.choice(string.ascii_uppercase) for i in range(12)),
+                        'date': time.strftime("%H:%M:%S"),
+                        'type': messagetype,
+                        'from': self.get_secure_cookie('user', rightdatadecoded),
+                        'body': textandsmyley,
+                    }
+                    print 'message?', message
+                else:
+                    print 'je tape dans le else'
+                    message = {
+                        '_id': ''.join(random.choice(string.ascii_uppercase) for i in range(12)),
+                        'date': time.strftime("%H:%M:%S"),
+                        'type': messagetype,
+                        'from': self.get_secure_cookie('user', rightdatadecoded),
+                        'body': datadecoded["body"],
+                    }
             notificationcheck = message['body'].split(' ')[0]
             notificationcheck = notificationcheck.split('@')
-            print notificationcheck
+            print 'notifcheck content ', notificationcheck
 
             if message['body'].startswith('@' + notificationcheck[0]):
+                print "toupie"
                 listmessagebody = message['body'].split(' ')[0]
                 listmessagebody = listmessagebody.split('@')
                 message2 = {
@@ -494,6 +515,7 @@ class ChatSocketHandler(tornado.websocket.WebSocketHandler):
         try:
             # Convert to JSON-literal.
             message_encoded = tornado.escape.json_encode(message)
+            #print 'message encoded', message_encoded
             self.write_message(message_encoded)
             # Persistently store message in Redis.
             self.application.client.rpush(self.room, message_encoded)
