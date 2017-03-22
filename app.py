@@ -433,83 +433,126 @@ class ChatSocketHandler(tornado.websocket.WebSocketHandler):
         """
         Callback when new message received vie the socket.
         """
-        logging.info('Received new message %r', data)
-        try:
-            # Parse input to message dict.
-            print "raw data", data
-            datadecoded = tornado.escape.json_decode(data)
-            what = str(datadecoded['user'])
+        #logging.info('Received new message %r', data)
+        #try:
+        # Parse input to message dict.
+        #print "raw data", data
+        datadecoded = tornado.escape.json_decode(data)
+        what = str(datadecoded['user'])
 
-            rightdatadecoded = what.split('"', 1)
-            rightdatadecoded = str(rightdatadecoded[1]) # Workaround because #tornado.escape.json_decode(data) keeps an unwanted leading " : [W 160909 14:32:41 web:2659] #Invalid cookie signature '"ZXhhbHRpYQ==|1473424358|015bc4923b6db19a0a7c084cdc60b81952868c12'
-            #                          ^There
-            #coded(JSON) example message is : #{"body":"222","_xsrf":"b8f28cd1a8184afeb9296d48bb943d0a","user":"\"ZXhhbHRpYQ==|1473424358|015b#c4923b6db19a0a7c084cdc60b81952868c12"} wich seems right
-            messagetype = 'regular'
-            print 'datadecoded body', datadecoded['body']
-            print 'datadecoded len', len(datadecoded['body'])
-            myuser = self.get_secure_cookie('user', rightdatadecoded)
+        rightdatadecoded = what.split('"', 1)
+        rightdatadecoded = str(rightdatadecoded[1]) # Workaround because #tornado.escape.json_decode(data) keeps an unwanted leading " : [W 160909 14:32:41 web:2659] #Invalid cookie signature '"ZXhhbHRpYQ==|1473424358|015bc4923b6db19a0a7c084cdc60b81952868c12'
+        #                          ^There
+        #coded(JSON) example message is : #{"body":"222","_xsrf":"b8f28cd1a8184afeb9296d48bb943d0a","user":"\"ZXhhbHRpYQ==|1473424358|015b#c4923b6db19a0a7c084cdc60b81952868c12"} wich seems right
+        messagetype = 'regular'
+        # print 'datadecoded body', datadecoded['body']
+        # print 'datadecoded len', len(datadecoded['body'])
+        myuser = self.get_secure_cookie('user', rightdatadecoded)
+        message = {
+            '_id': ''.join(random.choice(string.ascii_uppercase) for i in range(12)),
+            'date': time.strftime("%H:%M:%S"),
+            'type': messagetype,
+            'from': self.get_secure_cookie('user', rightdatadecoded),
+            'body': tornado.escape.linkify(datadecoded["body"]),
+        }
+        textandsmyley = ''
+        if 'emojioneemoji' in message['body']:
+            print 'data', datadecoded['body']
+            print "c'est un emote"
+            templistmessagebody = datadecoded['body'].split('<')
+            templistmessagebody = filter(None, templistmessagebody)
+            print templistmessagebody
+            Convertall = False
+            for i, row in enumerate(templistmessagebody):
+                if 'img' in templistmessagebody[i]:
+                    templistmessagebody[i] = '<' + templistmessagebody[i]
+                    print 'message number', i, templistmessagebody[i]
+                    if not templistmessagebody[i].startswith('<img') or not templistmessagebody[i].endswith('>'):
+                    #if not 'emojioneemoji' in templistmessagebody[i]:
+                        Convertall = True
+                        pos = templistmessagebody[i].find('>')
+                        print 'ca passe'
+                        # for i, row in enumerate(templistmessagebody):
+            if Convertall == True:
+                for i, row in enumerate(templistmessagebody):
+                    if templistmessagebody[i].startswith('<img'):
+                        templistmessagebody[i] = templistmessagebody[i][:pos] + ' width="32" ' + templistmessagebody[i][pos:]
+                        print 'hihi', i
+            else:
+                if not datadecoded['body'].startswith('<img'):
+                    print 'ok'
+                    for i, row in enumerate(templistmessagebody):
+                        print 'content', templistmessagebody[i]
+                        if 'img' in templistmessagebody[i]:
+                            print 'img found'
+                            pos = templistmessagebody[i].find('>')
+                            templistmessagebody[i] = templistmessagebody[i][:pos] + ' width="32" ' + templistmessagebody[i][
+                                                                                                     pos:]
+
+                    #if not datadecoded['body'].startswith("<img alt") or not datadecoded['body'].endswith('">'):
+
+                    #pos = datadecoded['body'].find('>')
+                    #print pos
+                    #templistmessagebody = datadecoded['body'].split('<')
+
+                    #for i, row in enumerate(templistmessagebody):
+                    #templistmessagebody[i] = '<' + templistmessagebody[i]
+                    #pos = templistmessagebody[i].find('>')
+                    #print 'ca passe'
+                    #for i, row in enumerate(templistmessagebody):
+                    #templistmessagebody[i] = templistmessagebody[i][:pos] + ' width="32" ' + templistmessagebody[i][pos:]
+
+            textandsmyley = textandsmyley.join(templistmessagebody)
+            print '1', templistmessagebody
+            print '2', textandsmyley
+            #textandsmyley = datadecoded['body'][:pos] + 'width="32" ' + datadecoded['body'][pos:]
+            #print message['body']
             message = {
                 '_id': ''.join(random.choice(string.ascii_uppercase) for i in range(12)),
                 'date': time.strftime("%H:%M:%S"),
                 'type': messagetype,
                 'from': self.get_secure_cookie('user', rightdatadecoded),
-                'body': tornado.escape.linkify(datadecoded["body"]),
+                'body': textandsmyley,
             }
-            if 'emojioneemoji' in message['body']:
-                print "c'est un emote"
-                if not datadecoded['body'].startswith("<img alt") or not datadecoded['body'].endswith('">'):
-                    print 'pouet'
-                    print message['body']
-                    pos = datadecoded['body'].find('>')
-                    print pos
-                    textandsmyley = datadecoded['body'][:pos] + 'width="32" ' + datadecoded['body'][pos:]
-                    print message['body']
-                    message = {
-                        '_id': ''.join(random.choice(string.ascii_uppercase) for i in range(12)),
-                        'date': time.strftime("%H:%M:%S"),
-                        'type': messagetype,
-                        'from': self.get_secure_cookie('user', rightdatadecoded),
-                        'body': textandsmyley,
-                    }
-                    print 'message?', message
-                else:
-                    print 'je tape dans le else'
-                    message = {
-                        '_id': ''.join(random.choice(string.ascii_uppercase) for i in range(12)),
-                        'date': time.strftime("%H:%M:%S"),
-                        'type': messagetype,
-                        'from': self.get_secure_cookie('user', rightdatadecoded),
-                        'body': datadecoded["body"],
-                    }
-            notificationcheck = message['body'].split(' ')[0]
-            notificationcheck = notificationcheck.split('@')
-            print 'notifcheck content ', notificationcheck
+            #print 'message?', message
+        else:
+            print 'je tape dans le else'
+            message = {
+                '_id': ''.join(random.choice(string.ascii_uppercase) for i in range(12)),
+                'date': time.strftime("%H:%M:%S"),
+                'type': messagetype,
+                'from': self.get_secure_cookie('user', rightdatadecoded),
+                'body': datadecoded["body"],
+            }
+        notificationcheck = message['body'].split(' ')[0]
+        notificationcheck = notificationcheck.split('@')
+        print 'notifcheck content ', notificationcheck
 
-            if message['body'].startswith('@' + notificationcheck[0]):
-                print "toupie"
-                listmessagebody = message['body'].split(' ')[0]
-                listmessagebody = listmessagebody.split('@')
-                message2 = {
-                    '_id': ''.join(random.choice(string.ascii_uppercase) for i in range(12)),
-                    'date': time.strftime("%H:%M:%S"),
-                    'type': 'notification',
-                    'from': self.get_secure_cookie('user', rightdatadecoded),
-                    'body': 'You were directly mentionned',
-                }
-                message2_encoded = tornado.escape.json_encode(message2)
-                self.write_message(message2_encoded)
-                # Persistently store message in Redis.
-                self.application.client.rpush(str(listmessagebody[1]), message2_encoded)
-                # Publish message in Redis channel.
-                self.application.client.publish(str(listmessagebody[1]), message2_encoded)
-            if not message['from']:
-                logging.warning("Error: Authentication missing")
-                message['from'] = 'Guest'
-        except Exception, err:
-            # Send an error back to client.
-            self.write_message({'error': 1, 'textStatus': 'Bad input data ... ' + str(err) + data})
-            print sys.exc_info()
-            return
+        if message['body'].startswith('@' + notificationcheck[0]):
+            print "toupie"
+            listmessagebody = message['body'].split(' ')[0]
+            listmessagebody = listmessagebody.split('@')
+            message2 = {
+                '_id': ''.join(random.choice(string.ascii_uppercase) for i in range(12)),
+                'date': time.strftime("%H:%M:%S"),
+                'type': 'notification',
+                'from': self.get_secure_cookie('user', rightdatadecoded),
+                'body': 'You were directly mentionned',
+            }
+            message2_encoded = tornado.escape.json_encode(message2)
+            self.write_message(message2_encoded)
+            # Persistently store message in Redis.
+            self.application.client.rpush(str(listmessagebody[1]), message2_encoded)
+            # Publish message in Redis channel.
+            self.application.client.publish(str(listmessagebody[1]), message2_encoded)
+        if not message['from']:
+            logging.warning("Error: Authentication missing")
+            message['from'] = 'Guest'
+        # except Exception, err:
+        #     # Send an error back to client.
+        #     self.write_message({'error': 1, 'textStatus': 'Bad input data ... ' + str(err) + data})
+        #     print sys.exc_info()
+        #     return
 
         # Save message and publish in Redis.
         try:
