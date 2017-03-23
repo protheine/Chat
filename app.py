@@ -468,7 +468,7 @@ class ChatSocketHandler(tornado.websocket.WebSocketHandler):
                     templistmessagebody[i] = '<' + templistmessagebody[i]
                     print 'message number', i, templistmessagebody[i]
                     if not templistmessagebody[i].startswith('<img') or not templistmessagebody[i].endswith('>'):
-                    #if not 'emojioneemoji' in templistmessagebody[i]:
+                        #if not 'emojioneemoji' in templistmessagebody[i]:
                         Convertall = True
                         pos = templistmessagebody[i].find('>')
                         print 'ca passe'
@@ -489,18 +489,18 @@ class ChatSocketHandler(tornado.websocket.WebSocketHandler):
                             templistmessagebody[i] = templistmessagebody[i][:pos] + ' width="32" ' + templistmessagebody[i][
                                                                                                      pos:]
 
-                    #if not datadecoded['body'].startswith("<img alt") or not datadecoded['body'].endswith('">'):
+                            #if not datadecoded['body'].startswith("<img alt") or not datadecoded['body'].endswith('">'):
 
-                    #pos = datadecoded['body'].find('>')
-                    #print pos
-                    #templistmessagebody = datadecoded['body'].split('<')
+                            #pos = datadecoded['body'].find('>')
+                            #print pos
+                            #templistmessagebody = datadecoded['body'].split('<')
 
-                    #for i, row in enumerate(templistmessagebody):
-                    #templistmessagebody[i] = '<' + templistmessagebody[i]
-                    #pos = templistmessagebody[i].find('>')
-                    #print 'ca passe'
-                    #for i, row in enumerate(templistmessagebody):
-                    #templistmessagebody[i] = templistmessagebody[i][:pos] + ' width="32" ' + templistmessagebody[i][pos:]
+                            #for i, row in enumerate(templistmessagebody):
+                            #templistmessagebody[i] = '<' + templistmessagebody[i]
+                            #pos = templistmessagebody[i].find('>')
+                            #print 'ca passe'
+                            #for i, row in enumerate(templistmessagebody):
+                            #templistmessagebody[i] = templistmessagebody[i][:pos] + ' width="32" ' + templistmessagebody[i][pos:]
 
             textandsmyley = textandsmyley.join(templistmessagebody)
             print '1', templistmessagebody
@@ -526,8 +526,12 @@ class ChatSocketHandler(tornado.websocket.WebSocketHandler):
             }
         notificationcheck = message['body'].split(' ')[0]
         notificationcheck = notificationcheck.split('@')
-        print 'notifcheck content ', notificationcheck
-
+        notificationcheck = filter(None, notificationcheck)
+        if '&nbsp' in notificationcheck[0]:
+            notificationcheck[0].split('&nbsp')
+            notificationcheck = notificationcheck[0]
+        print 'notifcheck content ', notificationcheck[0]
+        print "body", message['body']
         if message['body'].startswith('@' + notificationcheck[0]):
             print "toupie"
             listmessagebody = message['body'].split(' ')[0]
