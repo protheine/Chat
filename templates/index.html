@@ -23,6 +23,7 @@
     <link rel="stylesheet" href="../static/css/jquery.mCustomScrollbar.min.css">
     <link rel="stylesheet" href="../static/css/emojionearea.min.css">
     <link rel="stylesheet" href="../static/css/styles.css">
+    <link rel="stylesheet" href="../static/css/daydate.css">
 
 
     <!-- Media styles -->
@@ -125,9 +126,9 @@
                         <div class="widget-content">
                             <div class="info"><span>Channel</span><span class="channels-count">(5)</span><a href="#"><span class="icon-plus"></span></a></div>
                             <ul class="channels-list">
-                                <li><a href="#">#Mission 0</a></li>
-                                <li><a href="#">#Chatname</a></li>
-                                <li><a href="#">#Mission 1</a></li>
+                                {% for row in RoomName %}
+                                <li><a href="#">{{ row }}</a></li>
+                                {% end %}
                             </ul>
                         </div>
                     </div>
@@ -157,7 +158,7 @@
                         </div>
                     </div>
                     <div class="messages_footer">
-                        <form action="/upload?{{RoomName[0][0]}}" method="POST" enctype="MULTIPART/FORM-DATA" id="testtt">
+                        <form action="/upload?{{RoomName[0][0]}}?{{UserName[0]}}" method="POST" enctype="MULTIPART/FORM-DATA" id="testtt">
                             {% raw xsrf_form_html() %}
                         </form>
                         <form id="chat-input" action="">
@@ -187,7 +188,7 @@
                 <div class="scrollbar-section">
                     <div class="sidebar-content info-section">
                         <div class="sidebar-header">
-                            <h3 class="title">#Chatname <a href="#"><span class="icon-notification"></span></a></h3>
+                            <h3 class="title"> {{ RoomName[0] }} <a href="#"><span class="icon-notification"></span></a></h3>
                             <span class="description">Created by <a href="#">member</a> on August 26th</span>
                             <a href="#" class="close-panel-button"><span class="icon-close"></span></a>
                         </div>
@@ -295,9 +296,9 @@
                                 <div class="collapsible-section collapse in" id="collapseMembers">
                                     <div class="widget-content">
                                         <ul class="users-list">
-                                            <li><a href="#" class="thumbnail user-avatar"><img src="../static/images/user-avatar.png" alt=""></a><span>Member 1</span></li>
-                                            <li><a href="#" class="thumbnail user-avatar"><img src="../static/images/user-avatar.png" alt=""></a><span>Member 2</span></li>
-                                            <li><a href="#" class="thumbnail user-avatar"><img src="../static/images/user-avatar.png" alt=""></a><span>Member 3</span></li>
+                                            {% for row in UserNames %}
+                                            <li><a href="#" class="thumbnail user-avatar"><img src="../static/images/user-avatar.png" alt=""></a><span>{{ row[0] }}</span></li>
+                                            {% end %}
                                         </ul>
                                     </div>
                                 </div>
@@ -341,67 +342,7 @@
                                     </div>
                                 </div>
                             </li>
-                            <li class="widget pinned-items">
-                                <div class="widget-header collapse-control" data-toggle="collapse" href="#collapsePinnedItems" aria-expanded="true" aria-controls="collapsePinnedItems">
-                                    <span class="icon-pin"></span>
-                                    <span class="title">Pinned Items</span>
-                                    <span class="collapse-icon icon-arrow-top"></span>
-                                </div>
-                                <div class="collapsible-section collapse in" id="collapsePinnedItems">
-                                    <div class="widget-content">
-                                        <div class="widget-item file-item">
-                                            <div class="icon-wrapper">
-                                                <span class="icon-blockqoute"></span>
-                                            </div>
-                                            <div class="description">
-                                                <div class="message-info"><a class="user-name" href="#">Member 2</a><span class="date">Aujourd'hui à 14:55</span></div>
-                                                <div class="message-container">Lorem ipsum dolor sit amet</div>
-                                            </div>
-                                            <div class="widget-item-menu">
-                                                <div class="dropdown btn-group">
-                                                    <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="fa fa-ellipsis-h"></i></a>
-                                                    <ul class="dropdown-menu users-checklist-dropdown dropdown-menu-right">
-                                                        <li class="menu-visibility-option"><a href="#">Hide/Show #fileroom <i class="fa fa-eye" aria-hidden="true"></i><i class="fa fa-eye-slash" aria-hidden="true"></i></a></li>
-                                                        <li role="separator" class="divider"></li>
-                                                        <li><a href="#">Un-attache the file</a></li>
-                                                        <li><a href="#">Open a #fileroom</a></li>
-                                                        <li><a href="#">Download file</a></li>
-                                                        <li><a href="#">Add to filemanager</a></li>
-                                                    </ul>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="widget-item message-item">
-                                            <div class="icon-wrapper">
-                                                <span class="icon-image"></span>
-                                            </div>
-                                            <div class="uploaded-file-wrapper description">
-                                                <div class="file-description">
-                                                    <a href="#" class="file-name">Informatique-Securite.jpg</a>
-                                                    <span class="file-description">1.43 MB</span>
-                                                </div>
-                                                <div class="user-description">
-                                                    <a href="#" class="user-name">arnauddsj</a>
-                                                    <span>Aug 31st at 3:38 PM</span>
-                                                </div>
-                                            </div>
-                                            <div class="widget-item-menu">
-                                                <div class="dropdown btn-group">
-                                                    <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="fa fa-ellipsis-h"></i></a>
-                                                    <ul class="dropdown-menu users-checklist-dropdown dropdown-menu-right">
-                                                        <li class="menu-visibility-option"><a href="#">Hide/Show #fileroom <i class="fa fa-eye" aria-hidden="true"></i><i class="fa fa-eye-slash" aria-hidden="true"></i></a></li>
-                                                        <li role="separator" class="divider"></li>
-                                                        <li><a href="#">Un-attache the file</a></li>
-                                                        <li><a href="#">Open a #fileroom</a></li>
-                                                        <li><a href="#">Download file</a></li>
-                                                        <li><a href="#">Add to filemanager</a></li>
-                                                    </ul>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </li>
+                            {% raw pinnedcontent %}
                             <li class="widget links">
                                 <div class="widget-header collapse-control" data-toggle="collapse" href="#collapseLinks" aria-expanded="true" aria-controls="collapseLinks">
                                     <span class="icon-pin"></span>
