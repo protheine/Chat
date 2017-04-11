@@ -40,7 +40,7 @@ $(document).ready(function() {
     if (!window.console.log) window.console.log = function () {
     };
 
-    $.post("/room/testroom", function (data) {
+    $.post(window.location.pathname, function (data) {
         truc = JSON.parse(data);
         ws = new WebSocket(truc.url);
         // Websocket callbacks:
@@ -150,7 +150,7 @@ $(document).ready(function() {
                     <ul class="dropdown-menu users-checklist-dropdown dropdown-menu-right"> \
                         <li class="menu-visibility-option"><a href="#">Hide/Show #fileroom <i class="fa fa-eye" aria-hidden="true"></i><i class="fa fa-eye-slash" aria-hidden="true"></i></a></li> \
                         <li role="separator" class="divider"></li> \
-                        <li><a href="#">Un-attache the file</a></li> \
+                        <li><a href="/testpin?" + message.id + "&{{ RoomName }}">Pin item</a></li> \
                         <li><a href="#">Open a #fileroom</a></li> \
                         <li><a href="#">Download file</a></li> \
                         <li><a href="#">Add to filemanager</a></li> \
@@ -182,7 +182,7 @@ $(document).ready(function() {
                 <ul class="dropdown-menu users-checklist-dropdown dropdown-menu-right"> \
                     <li class="menu-visibility-option"><a href="#">Hide/Show #fileroom <i class="fa fa-eye" aria-hidden="true"></i><i class="fa fa-eye-slash" aria-hidden="true"></i></a></li> \
                     <li role="separator" class="divider"></li> \
-                    <li><a href="#">Un-attache the file</a></li> \
+                    <li><a href="/testpin?&{{ RoomName }}">Pin item</a></li> \
                     <li><a href="#">Open a #fileroom</a></li> \
                     <li><a href="#">Download file</a></li> \
                     <li><a href="#">Add to filemanager</a></li> \
