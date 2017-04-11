@@ -1,9 +1,16 @@
+
 {% for message in messages %}
+{% if message.get('newday') %}
+    <div class="daydate">
+   <span>{% raw message['newday'] %}</span>
+</div>
+{% end %}
 {% if message['from'] != '' %}
 <div class="message-container">
     <a href="#" class="thumbnail user-avatar"><img src="../static/images/user-avatar.png" alt=""></a>
     <div class="message">
         <h6 id="username" hidden>{{ message["from"] }}"</h6>
+        <h6 id="msgid" hidden>{{ message['_id'] }}</h6>
         <div class="info"><a href="#" class="user-name">{{ message["from"] }}</a><span class="info">{% if message.get("date") %}{{ message["date"] }}{% end %}</span></div>
         <div class="content-message">{% module Template("message.html", message=message) %}</div>
     </div>
@@ -12,7 +19,7 @@
         <ul class="dropdown-menu users-checklist-dropdown dropdown-menu-right">
             <li class="menu-visibility-option"><a href="#">Hide/Show #fileroom <i class="fa fa-eye" aria-hidden="true"></i><i class="fa fa-eye-slash" aria-hidden="true"></i></a></li>
             <li role="separator" class="divider"></li>
-            <li><a href="#">Un-attache the file</a></li>
+            <li><a href="/testpin?{{ message['_id'] }}&{{ RoomName }}">Pin item</a></li>
             <li><a href="#">Open a #fileroom</a></li>
             <li><a href="#">Download file</a></li>
             <li><a href="#">Add to filemanager</a></li>
@@ -23,7 +30,7 @@
 {% if message['from'] == ''%}
 <div class="message-container messagefollow">
     <div class="message">
-        <div class="info"><a href="#" class="user-name">{{ message["from"] }}</a><span class="info">{% if message.get("date") %}{{ message["date"] }}{% end %}</span></div>
+        <div class="info"><a href="#" class="user-name">{{ message["from"] }}</a><span class="info">{{ message['_id'] }}{% if message.get("date") %}{{ message["date"] }}{% end %}</span></div>
         <div class="content-message">{% module Template("message.html", message=message) %}</div>
     </div>
     <div class="dropdown btn-group">
@@ -31,7 +38,8 @@
         <ul class="dropdown-menu users-checklist-dropdown dropdown-menu-right">
             <li class="menu-visibility-option"><a href="#">Hide/Show #fileroom <i class="fa fa-eye" aria-hidden="true"></i><i class="fa fa-eye-slash" aria-hidden="true"></i></a></li>
             <li role="separator" class="divider"></li>
-            <li><a href="#">Un-attache the file</a></li>
+            <form id="testpin" action="{{ request.uri }}/testpin?{{ message['_id'] }}"></form>
+            <li><a href="/testpin?{{ message['_id'] }}&{{ RoomName }}">Pin item</a></li>
             <li><a href="#">Open a #fileroom</a></li>
             <li><a href="#">Download file</a></li>
             <li><a href="#">Add to filemanager</a></li>
