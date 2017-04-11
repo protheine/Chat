@@ -34,18 +34,12 @@ class ChatEdit(tornado.web.RequestHandler):
         print "Placeholder"
 class UploadHandler(tornado.web.RequestHandler):#tornado.web.RequestHandler):
     def post(self):#, url):
-        print "c'est parti pour l'upload"
         db = connect(host=config.SQLSERVER, user=config.SQLUSER, passwd=config.SQLPASS, db=config.SQLDB)
         cursor = db.cursor()
         uri = self.request.uri
-        print uri
         url = uri.split('?')
-        print len(url)
-        print 'url tuple', url
         RoomName = url[1]
-        print 'UserName?', url[2]
         UserName = url[2]
-        print RoomName
         sql = 'SELECT RoomID FROM abcd_un WHERE RoomName = %s', [RoomName]
         cursor.execute(*sql)
         RoomID = cursor.fetchone()
@@ -70,7 +64,6 @@ class UploadHandler(tornado.web.RequestHandler):#tornado.web.RequestHandler):
                 'body': file_url2,
                 }
             elif fname_tuple[1] == 'gif':
-                print "It's a JIF!"
                 file_url2 = '<img src ="' + current_location2 + '" >'
                 message2 = {
                     '_id': ''.join(random.choice(string.ascii_uppercase) for i in range(12)),
@@ -120,7 +113,6 @@ class UploadHandler(tornado.web.RequestHandler):#tornado.web.RequestHandler):
             if width > height: #Ratio calculation, depending on wich side is the longuest one
                 ratio = width / thumbwidhtsize
                 finalsize = width / ratio, height / ratio
-                print finalsize
                 img = img.resize((finalsize), Image.BILINEAR)
             else:
                 ratio = height / thumbheightsize
@@ -178,14 +170,12 @@ class UnPinItem(BaseHandler):
         testunpin = testunpin[1].split('&')
         #testunpin = origin[0]
         #testunpin = testunpin[1]
-        print testunpin
         sql = "SELECT UserID FROM Users WHERE SessionID = %s", [BroswerSessionID]
         cursor.execute(*sql)
         UserID = cursor.fetchone()
         sql = "SELECT UserName FROM Users_info WHERE UserID = %s", [UserID]
         cursor.execute(*sql)
         UserName = cursor.fetchone()
-        print 'UserID?', UserID
         sql = "SELECT UserGroupID, CompanyID FROM Users_info WHERE UserID = %s", [UserID]
         cursor.execute(*sql)
         GroupandOwnerID = cursor.fetchone()
@@ -195,7 +185,6 @@ class UnPinItem(BaseHandler):
         cursor.execute(*sql)
         AppID = cursor.fetchone()
         Tablename = AppID[1] + AppID[2]
-        print 'testunpin', testunpin[0]
         sql = 'DELETE FROM ' + Tablename + '_PinnedItems' + ' WHERE MessageID = %s', [testunpin[0]]
         cursor.execute(*sql)
         db.commit()
@@ -223,11 +212,7 @@ class PinItem(BaseHandler):
          cursor.execute(*sql)
          AppID = cursor.fetchone()
          Tablename = AppID[1] + AppID[2]
-         # print 'uri', machinuri
-         # if "testpin" in machinuri:
-         # machinurl = machinuri.split('?', 1)
          origin = machinuri.split('&', 1)
-         # print 'origin', origin
          testpin = origin[0]
          testpin = testpin.split('?')
          testpin = testpin[1]
@@ -237,36 +222,22 @@ class PinItem(BaseHandler):
          for message in result:
             temp = (tornado.escape.json_decode(message))
             if temp['_id'] == testpin:
-                print 'found!'
-                print temp
                 sql = 'SELECT MessageID FROM ' + Tablename + '_PinnedItems' + ' WHERE MessageID = %s', [temp[u'_id']]
                 cursor.execute(*sql)
                 if cursor.fetchone():
-                    print 'Item already pinned, doing nothing more'
                     break
                 else:
-                    print temp['date']
                     sql = 'INSERT INTO '  + Tablename + '_PinnedItems' + '(MessageID, Date, UserName, Body) VALUES (%s, %s, %s, %s)', [temp['_id'], temp['date'], temp['from'], temp['body']]
                     cursor.execute(*sql)
                     db.commit()
                     db.close
-                    print 'done'
                 break
-         # self.redirect(origin)
-         # return result
-        #print result
     def on_result(self, result):
         assert result != 'n', 'Result is fucked up'
-        print 'result is ', result
         result = '-' + str(result) #We need a negative start position for redis
-        print 'PinITEM'
         self.application.client.lrange('82c42a73b26dc109f681618ef297ef89', result, -1, self.search)
-
-
-        print 'fini'
     def get(self, result, room=None):
         url = self.request.uri
-        print 'hey?'
         url = url.split('&')
         REDIS_HOST = 'localhost'
         REDIS_PORT = 6379
@@ -278,14 +249,6 @@ class PinItem(BaseHandler):
         self.application.client.llen('82c42a73b26dc109f681618ef297ef89', self.on_result)  # Todo : Boooh, hardcoded value
         redirection = 'room/' + url[1]
         self.redirect(redirection)
-        #print result
-        # if 'testpin' in self.request.uri:
-        #     assert result != 'n', 'Result is fucked up'
-        #     print 'peut etre?'
-        #     client.llen('82c42a73b26dc109f681618ef297ef89', self.on_result) #Todo : Boooh, hardcoded value
-        #     print result
-        #     print 'mais osef?'
-        # print 'osef hors if?'
 class MainHandler(BaseHandler):
     """
     Main request handler for the root path and for chat rooms.
@@ -302,8 +265,6 @@ class MainHandler(BaseHandler):
         RoomID = str(RoomID[0])
         RoomID = RoomID.decode()
         fullurl = 'ws://' + self.request.host + '/socket/' + RoomID
-
-        #print uri
         db.close()
         wsurl = {
             'url': fullurl,
@@ -312,14 +273,6 @@ class MainHandler(BaseHandler):
         self.write(wsurl_encoded)
     @tornado.web.asynchronous
     def get(self, room=None):
-        print 'par ici?!'
-        # machinuri = self.request.uri
-        # print 'uri', machinuri
-        # if "testpin" in machinuri:
-        #     origin = machinuri.split('&', 1)
-        #     machinurl = machinuri.split('?', 1)
-        #     print 'youpiurl', machinurl
-        #     self.redirect(origin[0])
         print 'xsrf token', self.xsrf_token #DO NOT REMOVE doing that is enough to set the xsrf cookie, required by javascript to post, strange, i know
         url = self.request.uri
         url = url.split('/')
@@ -361,7 +314,6 @@ class MainHandler(BaseHandler):
                 uri = self.request.uri
                 url = uri.split('/')
                 url = url[2].split('&')
-                print 'len url', len(url), ' and value', url
                 RoomName = url[0]
                 RoomName = RoomName.strip('?')
                 sql = 'SELECT RoomID FROM abcd_un WHERE RoomName = %s', [RoomName]
@@ -405,19 +357,13 @@ class MainHandler(BaseHandler):
         messages = []
         notifications = []
         checktypevariable = str(type(mix))
-        #checktypevariable = str(checktypevariable)
-        print 'checkcontent', checktypevariable
         if checktypevariable == "<type 'tuple'>":
-            print 'bing...'
-            # messages={}
             messages =  'Error, you are using a non functional version of brukva, please use the one from evilkost<br><H1>Program terminated</H1>'
             self.render("test.html", messages=messages)
             sys.exit(1)
         elif checktypevariable == "<type 'list'>":
             for message in mix:
-               #checkvartype = "<type 'tuple'>"
                 try:
-                    #print 'message type is: ', type(message), 'len is: ', len(message), 'and content[0] is: ', message
                     temp.append(tornado.escape.json_decode(message))
                 except:
                     print 'faulty message: ', message
@@ -429,7 +375,6 @@ class MainHandler(BaseHandler):
                     try:
                         for message in temp:
                             if not 'type' in message.keys():
-                                print 'no message type for', message
                                 message['type'] = 'file'
                             elif message['type'] == 'notification':
                                 notifications.append(message)
@@ -451,24 +396,11 @@ class MainHandler(BaseHandler):
 
                                         if datetime.strptime(message['date'], "%Y-%m-%d %H:%M:%S"):
                                             splitdate = message['date'].split(' ')
-                                            print datetime.strptime(message['date'], "%Y-%m-%d %H:%M:%S")
-                                            #if splitdate[0].startswith(currentday) and splitdate[0] != currentday:
                                             if splitdate[0] != currentday:
-                                            #if not datetime.strptime(message['date'], "%Y-%m-%d %H:%M:%S").startswith(currentday):
-                                                print "day changed"
                                                 currentday = splitdate[0]
-                                                print 'current day ', currentday
-                                                #if datetime.strptime(message['date'], "%Y-%m-%d %H:%M:%S") < datetime.now() - timedelta(days=1) and datetime.strptime(message['date'], "%Y-%m-%d %H:%M:%S") > datetime.now() - timedelta(days=2):#min(message['date'], key=lambda d: abs(d - now)):
-                                                print 'ca match'
                                                 message['newday'] = str(splitdate[0])
                                                 message['date'] = str(splitdate[1])
-                                                # if len(splitdate) == 2:
-                                                #     print 'on a splite'
-                                                #     print 'splitdate', splitdate
-                                                #     #message['date'] = str(splitdate[1])
-                                                #     message['date'] = "Yesterday " + str(splitdate[1])
                                             else:
-                                                #currentday = ''
                                                 message['date'] = str(splitdate[1])
 
                                     except ValueError:
@@ -489,38 +421,30 @@ class MainHandler(BaseHandler):
         db = connect(host=config.SQLSERVER, user=config.SQLUSER, passwd=config.SQLPASS, db=config.SQLDB, charset='utf8mb4')
         cursor = db.cursor()
         BroswerSessionID = self.get_secure_cookie('SessionID')
-        print 'BroswerSessionID', BroswerSessionID
         sql = "SELECT UserID FROM Users WHERE SessionID = %s", [BroswerSessionID]
         cursor.execute(*sql)
         UserID = cursor.fetchone()
         sql = "SELECT UserName FROM Users_info WHERE UserID = %s", [UserID]
         cursor.execute(*sql)
         UserName = cursor.fetchone()
-        print 'UserName?', UserName
-        print 'Userid', UserID
         sql = "SELECT UserGroupID, CompanyID FROM Users_info WHERE UserID = %s", [UserID]
         cursor.execute(*sql)
         GroupandOwnerID = cursor.fetchone()
-        print 'GroupandOwnerID', GroupandOwnerID
         sql = "SELECT AppID, Tableprefix, AppName FROM GroupApps WHERE GroupID = %s AND OwnerID = %s", [GroupandOwnerID[0],
                                                                                                         GroupandOwnerID[1]]
         cursor.execute(*sql)
         AppID = cursor.fetchone()
-        print 'AppID', AppID
         Tablename = AppID[1] + AppID[2]
         print 'Tablename', Tablename
         sql = "SELECT RoomName FROM " + Tablename + " WHERE AppID = %s", [AppID[0]]
         cursor.execute(*sql)
         AllRoomName = cursor.fetchall()
-        print 'appid is:', AppID
         sql = "SELECT Csspath FROM Templates WHERE AppID = %s  AND GroupID = %s AND IsActive = '1'", (
             AppID[0], GroupID)
         cursor.execute(*sql)
         draftcsspath = cursor.fetchall()
         draftcsspath = draftcsspath[0][0].split('css', 1)
         draftcsspath = '../static/css' + draftcsspath[1]
-        print str(AllRoomName[0][0])
-        print 'draftcsspath is:', draftcsspath
         AappID = 1
         RoomNumber = '1'  # Todo : Change that to non hardcoded values
         sql = "SELECT RoomID FROM abcd_un WHERE RoomNumber = %s AND AppID = %s", [RoomNumber,
@@ -539,20 +463,14 @@ class MainHandler(BaseHandler):
         sql = "SELECT RoomName FROM " + Tablename + " WHERE RoomID = %s", RoomIDS
         cursor.execute(*sql)
         RoomName = cursor.fetchone()
-        print RoomName[0]
         sql = 'SELECT * FROM ' + Tablename + '_PinnedItems ORDER BY Date ASC'
         cursor.execute(sql)
         pins = cursor.fetchall() #Pinned items won't display
-        # if not pins:
-        #     pins = ('Vide', 'Vide', 'Vide', 'Vide', 'Rien')
-        #     print len(pins)
-        print 'pins?', pins
         newday = ''
         pinnedcontent = self.render_string("Pinneditems.html", RoomName=RoomName[0], pins=pins, messages=messages)
         content = self.render_string("messages.html", newday=newday, RoomName=RoomName[0], messages=messages)
         notifcontent = self.render_string("notifications.html", notifications=notifications)
         self.render_default("index.html", pinnedcontent=pinnedcontent, UserNames=UserNames, RoomName=RoomName, UserName=UserName, draftcsspath=draftcsspath, userlist=userlist, AllRoomName=AllRoomName, notifcontent=notifcontent, content=content, chat=1)
-        print "je pagerender"
         db.close()
 class ChatSocketHandler(tornado.websocket.WebSocketHandler):
     """
@@ -611,16 +529,12 @@ class ChatSocketHandler(tornado.websocket.WebSocketHandler):
         in the given Redis chanel this method will be called.
         """
         try:
-            # Decode message
-            #print 'message lenght is: ', len(message), 'and content is: ', message
-            #print 'message index: ', message.index
             if 'body' in dir(message):
                 m = tornado.escape.json_decode(message.body)
                 # Send messages to other clients and finish connection.
                 self.write_message(dict(messages=[m]))
         except :
             print 'message is:', dir(message)
-            print message.__doc__
             self.on_close()
             print 'Hey, something went wrong in section on_messages_published!', sys.exc_info()
 
@@ -628,10 +542,6 @@ class ChatSocketHandler(tornado.websocket.WebSocketHandler):
         """
         Callback when new message received vie the socket.
         """
-        #logging.info('Received new message %r', data)
-        #try:
-        # Parse input to message dict.
-        #print "raw data", data
         datadecoded = tornado.escape.json_decode(data)
         what = str(datadecoded['user'])
 
@@ -640,8 +550,6 @@ class ChatSocketHandler(tornado.websocket.WebSocketHandler):
         #                          ^There
         #coded(JSON) example message is : #{"body":"222","_xsrf":"b8f28cd1a8184afeb9296d48bb943d0a","user":"\"ZXhhbHRpYQ==|1473424358|015b#c4923b6db19a0a7c084cdc60b81952868c12"} wich seems right
         messagetype = 'regular'
-        # print 'datadecoded body', datadecoded['body']
-        # print 'datadecoded len', len(datadecoded['body'])
         myuser = self.get_secure_cookie('user', rightdatadecoded)
         message = {
             '_id': ''.join(random.choice(string.ascii_uppercase) for i in range(12)),
@@ -650,12 +558,9 @@ class ChatSocketHandler(tornado.websocket.WebSocketHandler):
             'from': self.get_secure_cookie('user', rightdatadecoded),
             'body': tornado.escape.linkify(datadecoded["body"]),
         }
-        print 'chatcheck', message['date']
         textandsmyley = ''
         if 'emojioneemoji' in message['body']:
             Smileys = True
-            print 'data', datadecoded['body']
-            print "c'est un emote"
             templistmessagebody = datadecoded['body'].split('<')
             templistmessagebody = filter(None, templistmessagebody)
             print templistmessagebody
@@ -673,6 +578,7 @@ class ChatSocketHandler(tornado.websocket.WebSocketHandler):
             if Convertall == True:
                 for i, row in enumerate(templistmessagebody):
                     if templistmessagebody[i].startswith('<img'):
+                        pos = templistmessagebody[i].find('>')
                         templistmessagebody[i] = templistmessagebody[i][:pos] + ' width="32" ' + templistmessagebody[i][pos:]
                         print 'hihi', i
             else:
@@ -685,25 +591,9 @@ class ChatSocketHandler(tornado.websocket.WebSocketHandler):
                             pos = templistmessagebody[i].find('>')
                             templistmessagebody[i] = templistmessagebody[i][:pos] + ' width="32" ' + templistmessagebody[i][
                                                                                                      pos:]
-
-                            #if not datadecoded['body'].startswith("<img alt") or not datadecoded['body'].endswith('">'):
-
-                            #pos = datadecoded['body'].find('>')
-                            #print pos
-                            #templistmessagebody = datadecoded['body'].split('<')
-
-                            #for i, row in enumerate(templistmessagebody):
-                            #templistmessagebody[i] = '<' + templistmessagebody[i]
-                            #pos = templistmessagebody[i].find('>')
-                            #print 'ca passe'
-                            #for i, row in enumerate(templistmessagebody):
-                            #templistmessagebody[i] = templistmessagebody[i][:pos] + ' width="32" ' + templistmessagebody[i][pos:]
-
             textandsmyley = textandsmyley.join(templistmessagebody)
             print '1', templistmessagebody
             print '2', textandsmyley
-            #textandsmyley = datadecoded['body'][:pos] + 'width="32" ' + datadecoded['body'][pos:]
-            #print message['body']
             message = {
                 '_id': ''.join(random.choice(string.ascii_uppercase) for i in range(12)),
                 'date': time.strftime("%Y-%m-%d %H:%M:%S"),
@@ -711,8 +601,6 @@ class ChatSocketHandler(tornado.websocket.WebSocketHandler):
                 'from': self.get_secure_cookie('user', rightdatadecoded),
                 'body': textandsmyley,
             }
-            print 'chatcheck2', message['date']
-            #print 'message?', message
         else:
             print 'je tape dans le else'
             message = {
@@ -722,20 +610,13 @@ class ChatSocketHandler(tornado.websocket.WebSocketHandler):
                 'from': self.get_secure_cookie('user', rightdatadecoded),
                 'body': datadecoded["body"],
             }
-            # splitdate = message['date'].split(' ')
-            # if len(splitdate) == 2:
-            #     print 'splitdate', splitdate
-            #     message['date'] = str(splitdate[1])
         notificationcheck = message['body'].split(' ')[0]
         notificationcheck = notificationcheck.split('@')
         notificationcheck = filter(None, notificationcheck)
         if '&nbsp' in notificationcheck[0]:
             notificationcheck[0].split('&nbsp')
             notificationcheck = notificationcheck[0]
-        print 'notifcheck content ', notificationcheck[0]
-        print "body", message['body']
         if message['body'].startswith('@' + notificationcheck[0]):
-            print "toupie"
             listmessagebody = message['body'].split(' ')[0]
             listmessagebody = listmessagebody.split('@')
             message2 = {
@@ -754,16 +635,10 @@ class ChatSocketHandler(tornado.websocket.WebSocketHandler):
         if not message['from']:
             logging.warning("Error: Authentication missing")
             message['from'] = 'Guest'
-        # except Exception, err:
-        #     # Send an error back to client.
-        #     self.write_message({'error': 1, 'textStatus': 'Bad input data ... ' + str(err) + data})
-        #     print sys.exc_info()
-        #     return
 
         # Save message and publish in Redis.
         try:
             # Convert to JSON-literal.
-            #print "Smyley", Smileys
             message_encoded = tornado.escape.json_encode(message)
             print 'message encoded', message_encoded
             self.write_message(message_encoded)
@@ -771,7 +646,6 @@ class ChatSocketHandler(tornado.websocket.WebSocketHandler):
             self.application.client.rpush(self.room, message_encoded)
             # Publish message in Redis channel, redefining message content, to not handle the display in the javascript.
             splitdate =  message['date'].split(' ')
-            #print 'test', message_encoded['date']
             message = {
                 '_id': message['_id'],
                 'date': splitdate[1],
