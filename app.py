@@ -41,9 +41,25 @@ class UploadHandler(tornado.web.RequestHandler):#tornado.web.RequestHandler):
         url = uri.split('?')
         RoomName = url[1]
         UserName = url[2]
+        BroswerSessionID = self.get_secure_cookie('SessionID')
         sql = 'SELECT RoomID FROM abcd_un WHERE RoomName = %s', [RoomName]
         cursor.execute(*sql)
         RoomID = cursor.fetchone()
+        sql = "SELECT UserID FROM Users WHERE SessionID = %s", [BroswerSessionID]
+        cursor.execute(*sql)
+        UserID = cursor.fetchone()
+        sql = "SELECT UserName FROM Users_info WHERE UserID = %s", [UserID]
+        cursor.execute(*sql)
+        UserName = cursor.fetchone()
+        sql = "SELECT UserGroupID, CompanyID FROM Users_info WHERE UserID = %s", [UserID]
+        cursor.execute(*sql)
+        GroupandOwnerID = cursor.fetchone()
+        sql = "SELECT AppID, Tableprefix, AppName FROM GroupApps WHERE GroupID = %s AND OwnerID = %s", [
+            GroupandOwnerID[0],
+            GroupandOwnerID[1]]
+        cursor.execute(*sql)
+        AppID = cursor.fetchone()
+        Tablename = AppID[1] + AppID[2]
         print 'roomid', RoomID
         RoomID = str(RoomID[0])
         RoomID = RoomID.decode()
@@ -54,38 +70,6 @@ class UploadHandler(tornado.web.RequestHandler):#tornado.web.RequestHandler):
             encoded_fname = tornado.escape.url_escape(original_fname, plus=False) #Filename must be %20 and not +
             current_location2 = self.request.protocol + "://" + self.request.host + "/static/uploads/" + 'resized-' + encoded_fname
             fname_tuple = original_fname.rsplit('.', 1)
-
-            # if fname_tuple[1] == 'png':
-            #     file_url2 = "<img src ='" + current_location2 + "'/>"
-            #
-            #     message2 = {
-            #     '_id': ''.join(random.choice(string.ascii_uppercase) for i in range(12)),
-            #     'date': time.strftime("%Y-%m-%d %H:%M:%S"),
-            #     'type': 'file',
-            #     'from': UserName,
-            #     'body': file_url2,
-            #     }
-            # elif fname_tuple[1] == 'gif':
-            #     file_url2 = '<img src ="' + current_location2 + '" >'
-            #     message2 = {
-            #         '_id': ''.join(random.choice(string.ascii_uppercase) for i in range(12)),
-            #         'date': time.strftime("%Y-%m-%d %H:%M:%S"),
-            #         'type': 'file',
-            #         'from': UserName,
-            #         'body': file_url2,
-            #         }
-            # elif fname_tuple[1] == 'jpg':
-            #     #file_url2 = '<img src ="' + current_location2 + '" />'
-            #
-            #     message2 = {
-            #         '_id': ''.join(random.choice(string.ascii_uppercase) for i in range(12)),
-            #         'date': time.strftime("%Y-%m-%d %H:%M:%S"),
-            #         'type': 'file',
-            #         'from': UserName,
-            #         #'body': file_url2,
-            #         #'body': file1,
-            #         'body': current_location2
-            #         }
             output_file = open("static/uploads/" + original_fname, 'wb')
             output_file.write(file1['body'])
             size = 128, 128
@@ -163,6 +147,10 @@ class UploadHandler(tornado.web.RequestHandler):#tornado.web.RequestHandler):
             time.sleep(1)
             t = Timer(0.1, client.disconnect)
             t.start()
+            sql = 'INSERT INTO ' + Tablename + '_Files' + ' (UserName, Date, Path) VALUES (%s, %s, %s)', [message['from'][0], message['date'], str(fileloc)]
+            print sql
+            cursor.execute(*sql)
+            db.commit()
             db.close()
             self.redirect(origin)
             # self.finish('pouet')
