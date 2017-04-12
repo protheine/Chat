@@ -9,7 +9,7 @@
 <div class="message-container">
     <a href="#" class="thumbnail user-avatar"><img src="../static/images/user-avatar.png" alt=""></a>
     <div class="message">
-        <h6 id="username" hidden>{{ message["from"] }}"</h6>
+        <h6 id="username" hidden>{{ message["from"] }}</h6>
         <h6 id="msgid" hidden>{{ message['_id'] }}</h6>
         <div class="info"><a href="#" class="user-name">{{ message["from"] }}</a><span class="info">{% if message.get("date") %}{{ message["date"] }}{% end %}</span></div>
         <div class="content-message">{% module Template("message.html", message=message) %}</div>
@@ -30,7 +30,9 @@
 {% if message['from'] == ''%}
 <div class="message-container messagefollow">
     <div class="message">
-        <div class="info"><a href="#" class="user-name">{{ message["from"] }}</a><span class="info">{{ message['_id'] }}{% if message.get("date") %}{{ message["date"] }}{% end %}</span></div>
+        <h6 id="username" hidden>{{ message["from"] }}</h6>
+        <h6 id="msgid" hidden>{{ message['_id'] }}</h6>
+        <div class="info"><a href="#" class="user-name">{{ message["from"] }}</a><span class="info">{% if message.get("date") %}{{ message["date"] }}{% end %}</span></div>
         <div class="content-message">{% module Template("message.html", message=message) %}</div>
     </div>
     <div class="dropdown btn-group">
