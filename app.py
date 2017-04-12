@@ -26,6 +26,7 @@ import brukva
 from base import BaseHandler
 #from login import LoginHandler
 from login import LogoutHandler
+import magic
 #import settings as config
 # Define port from command line parameter.
 tornado.options.define("port", default=8888, help="run on the given port", type=int)
@@ -43,6 +44,7 @@ class UploadHandler(tornado.web.RequestHandler):#tornado.web.RequestHandler):
         sql = 'SELECT RoomID FROM abcd_un WHERE RoomName = %s', [RoomName]
         cursor.execute(*sql)
         RoomID = cursor.fetchone()
+        print 'roomid', RoomID
         RoomID = str(RoomID[0])
         RoomID = RoomID.decode()
         origin = self.request.protocol + "://" + self.request.host + '/room/' + url[1]# + '/' + url[3]
@@ -53,35 +55,46 @@ class UploadHandler(tornado.web.RequestHandler):#tornado.web.RequestHandler):
             current_location2 = self.request.protocol + "://" + self.request.host + "/static/uploads/" + 'resized-' + encoded_fname
             fname_tuple = original_fname.rsplit('.', 1)
 
-            if fname_tuple[1] == 'png':
-                file_url2 = "<img src ='" + current_location2 + "'/>"
-
-                message2 = {
-                '_id': ''.join(random.choice(string.ascii_uppercase) for i in range(12)),
-                'date': time.strftime("%Y-%m-%d %H:%M:%S"),
-                'type': 'file',
-                'from': UserName,
-                'body': file_url2,
-                }
-            elif fname_tuple[1] == 'gif':
-                file_url2 = '<img src ="' + current_location2 + '" >'
-                message2 = {
-                    '_id': ''.join(random.choice(string.ascii_uppercase) for i in range(12)),
-                    'date': time.strftime("%Y-%m-%d %H:%M:%S"),
-                    'type': 'file',
-                    'from': UserName,
-                    'body': file_url2,
-                    }
-            elif fname_tuple[1] == 'jpg':
-                file_url2 = '<img src ="' + current_location2 + '" />'
-                message2 = {
-                    '_id': ''.join(random.choice(string.ascii_uppercase) for i in range(12)),
-                    'date': time.strftime("%Y-%m-%d %H:%M:%S"),
-                    'type': 'file',
-                    'from': UserName,
-                    'body': file_url2,
-                    }
-            elif fname_tuple[1] == 'bmp':
+            # if fname_tuple[1] == 'png':
+            #     file_url2 = "<img src ='" + current_location2 + "'/>"
+            #
+            #     message2 = {
+            #     '_id': ''.join(random.choice(string.ascii_uppercase) for i in range(12)),
+            #     'date': time.strftime("%Y-%m-%d %H:%M:%S"),
+            #     'type': 'file',
+            #     'from': UserName,
+            #     'body': file_url2,
+            #     }
+            # elif fname_tuple[1] == 'gif':
+            #     file_url2 = '<img src ="' + current_location2 + '" >'
+            #     message2 = {
+            #         '_id': ''.join(random.choice(string.ascii_uppercase) for i in range(12)),
+            #         'date': time.strftime("%Y-%m-%d %H:%M:%S"),
+            #         'type': 'file',
+            #         'from': UserName,
+            #         'body': file_url2,
+            #         }
+            # elif fname_tuple[1] == 'jpg':
+            #     #file_url2 = '<img src ="' + current_location2 + '" />'
+            #
+            #     message2 = {
+            #         '_id': ''.join(random.choice(string.ascii_uppercase) for i in range(12)),
+            #         'date': time.strftime("%Y-%m-%d %H:%M:%S"),
+            #         'type': 'file',
+            #         'from': UserName,
+            #         #'body': file_url2,
+            #         #'body': file1,
+            #         'body': current_location2
+            #         }
+            output_file = open("static/uploads/" + original_fname, 'wb')
+            output_file.write(file1['body'])
+            size = 128, 128
+            output_file.close()
+            mime = magic.Magic(mime=True)
+            fileloc = "static/uploads/" + original_fname
+            test = mime.from_file(fileloc)
+            print 'mimeresult', test
+            if test.startswith('image'):
                 file_url2 = '<img src ="' + current_location2 + '"/>'
                 message2 = {
                     '_id': ''.join(random.choice(string.ascii_uppercase) for i in range(12)),
@@ -90,7 +103,20 @@ class UploadHandler(tornado.web.RequestHandler):#tornado.web.RequestHandler):
                     'from': UserName,
                     'body': file_url2,
                 }
-            elif fname_tuple[1] == 'mp4':
+                thumbwidhtsize, thumbheightsize = 128, 128
+                size = thumbwidhtsize, thumbheightsize
+                img = Image.open(os.path.join("static/uploads/", original_fname))
+                width, height = img.size
+                if width > height:  # Ratio calculation, depending on wich side is the longuest one
+                    ratio = width / thumbwidhtsize
+                    finalsize = width / ratio, height / ratio
+                    img = img.resize((finalsize), Image.BILINEAR)
+                else:
+                    ratio = height / thumbheightsize
+                    finalsize = width / ratio, height / ratio
+                    img = img.resize((finalsize), Image.BILINEAR)
+                img.save(os.path.join("static/uploads/", 'resized-' + original_fname))
+            elif test.startswith('video'):
                 file_url2 = '<video width="320" height="240" controls="controls">' + '<source src="'+ current_location2 + '" type="video/mp4" />' + '</video>'
                 message2 = {
                     '_id': ''.join(random.choice(string.ascii_uppercase) for i in range(12)),
@@ -102,24 +128,7 @@ class UploadHandler(tornado.web.RequestHandler):#tornado.web.RequestHandler):
             else:
                 file_url2 = ''
                 message2 = ''
-            output_file = open("static/uploads/" + original_fname, 'wb')
-            output_file.write(file1['body'])
-            size = 128, 128
-            output_file.close()
-            thumbwidhtsize, thumbheightsize = 128, 128
-            size = thumbwidhtsize, thumbheightsize
-            img = Image.open(os.path.join("static/uploads/", original_fname))
-            width, height = img.size
-            if width > height: #Ratio calculation, depending on wich side is the longuest one
-                ratio = width / thumbwidhtsize
-                finalsize = width / ratio, height / ratio
-                img = img.resize((finalsize), Image.BILINEAR)
-            else:
-                ratio = height / thumbheightsize
-                finalsize = width / ratio, height / ratio
-                img = img.resize((finalsize), Image.BILINEAR)
 
-            img.save(os.path.join("static/uploads/", 'resized-' + original_fname))
 
             redistogo_url = os.getenv('REDISTOGO_URL', None)
             REDIS_HOST = 'localhost'
@@ -396,11 +405,15 @@ class MainHandler(BaseHandler):
 
                                         if datetime.strptime(message['date'], "%Y-%m-%d %H:%M:%S"):
                                             splitdate = message['date'].split(' ')
+                                            print splitdate
                                             if splitdate[0] != currentday:
                                                 currentday = splitdate[0]
+                                                print 'message date', message['date']
+                                                print 'new day', currentday
                                                 message['newday'] = str(splitdate[0])
                                                 message['date'] = str(splitdate[1])
                                             else:
+                                                print 'nope', message['date']
                                                 message['date'] = str(splitdate[1])
 
                                     except ValueError:
