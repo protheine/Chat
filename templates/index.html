@@ -22,6 +22,7 @@
     <link rel="stylesheet" href="../static/css/bootstrap.min.css">
     <link rel="stylesheet" href="../static/css/jquery.mCustomScrollbar.min.css">
     <link rel="stylesheet" href="../static/css/emojionearea.min.css">
+    <link rel="stylesheet" href="../static/css/lightbox.css">
     <link rel="stylesheet" href="../static/css/styles.css">
     <link rel="stylesheet" href="../static/css/daydate.css">
 
@@ -158,7 +159,7 @@
                         </div>
                     </div>
                     <div class="messages_footer">
-                        <form action="/upload?{{RoomName[0][0]}}?{{UserName[0]}}" method="POST" enctype="MULTIPART/FORM-DATA" id="testtt">
+                        <form action="/upload?{{RoomName[0]}}?{{UserName[0]}}" method="POST" enctype="MULTIPART/FORM-DATA" id="testtt">
                             {% raw xsrf_form_html() %}
                         </form>
                         <form id="chat-input" action="">
@@ -310,19 +311,32 @@
                                     <span class="collapse-icon icon-arrow-top"></span>
                                 </div>
                                 <div class="collapsible-section collapse in" id="collapseSharedFiles">
+                                    {% for row in Filespath %}
                                     <div class="widget-content">
                                         <div class="widget-item uploaded-file-wrapper">
                                             <a href="#" class="uploaded-file">
-                                                <img src="../static/images/uploaded-img.png" alt="">
+                                                {% if str(row[5]).startswith('image') %}
+                                                    <img src="../{{ row[3] }}" alt="">
+                                                {% else %}
+                                                    <img src="../static/images/user-avatar.png">
+                                                {% end %}
                                             </a>
                                             <div class="description">
                                                 <div class="file-info">
-                                                    <a href="#" class="file-name">Informatique-Securite.jpg</a>
-                                                    <span class="file-size">1.43 MB</span>
+                                                    <input type = "hidden" value="{{ fname = row[3].split('/') }}">
+                                                    <a href="#" class="file-name">{{ fname[2] }}</a>
+                                                    {% if row[4] >= 1048576 %}
+                                                        <input type = "hidden" value="{{ filesize = float(row[4] / 1048576.00) }}">
+                                                        <span class="file-size">{{ ("%.2f" % filesize) }}MB</span>
+
+                                                    {% elif row[4] >= 1024 %}
+                                                        <input type = "hidden" value="{{ filesize = row[4] / 1024 }}">
+                                                        <span class="file-size">{{ ("%.2f" % filesize) }}KB</span>
+                                                    {% end %}
                                                 </div>
                                                 <div class="user-description">
-                                                    <a href="#" class="user-name">arnauddsj</a>
-                                                    <span>Aug 31st at 3:38 PM</span>
+                                                    <a href="#" class="user-name">{{ row[1] }}</a>
+                                                    <span>{{ row[2] }}</span>
                                                 </div>
                                             </div>
                                             <div class="widget-item-menu">
@@ -340,6 +354,7 @@
                                             </div>
                                         </div>
                                     </div>
+                                    {% end %}
                                 </div>
                             </li>
                             {% raw pinnedcontent %}
@@ -407,6 +422,7 @@
 <script type="text/javascript" src="../static/js/table-filter.js"></script>
 <script type="text/javascript" src="../static/js/core.js"></script>
 <script type="text/javascript" src="../static/js/app.js"></script>
+<script type="text/javascript" src="../static/js/lightbox.js"></script>
 
 </body>
 </html>
