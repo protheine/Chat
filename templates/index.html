@@ -45,7 +45,13 @@
         <div class="navbar-header">
             <a class="navbar-brand" href="#">Logo</a>
         </div>
-        <span class="site-description">Title</span>
+        <span class="site-description">Title
+            {% if errormessage != 'None' %}
+                <script>
+                    alert('{{ errormessage }}')
+                </script>
+            {% end %}
+        </span>
 
         <nav class="nav-menu settings-menu">
             <ul>
@@ -312,18 +318,19 @@
                                 </div>
                                 <div class="collapsible-section collapse in" id="collapseSharedFiles">
                                     {% for row in Filespath %}
+                                    <input type = "hidden" value="{{ fname = row[3].split('/') }}">
                                     <div class="widget-content">
                                         <div class="widget-item uploaded-file-wrapper">
-                                            <a href="#" class="uploaded-file">
+                                            <a href="../{{ row[3] }}" class="uploaded-file" data-lightbox="{{ row[3] }}">
                                                 {% if str(row[5]).startswith('image') %}
-                                                    <img src="../{{ row[3] }}" alt="">
+                                                    <img src="../{{ fname[0] }}/{{ fname[1] }}/resized-{{ fname[2] }}" alt="">
                                                 {% else %}
                                                     <img src="../static/images/user-avatar.png">
                                                 {% end %}
                                             </a>
                                             <div class="description">
                                                 <div class="file-info">
-                                                    <input type = "hidden" value="{{ fname = row[3].split('/') }}">
+
                                                     <a href="#" class="file-name">{{ fname[2] }}</a>
                                                     {% if row[4] >= 1048576 %}
                                                         <input type = "hidden" value="{{ filesize = float(row[4] / 1048576.00) }}">

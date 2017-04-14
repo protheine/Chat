@@ -38,6 +38,8 @@ class ChatEdit(tornado.web.RequestHandler):
         print "Placeholder"
 class UploadHandler(tornado.web.RequestHandler):#tornado.web.RequestHandler):
     def post(self):#, url):
+        #global errormessage
+        errormessage = ''
         db = connect(host=config.SQLSERVER, user=config.SQLUSER, passwd=config.SQLPASS, db=config.SQLDB)
         cursor = db.cursor()
         uri = self.request.uri
@@ -68,103 +70,110 @@ class UploadHandler(tornado.web.RequestHandler):#tornado.web.RequestHandler):
         RoomID = RoomID.decode()
         origin = self.request.protocol + "://" + self.request.host + '/room/' + url[1]# + '/' + url[3]
         file1 = self.request.files['file1'][0]
-
         original_fname = file1['filename']
-        # try: # TODO : Better use mime type!
-        encoded_fname = tornado.escape.url_escape(original_fname, plus=False) #Filename must be %20 and not +
-        current_location2 = self.request.protocol + "://" + self.request.host + "/static/uploads/" + 'resized-' + encoded_fname
-        fname_tuple = original_fname.rsplit('.', 1)
-        output_file = open("static/uploads/" + original_fname, 'wb')
-        output_file.write(file1['body'])
-        size = 128, 128
-        output_file.close()
-        mime = magic.Magic(mime=True)
-        fileloc = "static/uploads/" + original_fname
-        filesize =  os.path.getsize(fileloc)
-        test = mime.from_file(fileloc)
-        print 'mimeresult', test
-        if test.startswith('image'):
-            #file_url2 = '<img src ="' + current_location2 + '"/>'
-            file_url2 = '<a href="../' + fileloc + '" data-lightbox="' + fileloc +'"><img src ="' + current_location2 + '"/></a>'
-            message2 = {
-                '_id': ''.join(random.choice(string.ascii_uppercase) for i in range(12)),
-                'date': time.strftime("%Y-%m-%d %H:%M:%S"),
-                'type': 'file',
-                'from': UserName[0],
-                'body': file_url2,
-            }
-            thumbwidhtsize, thumbheightsize = 128, 128
-            size = thumbwidhtsize, thumbheightsize
-            img = Image.open(os.path.join("static/uploads/", original_fname))
-            width, height = img.size
-            if width > height:  # Ratio calculation, depending on wich side is the longuest one
-                ratio = width / thumbwidhtsize
-                finalsize = width / ratio, height / ratio
-                img = img.resize((finalsize), Image.BILINEAR)
+        sql = "SELECT Path From " + Tablename + '_Files WHERE Path LIKE %%s', original_fname
+        if cursor.fetchone:
+            origin += '&errorcode=100' #error codes class 1XX for all file problems
+            #errorcode = '1'
+            self.redirect(origin)
+
+        else:
+
+            # try: # TODO : Better use mime type!
+            encoded_fname = tornado.escape.url_escape(original_fname, plus=False) #Filename must be %20 and not +
+            current_location2 = self.request.protocol + "://" + self.request.host + "/static/uploads/" + 'resized-' + encoded_fname
+            fname_tuple = original_fname.rsplit('.', 1)
+            output_file = open("static/uploads/" + original_fname, 'wb')
+            output_file.write(file1['body'])
+            size = 128, 128
+            output_file.close()
+            mime = magic.Magic(mime=True)
+            fileloc = "static/uploads/" + original_fname
+            filesize =  os.path.getsize(fileloc)
+            test = mime.from_file(fileloc)
+            if test.startswith('image'):
+                #file_url2 = '<img src ="' + current_location2 + '"/>'
+                file_url2 = '<a href="../' + fileloc + '" data-lightbox="' + fileloc +'"><img src ="' + current_location2 + '"/></a>'
+                message2 = {
+                    '_id': ''.join(random.choice(string.ascii_uppercase) for i in range(12)),
+                    'date': time.strftime("%Y-%m-%d %H:%M:%S"),
+                    'type': 'file',
+                    'from': UserName[0],
+                    'body': file_url2,
+                }
+                thumbwidhtsize, thumbheightsize = 128, 128
+                size = thumbwidhtsize, thumbheightsize
+                img = Image.open(os.path.join("static/uploads/", original_fname))
+                width, height = img.size
+                if width > height:  # Ratio calculation, depending on wich side is the longuest one
+                    ratio = width / thumbwidhtsize
+                    finalsize = width / ratio, height / ratio
+                    img = img.resize((finalsize), Image.BILINEAR)
+                else:
+                    ratio = height / thumbheightsize
+                    finalsize = width / ratio, height / ratio
+                    print finalsize
+                    #assert type(finalsize) == "<type 'int'>", 'type is wrong %r' % type(finalsize)
+                    img = img.resize((finalsize), Image.BILINEAR)
+                img.save(os.path.join("static/uploads/", 'resized-' + original_fname))
+            elif test.startswith('video'):
+                file_url2 = '<video width="320" height="240" controls="controls">' + '<source src="'+ current_location2 + '" type="video/mp4" />' + '</video>'
+                message2 = {
+                    '_id': ''.join(random.choice(string.ascii_uppercase) for i in range(12)),
+                    'date': time.strftime("%Y-%m-%d %H:%M:%S"),
+                    'type': 'file',
+                    'from': UserName,
+                    'body': file_url2,
+                }
             else:
-                ratio = height / thumbheightsize
-                finalsize = width / ratio, height / ratio
-                print finalsize
-                #assert type(finalsize) == "<type 'int'>", 'type is wrong %r' % type(finalsize)
-                img = img.resize((finalsize), Image.BILINEAR)
-            img.save(os.path.join("static/uploads/", 'resized-' + original_fname))
-        elif test.startswith('video'):
-            file_url2 = '<video width="320" height="240" controls="controls">' + '<source src="'+ current_location2 + '" type="video/mp4" />' + '</video>'
-            message2 = {
+                file_url2 = ''
+                message2 = ''
+
+
+            redistogo_url = os.getenv('REDISTOGO_URL', None)
+            REDIS_HOST = 'localhost'
+            REDIS_PORT = 6379
+            REDIS_PWD = None
+            REDIS_USER = None
+            client = brukva.Client(host=REDIS_HOST, port=int(REDIS_PORT), password=REDIS_PWD)
+            client.connect()
+            client.listen(self)
+            current_location = self.request.protocol + '://' + self.request.host + "/static/uploads/" + encoded_fname
+            file_url = 'file ' + encoded_fname + ' has been uploaded to ' + tornado.escape.linkify(current_location)
+            message = {
                 '_id': ''.join(random.choice(string.ascii_uppercase) for i in range(12)),
                 'date': time.strftime("%Y-%m-%d %H:%M:%S"),
-                'type': 'file',
+                'type': 'regular',
                 'from': UserName,
-                'body': file_url2,
+                'body': file_url,
             }
-        else:
-            file_url2 = ''
-            message2 = ''
-
-
-        redistogo_url = os.getenv('REDISTOGO_URL', None)
-        REDIS_HOST = 'localhost'
-        REDIS_PORT = 6379
-        REDIS_PWD = None
-        REDIS_USER = None
-        client = brukva.Client(host=REDIS_HOST, port=int(REDIS_PORT), password=REDIS_PWD)
-        client.connect()
-        client.listen(self)
-        current_location = self.request.protocol + '://' + self.request.host + "/static/uploads/" + encoded_fname
-        file_url = 'file ' + encoded_fname + ' has been uploaded to ' + tornado.escape.linkify(current_location)
-        message = {
-            '_id': ''.join(random.choice(string.ascii_uppercase) for i in range(12)),
-            'date': time.strftime("%Y-%m-%d %H:%M:%S"),
-            'type': 'regular',
-            'from': UserName,
-            'body': file_url,
-        }
-        message_encoded = tornado.escape.json_encode(message)
-        room = RoomID #FIXME : message will land in room 1 for all upload in all rooms
-        logging.info('New user for upload connected to chat room ' + room)
-        client.rpush(room, message_encoded)
-        #Publish message in Redis channel
-        client.publish(room, message_encoded)
-        if message2 is not '':
-            message_encoded = tornado.escape.json_encode(message2)
+            message_encoded = tornado.escape.json_encode(message)
+            room = RoomID #FIXME : message will land in room 1 for all upload in all rooms
+            logging.info('New user for upload connected to chat room ' + room)
             client.rpush(room, message_encoded)
-            #Publish message in Redis channel.
+            #Publish message in Redis channel
             client.publish(room, message_encoded)
-        else:
-            pass
-        time.sleep(1)
-        t = Timer(0.1, client.disconnect)
-        t.start()
+            if message2 is not '':
+                message_encoded = tornado.escape.json_encode(message2)
+                client.rpush(room, message_encoded)
+                #Publish message in Redis channel.
+                client.publish(room, message_encoded)
+            else:
+                pass
+            time.sleep(1)
+            t = Timer(0.1, client.disconnect)
+            t.start()
 
-        sql = 'INSERT INTO ' + Tablename + '_Files' + ' (UserName, Date, Path, Size, Type) VALUES (%s, %s, %s, %s, %s)', [message['from'][0], message['date'], str(fileloc), str(filesize), test]
-        print sql
-        cursor.execute(*sql)
-        db.commit()
-        db.close()
-        self.redirect(origin)
-        # self.finish('pouet')
-        # except:
-        #     print 'Hey, something went wrong!', sys.exc_info()
+            sql = 'INSERT INTO ' + Tablename + '_Files' + ' (UserName, Date, Path, Size, Type) VALUES (%s, %s, %s, %s, %s)', [message['from'][0], message['date'], str(fileloc), str(filesize), test]
+            print sql
+            cursor.execute(*sql)
+            db.commit()
+            db.close()
+            #self.MainHandler.get()
+            #self.redirect(origin)
+            # self.finish('pouet')
+            # except:
+            #     print 'Hey, something went wrong!', sys.exc_info()
 class UnPinItem(BaseHandler):
     def get(self, truc):
         origin = self.request.uri
@@ -348,6 +357,10 @@ class MainHandler(BaseHandler):
         notifications = result
         self.on_conversation_found()
     def on_conversation_found(self):
+        # #errormessage = 'Noneonconvfound'
+        # if 'errormessage' not in globals():
+        #     global errormessage
+        #     errormessage = 'None'
         i = 0
         global messages
         global notifications
@@ -423,6 +436,16 @@ class MainHandler(BaseHandler):
         self.pagerender(messages, notifications)
         db.close()
     def pagerender(self, messages, notifications):#Renderding pages
+        uri = self.request.uri
+        try:
+            url = uri.split('errorcode=')
+            errorcode = url[len(url) -1]
+        except:
+            errorcode = '0'
+        if errorcode == '100':
+            errormessage = 'File not uploaded, File name already exist.'
+        else:
+            errormessage = 'None'
         GroupID = '1'
         db = connect(host=config.SQLSERVER, user=config.SQLUSER, passwd=config.SQLPASS, db=config.SQLDB, charset='utf8mb4')
         cursor = db.cursor()
@@ -476,13 +499,10 @@ class MainHandler(BaseHandler):
         sql = 'SELECT * FROM ' + Tablename + '_Files'
         cursor.execute(sql)
         Filespath = cursor.fetchall()
-        print 'FilePath Is', Filespath
-        for row in Filespath:
-            print type(row[5])
         pinnedcontent = self.render_string("Pinneditems.html", RoomName=RoomName[0], pins=pins, messages=messages)
         content = self.render_string("messages.html", newday=newday, RoomName=RoomName[0], messages=messages)
         notifcontent = self.render_string("notifications.html", notifications=notifications)
-        self.render_default("index.html", Filespath=Filespath, pinnedcontent=pinnedcontent, UserNames=UserNames, RoomName=RoomName, UserName=UserName, draftcsspath=draftcsspath, userlist=userlist, AllRoomName=AllRoomName, notifcontent=notifcontent, content=content, chat=1)
+        self.render_default("index.html", errormessage=errormessage, Filespath=Filespath, pinnedcontent=pinnedcontent, UserNames=UserNames, RoomName=RoomName, UserName=UserName, draftcsspath=draftcsspath, userlist=userlist, AllRoomName=AllRoomName, notifcontent=notifcontent, content=content, chat=1)
         db.close()
 class ChatSocketHandler(tornado.websocket.WebSocketHandler):
     """
