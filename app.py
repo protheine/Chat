@@ -29,6 +29,7 @@ from base import BaseHandler
 #from login import LoginHandler
 from login import LogoutHandler
 import magic
+from itertools import chain
 
 #import settings as config
 # Define port from command line parameter.
@@ -71,24 +72,56 @@ class UploadHandler(tornado.web.RequestHandler):#tornado.web.RequestHandler):
         origin = self.request.protocol + "://" + self.request.host + '/room/' + url[1]# + '/' + url[3]
         file1 = self.request.files['file1'][0]
         original_fname = file1['filename']
-        sql = "SELECT Path From " + Tablename + '_Files WHERE Path LIKE %%s', original_fname
-        if cursor.fetchone:
-            origin += '&errorcode=100' #error codes class 1XX for all file problems
+        original_fname = original_fname.split('.')
+        sql = "SELECT Path FROM " + Tablename + "_Files WHERE Path LIKE %s", ('%' + original_fname[0] + '%',)
+        print sql
+        cursor.execute(*sql)
+        if cursor.fetchone():
+            dbfilepath = cursor.fetchall()
+            dbfilepath = dbfilepath[len(dbfilepath) - 1]
+            print 'dbfilepath', dbfilepath
+            print 'originalfname', original_fname
+            #original_fname = dbfilepath[0].split('/')
+            if original_fname[0] in dbfilepath[0]:
+                original_fname = dbfilepath[0]
+                print original_fname
+            #origin += '&errorcode=100' #error codes class 1XX for all file problems
             #errorcode = '1'
-            self.redirect(origin)
-
-        else:
-
+            if '-' in original_fname:
+                print 'complicated one'
+                original_fname = original_fname.split('.')
+                original_fname[0] = original_fname[0].rsplit('-', 1)
+                print 'splitted fname', original_fname
+                original_fname[0][1] = int(original_fname[0][1]) + 1
+                original_fname[0][1] = str(original_fname[0][1])
+                original_fname[0][1] = '-' + original_fname[0][1]
+                filename1 = ''.join(list(chain(*original_fname[0])))
+                original_fname = filename1 + '.' + original_fname[1]
+                print 'file name is ', original_fname
+                # original_fname[0][len(original_fname[0] -1)].split('-')
+                # original_fname[0][len(original_fname[0] - 1)][len(original_fname[0] - 1)].split('-')
+            else:
+                print 'simple one'
+                original_fname = original_fname.split('.')
+                original_fname[0] = original_fname[0] + '-1'
+                original_fname = original_fname[0] + '.' + original_fname[1]
             # try: # TODO : Better use mime type!
+            original_fname = original_fname.split('/')
+            original_fname = original_fname[2]
             encoded_fname = tornado.escape.url_escape(original_fname, plus=False) #Filename must be %20 and not +
             current_location2 = self.request.protocol + "://" + self.request.host + "/static/uploads/" + 'resized-' + encoded_fname
             fname_tuple = original_fname.rsplit('.', 1)
-            output_file = open("static/uploads/" + original_fname, 'wb')
+            #output_file = open("static/uploads/" + original_fname, 'wb')
+            workingdir = os.getcwd()
+            output_file = open(workingdir + '/static/uploads/' + original_fname, 'wb')
+            print 'original file name', original_fname
             output_file.write(file1['body'])
             size = 128, 128
             output_file.close()
             mime = magic.Magic(mime=True)
-            fileloc = "static/uploads/" + original_fname
+
+            fileloc = os.path.join(workingdir + "/static/uploads/" + original_fname)
+            print fileloc
             filesize =  os.path.getsize(fileloc)
             test = mime.from_file(fileloc)
             if test.startswith('image'):
@@ -170,7 +203,7 @@ class UploadHandler(tornado.web.RequestHandler):#tornado.web.RequestHandler):
             db.commit()
             db.close()
             #self.MainHandler.get()
-            #self.redirect(origin)
+            self.redirect(origin)
             # self.finish('pouet')
             # except:
             #     print 'Hey, something went wrong!', sys.exc_info()
@@ -273,7 +306,10 @@ class MainHandler(BaseHandler):
         cursor = db.cursor()
         uri = self.request.uri
         url = uri.split('/')
-        RoomName = url[2]
+        print 'url, 1', url
+        url[2] = url[2].split('&')
+        print len(url)
+        RoomName = url[2][0]
         sql = 'SELECT RoomID FROM abcd_un WHERE RoomName = %s', [RoomName]
         cursor.execute(*sql)
         RoomID = cursor.fetchone()
