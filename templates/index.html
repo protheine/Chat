@@ -43,19 +43,19 @@
         </nav>
 
         <div class="navbar-header">
-            <a class="navbar-brand" href="#">Logo</a>
+            <!--<a class="navbar-brand" href="#">Logo</a>-->
         </div>
-        <span class="site-description">Title
+        <!--<span class="site-description">Title
             {% if errormessage != 'None' %}
                 <script>
                     alert('{{ errormessage }}')
                 </script>
             {% end %}
-        </span>
+        </span>-->
 
         <nav class="nav-menu settings-menu">
             <ul>
-                <li><a href="#" class="menu-btn pull-left"><span class="icon-plus"></span></a></li>
+                <!--<li><a href="#" class="menu-btn pull-left"><span class="icon-plus"></span></a></li>-->
             </ul>
         </nav>
     </div>
@@ -63,17 +63,17 @@
     <div class="second-section top-bar-section">
         <nav class="nav-menu">
             <ul>
-                <li><a href="#" class="menu-btn pull-left"><span class="icon-plus"></span></a></li>
-                <li><a href="#" class="menu-btn pull-left"><span class="icon-members"></span></a></li>
-                <li><a href="#" class="menu-btn pull-left"><span class="icon-area-chart"></span></a></li>
-                <li><a href="#" class="menu-btn pull-left"><span class="icon-file"></span></a></li>
-                <li><a href="#" class="menu-btn pull-left"><span class="icon-envelope"></span></a></li>
-                <li><a href="#" class="menu-btn pull-left"><span class="icon-speaker"></span></a></li>
-                <li><a href="#" class="menu-btn pull-left"><span class="icon-search"></span></a></li>
-                <li><a href="#" class="menu-btn pull-left"><span class="icon-comments"></span></a></li>
-                <li><a href="#" class="menu-btn pull-left"><span class="icon-pin"></span></a></li>
-                <li><a href="#" class="menu-btn pull-left"><span class="icon-support"></span></a><span class="badge">2</span></li>
-                <li><a href="#" class="menu-btn pull-left"><span class="icon-notification"></span></a><span id ="notif-badge" class="badge"></span></li>
+                <li><a href="#" class="menu-btn pull-left"><span class="icon-plus"  hidden></span></a></li>
+                <li><a href="#" class="menu-btn pull-left"><span class="icon-members" hidden></span></a></li>
+                <li><a href="#" class="menu-btn pull-left"><span class="icon-area-chart" hidden></span></a></li>
+                <li><a href="#" class="menu-btn pull-left"><span class="icon-file" hidden></span></a></li>
+                <li><a href="#" class="menu-btn pull-left"><span class="icon-envelope" hidden></span></a></li>
+                <li><a href="#" class="menu-btn pull-left"><span class="icon-speaker" hidden></span></a></li>
+                <li><a href="#" class="menu-btn pull-left"><span class="icon-search" hidden></span></a></li>
+                <li><a href="#" class="menu-btn pull-left"><span class="icon-comments" hidden></span></a></li>
+                <li><a href="#" class="menu-btn pull-left"><span class="icon-pin" hidden></span></a></li>
+                <li><a href="#" class="menu-btn pull-left"><span class="icon-support" hidden></span></a><span class="badge" hidden></span></li>
+                <li><a href="#" class="menu-btn pull-left"><span class="icon-notification" hidden></span></a><span id ="notif-badge" class="badge"></span></li>
             </ul>
         </nav>
 
@@ -128,10 +128,10 @@
                         <div class="title">
                             <span class="icon-comment"></span>
                             <span>Chat</span>
-                            <span class="badge">999 <span class="plus">+</span></span>
+                            <!--<span class="badge">999 <span class="plus">+</span></span>-->
                         </div>
                         <div class="widget-content">
-                            <div class="info"><span>Channel</span><span class="channels-count">(5)</span><a href="#"><span class="icon-plus"></span></a></div>
+                            <div class="info"><span>Channel</span><!--<span class="channels-count">(5)</span><a href="#"><span class="icon-plus">--></span></a></div>
                             <ul class="channels-list">
                                 {% for row in RoomName %}
                                 <li><a href="#">{{ row }}</a></li>
@@ -139,7 +139,7 @@
                             </ul>
                         </div>
                     </div>
-                    <div class="dates-widget">
+                    <!--<div class="dates-widget">
                         <div class="title">
                             <span class="icon-calendar"></span>
                             <span>Agenda</span>
@@ -149,7 +149,7 @@
                             <li><a href="#"><span class="icon-check"></span><span>Liste 2</span></a></li>
                         </ul>
                     </div>
-                </div>
+                </div>-->
             </aside>
             <div class="content_container">
                 <div id="messages_container" class="messages_container">
@@ -321,9 +321,9 @@
                                     <input type = "hidden" value="{{ fname = row[3].split('/') }}">
                                     <div class="widget-content">
                                         <div class="widget-item uploaded-file-wrapper">
-                                            <a href="../{{ row[3] }}" class="uploaded-file" data-lightbox="{{ row[3] }}">
+                                            <a href="..{{ row[3] }}" class="uploaded-file" data-lightbox="{{ row[3] }}">
                                                 {% if str(row[5]).startswith('image') %}
-                                                    <img src="../{{ fname[0] }}/{{ fname[1] }}/resized-{{ fname[2] }}" alt="">
+                                                    <img src="..{{ row[3] }}" alt="">
                                                 {% else %}
                                                     <img src="../static/images/user-avatar.png">
                                                 {% end %}
@@ -331,7 +331,7 @@
                                             <div class="description">
                                                 <div class="file-info">
 
-                                                    <a href="#" class="file-name">{{ fname[2] }}</a>
+                                                    <a href="#" class="file-name">{{ fname[3] }}</a>
                                                     {% if row[4] >= 1048576 %}
                                                         <input type = "hidden" value="{{ filesize = float(row[4] / 1048576.00) }}">
                                                         <span class="file-size">{{ ("%.2f" % filesize) }}MB</span>
@@ -365,7 +365,7 @@
                                 </div>
                             </li>
                             {% raw pinnedcontent %}
-                            <li class="widget links">
+                            <li class="widget links" hidden>
                                 <div class="widget-header collapse-control" data-toggle="collapse" href="#collapseLinks" aria-expanded="true" aria-controls="collapseLinks">
                                     <span class="icon-pin"></span>
                                     <span class="title">Links</span>
