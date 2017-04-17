@@ -77,7 +77,6 @@ class UploadHandler(tornado.web.RequestHandler):#tornado.web.RequestHandler):
         print sql
         cursor.execute(*sql)
         if cursor.fetchone():
-            print 'hum?'
             dbfilepath = cursor.fetchall()
             dbfilepath = dbfilepath[len(dbfilepath) - 1]
             print 'dbfilepath', dbfilepath
@@ -106,13 +105,12 @@ class UploadHandler(tornado.web.RequestHandler):#tornado.web.RequestHandler):
                 original_fname = original_fname.split('.')
                 original_fname[0] = original_fname[0] + '-1'
                 original_fname = original_fname[0] + '.' + original_fname[1]
-            # try: # TODO : Better use mime type!
             original_fname = original_fname.split('/')
             original_fname = original_fname[2]
         else:
-            print 'yep'
             original_fname = '.'.join(original_fname)
             encoded_fname = tornado.escape.url_escape(original_fname, plus=False) #Filename must be %20 and not +
+            print 'encoded_fname', encoded_fname
             current_location2 = self.request.protocol + "://" + self.request.host + "/static/uploads/" + 'resized-' + encoded_fname
         fname_tuple = original_fname.rsplit('.', 1)
         #output_file = open("static/uploads/" + original_fname, 'wb')
@@ -126,11 +124,12 @@ class UploadHandler(tornado.web.RequestHandler):#tornado.web.RequestHandler):
 
         fileloc = os.path.join(workingdir + "/static/uploads/" + original_fname)
         print fileloc
+        relativefileloc = os.path.join("/static/uploads/" + original_fname)
         filesize =  os.path.getsize(fileloc)
         test = mime.from_file(fileloc)
         if test.startswith('image'):
             #file_url2 = '<img src ="' + current_location2 + '"/>'
-            file_url2 = '<a href="../' + fileloc + '" data-lightbox="' + fileloc +'"><img src ="' + current_location2 + '"/></a>'
+            file_url2 = '<a href="..' + relativefileloc + '" data-lightbox="' + relativefileloc +'"><img src ="' + current_location2 + '"/></a>'
             message2 = {
                 '_id': ''.join(random.choice(string.ascii_uppercase) for i in range(12)),
                 'date': time.strftime("%Y-%m-%d %H:%M:%S"),
