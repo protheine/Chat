@@ -72,19 +72,31 @@ class UploadHandler(tornado.web.RequestHandler):#tornado.web.RequestHandler):
         origin = self.request.protocol + "://" + self.request.host + '/room/' + url[1]# + '/' + url[3]
         file1 = self.request.files['file1'][0]
         original_fname = file1['filename']
+        print 'what', original_fname
         original_fname = original_fname.split('.')
-        sql = "SELECT Path FROM " + Tablename + "_Files WHERE Path LIKE %s", ('%' + original_fname[0] + '%',)
+        sql = "SELECT Path FROM " + Tablename + "_Files WHERE Path LIKE %s", ("%" + str(original_fname[0]) + "%",)
         print sql
         cursor.execute(*sql)
-        if cursor.fetchone():
-            dbfilepath = cursor.fetchall()
-            dbfilepath = dbfilepath[len(dbfilepath) - 1]
+        dbfilepath = cursor.fetchall()
+        print 'dbfilepath', dbfilepath
+        if len(dbfilepath) >= 1:
+            #dbfilepath = cursor.fetchall()
             print 'dbfilepath', dbfilepath
+            if len(dbfilepath) > 1:
+                print 'je suis > 1'
+                dbfilepath = dbfilepath[len(dbfilepath) - 1]
+            elif len(dbfilepath) == 1:
+                dbfilepath = dbfilepath[0]
+                print type(dbfilepath), 'content', dbfilepath
+            dbfilepath = dbfilepath[0].split('/')
+            print 'dbfilepath2', dbfilepath
             print 'originalfname', original_fname
-            #original_fname = dbfilepath[0].split('/')
-            if original_fname[0] in dbfilepath[0]:
-                original_fname = dbfilepath[0]
-                print original_fname
+            print 'originalfname after split', original_fname
+            print 'dbfilepath after split', dbfilepath
+            if original_fname[0] in dbfilepath[2]:
+                print 'fname after if', dbfilepath[0]
+                original_fname = dbfilepath[2]
+                print 'hey?', original_fname
             #origin += '&errorcode=100' #error codes class 1XX for all file problems
             #errorcode = '1'
             if '-' in original_fname:
@@ -98,6 +110,8 @@ class UploadHandler(tornado.web.RequestHandler):#tornado.web.RequestHandler):
                 filename1 = ''.join(list(chain(*original_fname[0])))
                 original_fname = filename1 + '.' + original_fname[1]
                 print 'file name is ', original_fname
+                encoded_fname = tornado.escape.url_escape(original_fname, plus=False)  # Filename must be %20 and not +
+                current_location2 = self.request.protocol + "://" + self.request.host + "/static/uploads/" + 'resized-' + encoded_fname
                 # original_fname[0][len(original_fname[0] -1)].split('-')
                 # original_fname[0][len(original_fname[0] - 1)][len(original_fname[0] - 1)].split('-')
             else:
@@ -105,8 +119,8 @@ class UploadHandler(tornado.web.RequestHandler):#tornado.web.RequestHandler):
                 original_fname = original_fname.split('.')
                 original_fname[0] = original_fname[0] + '-1'
                 original_fname = original_fname[0] + '.' + original_fname[1]
-            original_fname = original_fname.split('/')
-            original_fname = original_fname[2]
+            #original_fname = original_fname.split('/')
+            #original_fname = original_fname[2]
         else:
             original_fname = '.'.join(original_fname)
             encoded_fname = tornado.escape.url_escape(original_fname, plus=False) #Filename must be %20 and not +
@@ -114,27 +128,27 @@ class UploadHandler(tornado.web.RequestHandler):#tornado.web.RequestHandler):
             current_location2 = self.request.protocol + "://" + self.request.host + "/static/uploads/" + 'resized-' + encoded_fname
         fname_tuple = original_fname.rsplit('.', 1)
         #output_file = open("static/uploads/" + original_fname, 'wb')
-        workingdir = os.getcwd()
-        output_file = open(workingdir + '/static/uploads/' + original_fname, 'wb')
+        output_file = open('static/uploads/' + original_fname, 'wb')
         print 'original file name', original_fname
         output_file.write(file1['body'])
         size = 128, 128
         output_file.close()
         mime = magic.Magic(mime=True)
-
-        fileloc = os.path.join(workingdir + "/static/uploads/" + original_fname)
+        encoded_fname = tornado.escape.url_escape(original_fname, plus=False)  # Filename must be %20 and not +
+        current_location2 = self.request.protocol + "://" + self.request.host + "/static/uploads/" + 'resized-' + encoded_fname
+        fileloc = os.path.join("static/uploads/" + original_fname)
         print fileloc
-        relativefileloc = os.path.join("/static/uploads/" + original_fname)
+        relativefileloc = os.path.join("static/uploads/" + original_fname)
         filesize =  os.path.getsize(fileloc)
         test = mime.from_file(fileloc)
         if test.startswith('image'):
             #file_url2 = '<img src ="' + current_location2 + '"/>'
-            file_url2 = '<a href="..' + relativefileloc + '" data-lightbox="' + relativefileloc +'"><img src ="' + current_location2 + '"/></a>'
+            file_url2 = '<a href="../' + relativefileloc + '" data-lightbox="' + relativefileloc +'"><img src ="' + current_location2 + '"/></a>'
             message2 = {
                 '_id': ''.join(random.choice(string.ascii_uppercase) for i in range(12)),
                 'date': time.strftime("%Y-%m-%d %H:%M:%S"),
                 'type': 'file',
-                'from': UserName[0],
+                'from': str(UserName[0]),
                 'body': file_url2,
             }
             thumbwidhtsize, thumbheightsize = 128, 128
@@ -151,7 +165,8 @@ class UploadHandler(tornado.web.RequestHandler):#tornado.web.RequestHandler):
                 print finalsize
                 #assert type(finalsize) == "<type 'int'>", 'type is wrong %r' % type(finalsize)
                 img = img.resize((finalsize), Image.BILINEAR)
-            img.save(os.path.join("static/uploads/", 'resized-' + original_fname))
+            imgsavepath = 'static/uploads/resized-' + original_fname
+            img.save(imgsavepath)
         elif test.startswith('video'):
             file_url2 = '<video width="320" height="240" controls="controls">' + '<source src="'+ current_location2 + '" type="video/mp4" />' + '</video>'
             message2 = {
@@ -180,7 +195,7 @@ class UploadHandler(tornado.web.RequestHandler):#tornado.web.RequestHandler):
             '_id': ''.join(random.choice(string.ascii_uppercase) for i in range(12)),
             'date': time.strftime("%Y-%m-%d %H:%M:%S"),
             'type': 'regular',
-            'from': UserName,
+            'from': str(UserName[0]),
             'body': file_url,
         }
         message_encoded = tornado.escape.json_encode(message)
@@ -200,7 +215,7 @@ class UploadHandler(tornado.web.RequestHandler):#tornado.web.RequestHandler):
         t = Timer(0.1, client.disconnect)
         t.start()
 
-        sql = 'INSERT INTO ' + Tablename + '_Files' + ' (UserName, Date, Path, Size, Type) VALUES (%s, %s, %s, %s, %s)', [message['from'][0], message['date'], str(fileloc), str(filesize), test]
+        sql = 'INSERT INTO ' + Tablename + '_Files' + ' (UserName, Date, Path, Size, Type) VALUES (%s, %s, %s, %s, %s)', [message['from'][0], message['date'], str(relativefileloc), str(filesize), test]
         print sql
         cursor.execute(*sql)
         db.commit()
@@ -544,6 +559,7 @@ class MainHandler(BaseHandler):
         notifcontent = self.render_string("notifications.html", notifications=notifications)
         self.render_default("index.html", errormessage=errormessage, Filespath=Filespath, pinnedcontent=pinnedcontent, UserNames=UserNames, RoomName=RoomName, UserName=UserName, draftcsspath=draftcsspath, userlist=userlist, AllRoomName=AllRoomName, notifcontent=notifcontent, content=content, chat=1)
         db.close()
+        print 'end?'
 class ChatSocketHandler(tornado.websocket.WebSocketHandler):
     """
     Handler for dealing with websockets. It receives, stores and distributes new messages.
