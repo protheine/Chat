@@ -465,22 +465,28 @@ class MainHandler(BaseHandler):
                                     #checkdate = messa
                                     now = datetime.now()
 
-                                    try:
-                                        #newday = ''
+                            try:
+                                #newday = ''
 
-                                        if datetime.strptime(message['date'], "%Y-%m-%d %H:%M:%S"):
-                                            splitdate = message['date'].split(' ')
-                                            if splitdate[0] != currentday:
-                                                currentday = splitdate[0]
-                                                message['newday'] = str(splitdate[0])
-                                                message['date'] = str(splitdate[1])
-                                            else:
-                                                message['date'] = str(splitdate[1])
-
-                                    except ValueError:
-                                        print 'value error, date is', message['date']
-                                        pass
-                                messages.append(message)
+                                if datetime.strptime(message['date'], "%Y-%m-%d %H:%M:%S"):
+                                    splitdate = message['date'].split(' ')
+                                    print 'ca split la date'
+                                    print 'current day', currentday
+                                    print 'splitdate', splitdate[0]
+                                    if splitdate[0] != currentday:
+                                        print 'yep'
+                                        currentday = splitdate[0]
+                                        message['newday'] = str(splitdate[0])
+                                        message['date'] = str(splitdate[1])
+                                        print 'yay', message['newday']
+                                    else:
+                                        message['date'] = str(splitdate[1])
+                                else:
+                                    print 'date', message['date']
+                            except ValueError:
+                                print 'value error, date is', message['date']
+                                pass
+                            messages.append(message)
                     except:
                         print 'error is', sys.exc_info()
                         print 'faulty message: ', message
