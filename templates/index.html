@@ -337,7 +337,7 @@
                                                         <span class="file-size">{{ ("%.2f" % filesize) }}MB</span>
 
                                                     {% elif row[4] >= 1024 %}
-                                                        <input type = "hidden" value="{{ filesize = row[4] / 1024 }}">
+                                                        <input type = "hidden" value="{{ filesize = row[4] / 1024.00 }}">
                                                         <span class="file-size">{{ ("%.2f" % filesize) }}KB</span>
                                                     {% end %}
                                                 </div>
