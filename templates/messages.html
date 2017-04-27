@@ -20,7 +20,9 @@
             <li class="menu-visibility-option"><a href="#">Hide/Show #fileroom <i class="fa fa-eye" aria-hidden="true"></i><i class="fa fa-eye-slash" aria-hidden="true"></i></a></li>
             <li role="separator" class="divider"></li>
             <li><a href="/testpin?{{ message['_id'] }}&{{ RoomName }}">Pin item</a></li>
+            {% if message['type'] == 'file' %}
             <li><a href="#">Open a #fileroom</a></li>
+            {% end %}
             <li><a href="#">Download file</a></li>
             <li><a href="#">Add to filemanager</a></li>
         </ul>
@@ -42,7 +44,9 @@
             <li role="separator" class="divider"></li>
             <form id="testpin" action="{{ request.uri }}/testpin?{{ message['_id'] }}"></form>
             <li><a href="/testpin?{{ message['_id'] }}&{{ RoomName }}">Pin item</a></li>
+            {% if message['type'] == 'file' %}
             <li><a href="#">Open a #fileroom</a></li>
+            {% end %}
             <li><a href="#">Download file</a></li>
             <li><a href="#">Add to filemanager</a></li>
         </ul>
