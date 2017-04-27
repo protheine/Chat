@@ -215,7 +215,7 @@ class UploadHandler(tornado.web.RequestHandler):#tornado.web.RequestHandler):
         t = Timer(0.1, client.disconnect)
         t.start()
 
-        sql = 'INSERT INTO ' + Tablename + '_Files' + ' (UserName, Date, Path, Size, Type) VALUES (%s, %s, %s, %s, %s)', [message['from'][0], message['date'], str(relativefileloc), str(filesize), test]
+        sql = 'INSERT INTO ' + Tablename + '_Files' + ' (UserName, Date, Path, Size, Type) VALUES (%s, %s, %s, %s, %s)', [message['from'], message['date'], str(relativefileloc), str(filesize), test]
         print sql
         cursor.execute(*sql)
         db.commit()
