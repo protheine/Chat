@@ -215,7 +215,7 @@ class UploadHandler(tornado.web.RequestHandler):#tornado.web.RequestHandler):
         t = Timer(0.1, client.disconnect)
         t.start()
 
-        sql = 'INSERT INTO ' + Tablename + '_Files' + ' (UserName, Date, Path, Size, Type) VALUES (%s, %s, %s, %s, %s)', [message['from'], message['date'], str(relativefileloc), str(filesize), test]
+        sql = 'INSERT INTO ' + Tablename + '_Files' + ' (UserName, Date, Path, Size, Type, IsAttached) VALUES (%s, %s, %s, %s, %s, %s)', [message['from'], message['date'], str(relativefileloc), str(filesize), test, 1]
         print sql
         cursor.execute(*sql)
         db.commit()
@@ -226,6 +226,37 @@ class UploadHandler(tornado.web.RequestHandler):#tornado.web.RequestHandler):
         # self.finish('pouet')
         # except:
         #     print 'Hey, something went wrong!', sys.exc_info()
+class DetachFile(BaseHandler):
+    def get(self, truc):
+        origin = self.request.uri
+        origin = origin.split('?', 1)
+        origin[1] = origin[1].split('&')
+        print 'origin', origin
+        db = connect(host=config.SQLSERVER, user=config.SQLUSER, passwd=config.SQLPASS, db=config.SQLDB, charset='utf8')
+        cursor = db.cursor()
+        BroswerSessionID = self.get_secure_cookie('SessionID')
+        sql = "SELECT UserID FROM Users WHERE SessionID = %s", [BroswerSessionID]
+        cursor.execute(*sql)
+        UserID = cursor.fetchone()
+        sql = "SELECT UserName FROM Users_info WHERE UserID = %s", [UserID]
+        cursor.execute(*sql)
+        UserName = cursor.fetchone()
+        sql = "SELECT UserGroupID, CompanyID FROM Users_info WHERE UserID = %s", [UserID]
+        cursor.execute(*sql)
+        GroupandOwnerID = cursor.fetchone()
+        sql = "SELECT AppID, Tableprefix, AppName FROM GroupApps WHERE GroupID = %s AND OwnerID = %s", [
+            GroupandOwnerID[0],
+            GroupandOwnerID[1]]
+        cursor.execute(*sql)
+        AppID = cursor.fetchone()
+        Tablename = AppID[1] + AppID[2]
+        sql = 'UPDATE ' + Tablename + "_Files SET IsAttached = '0' WHERE Path LIKE %s", ['%' + tornado.escape.url_unescape(origin[1][0]) + '%']
+        cursor.execute(*sql)
+        print cursor._executed
+        db.commit()
+        db.close()
+        redirect = '/room/' + origin[1][1]
+        self.redirect(redirect)
 class UnPinItem(BaseHandler):
     def get(self, truc):
         origin = self.request.uri
@@ -470,15 +501,11 @@ class MainHandler(BaseHandler):
 
                                 if datetime.strptime(message['date'], "%Y-%m-%d %H:%M:%S"):
                                     splitdate = message['date'].split(' ')
-                                    print 'ca split la date'
-                                    print 'current day', currentday
-                                    print 'splitdate', splitdate[0]
+
                                     if splitdate[0] != currentday:
-                                        print 'yep'
                                         currentday = splitdate[0]
                                         message['newday'] = str(splitdate[0])
                                         message['date'] = str(splitdate[1])
-                                        print 'yay', message['newday']
                                     else:
                                         message['date'] = str(splitdate[1])
                                 else:
@@ -557,7 +584,7 @@ class MainHandler(BaseHandler):
         cursor.execute(sql)
         pins = cursor.fetchall() #Pinned items won't display
         newday = ''
-        sql = 'SELECT * FROM ' + Tablename + '_Files'
+        sql = 'SELECT * FROM ' + Tablename + '_Files WHERE ISAttached = 1'
         cursor.execute(sql)
         Filespath = cursor.fetchall()
         pinnedcontent = self.render_string("Pinneditems.html", RoomName=RoomName[0], pins=pins, messages=messages)
@@ -794,6 +821,7 @@ class Application(tornado.web.Application):
             (r"/room/([^/]+)", MainHandler),
             (r"/testpin?([^/]+)", PinItem),
             (r"/testunpin?([^/]+)", UnPinItem),
+            (r"/detach?([^/]+)", DetachFile),
             #(r"/room/([a-zA-Z0-9]*)$", MainHandler),
             #(r"/room&([^/]+)", MainHandler),
             (r"/logout", LogoutHandler),
