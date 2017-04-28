@@ -318,12 +318,12 @@
                                 </div>
                                 <div class="collapsible-section collapse in" id="collapseSharedFiles">
                                     {% for row in Filespath %}
-                                    <input type = "hidden" value="{{ fname = row[3].split('/') }}">
+                                    <input type = "hidden" value="{{ fname = row[4].split('/') }}">
                                     <div class="widget-content">
                                         <div class="widget-item uploaded-file-wrapper">
-                                            <a href="../../{{ row[3] }}" class="uploaded-file" data-lightbox="../../{{ row[3] }}">
-                                                {% if str(row[5]).startswith('image') %}
-                                                    <img src="../../{{ row[3] }}" alt="">
+                                            <a href="../../{{ row[4] }}" class="uploaded-file" data-lightbox="../../{{ row[4] }}">
+                                                {% if str(row[6]).startswith('image') %}
+                                                    <img src="../../{{ row[4] }}" alt="">
                                                 {% else %}
                                                     <img src="../static/images/user-avatar.png">
                                                 {% end %}
@@ -332,18 +332,18 @@
                                                 <div class="file-info">
 
                                                     <a href="#" class="file-name">{{ fname[2] }}</a>
-                                                    {% if row[4] >= 1048576 %}
-                                                        <input type = "hidden" value="{{ filesize = float(row[4] / 1048576.00) }}">
+                                                    {% if row[5] >= 1048576 %}
+                                                        <input type = "hidden" value="{{ filesize = float(row[5] / 1048576.00) }}">
                                                         <span class="file-size">{{ ("%.2f" % filesize) }}MB</span>
 
-                                                    {% elif row[4] >= 1024 %}
-                                                        <input type = "hidden" value="{{ filesize = row[4] / 1024.00 }}">
+                                                    {% elif row[5] >= 1024 %}
+                                                        <input type = "hidden" value="{{ filesize = row[5] / 1024.00 }}">
                                                         <span class="file-size">{{ ("%.2f" % filesize) }}KB</span>
                                                     {% end %}
                                                 </div>
                                                 <div class="user-description">
-                                                    <a href="#" class="user-name">{{ row[1] }}</a>
-                                                    <span>{{ row[2] }}</span>
+                                                    <a href="#" class="user-name">{{ row[2] }}</a>
+                                                    <span>{{ row[3] }}</span>
                                                 </div>
                                             </div>
                                             <div class="widget-item-menu">
@@ -354,7 +354,7 @@
                                                         <li role="separator" class="divider"></li>
                                                         <li><a href="/detach?{{ fname[2] }}&{{ RoomName[0] }}">Detach the file</a></li>
                                                         <li><a href="#">Open a #fileroom</a></li>
-                                                        <li><a href="../../{{ row[3] }}" download>Download file</a></li>
+                                                        <li><a href="../../{{ row[4] }}" download>Download file</a></li>
                                                         <li><a href="#">Add to filemanager</a></li>
                                                     </ul>
                                                 </div>
