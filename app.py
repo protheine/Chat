@@ -226,6 +226,54 @@ class UploadHandler(tornado.web.RequestHandler):#tornado.web.RequestHandler):
         # self.finish('pouet')
         # except:
         #     print 'Hey, something went wrong!', sys.exc_info()
+class FileRoom(BaseHandler):
+    def get(self, truc):
+        origin = self.request.uri
+        origin = origin.split('?', 1)
+        #origin[1] = origin[1].split('&')
+        print 'origin', origin
+        db = connect(host=config.SQLSERVER, user=config.SQLUSER, passwd=config.SQLPASS, db=config.SQLDB, charset='utf8')
+        cursor = db.cursor()
+        BroswerSessionID = self.get_secure_cookie('SessionID')
+        sql = "SELECT UserID FROM Users WHERE SessionID = %s", [BroswerSessionID]
+        cursor.execute(*sql)
+        UserID = cursor.fetchone()
+        sql = "SELECT UserName FROM Users_info WHERE UserID = %s", [UserID]
+        cursor.execute(*sql)
+        UserName = cursor.fetchone()
+        sql = "SELECT UserGroupID, CompanyID FROM Users_info WHERE UserID = %s", [UserID]
+        cursor.execute(*sql)
+        GroupandOwnerID = cursor.fetchone()
+        sql = "SELECT AppID, Tableprefix, AppName FROM GroupApps WHERE GroupID = %s AND OwnerID = %s", [
+            GroupandOwnerID[0],
+            GroupandOwnerID[1]]
+        cursor.execute(*sql)
+        AppID = cursor.fetchone()
+        Tablename = AppID[1] + AppID[2]
+        sql = "SELECT Path FROM " + Tablename + '_Files WHERE MessageID = %s', [origin[1]]
+        print 'sql', sql
+        cursor.execute(*sql)
+        FilePath = cursor.fetchone()
+        FilePath = FilePath[0].split('/')
+        print FilePath
+        sql = "SELECT RoomName FROM " + Tablename + ' WHERE RoomName = %s', [FilePath[2]]
+        cursor.execute(*sql)
+        if cursor.fetchone():
+            RoomName = cursor.fetchone()
+            redirection = '/room/' + RoomName
+            self.redirect(redirection)
+        else:
+            RoomID = ''.join(random.choice(string.hexdigits) for i in range(32))
+            sql = 'SELECT RoomNumber, AppID FROM ' + Tablename + ' ORDER BY RoomNumber DESC LIMIT 1'
+            cursor.execute(sql)
+            Roomparameters = cursor.fetchone()
+            sql = 'INSERT INTO ' + Tablename + '(RoomNumber, AppID, RoomID, RoomName) VALUES (%s, %s, %s, %s)', [Roomparameters[0] +1, Roomparameters[1], RoomID, FilePath[2]]
+            cursor.execute(*sql)
+            print cursor._executed
+            db.commit()
+            redirection = '/room/' + FilePath[2]
+            self.redirect(redirection)
+        db.close()
 class DetachFile(BaseHandler):
     def get(self, truc):
         origin = self.request.uri
@@ -360,9 +408,12 @@ class MainHandler(BaseHandler):
         url[2] = url[2].split('&')
         print len(url)
         RoomName = url[2][0]
+        print 'RoomName in post', RoomName
+        RoomName = tornado.escape.url_unescape(RoomName)
         sql = 'SELECT RoomID FROM abcd_un WHERE RoomName = %s', [RoomName]
         cursor.execute(*sql)
         RoomID = cursor.fetchone()
+        print 'RoomID', RoomID
         RoomID = str(RoomID[0])
         RoomID = RoomID.decode()
         fullurl = 'ws://' + self.request.host + '/socket/' + RoomID
@@ -371,6 +422,7 @@ class MainHandler(BaseHandler):
             'url': fullurl,
         }
         wsurl_encoded = tornado.escape.json_encode(wsurl)
+        print 'wsurl', wsurl
         self.write(wsurl_encoded)
     @tornado.web.asynchronous
     def get(self, room=None):
@@ -417,6 +469,8 @@ class MainHandler(BaseHandler):
                 url = url[2].split('&')
                 RoomName = url[0]
                 RoomName = RoomName.strip('?')
+                RoomName = tornado.escape.url_unescape(RoomName)
+                print 'RoomName', RoomName
                 sql = 'SELECT RoomID FROM abcd_un WHERE RoomName = %s', [RoomName]
                 cursor.execute(*sql)
                 RoomID = cursor.fetchone()
@@ -562,12 +616,15 @@ class MainHandler(BaseHandler):
         draftcsspath = cursor.fetchall()
         draftcsspath = draftcsspath[0][0].split('css', 1)
         draftcsspath = '../static/css' + draftcsspath[1]
-        AappID = 1
-        RoomNumber = '1'  # Todo : Change that to non hardcoded values
-        sql = "SELECT RoomID FROM abcd_un WHERE RoomNumber = %s AND AppID = %s", [RoomNumber,
-                                                                                  AappID]  # Todo : Change that to non hardcoded values
+        #AappID = 1
+        #RoomNumber = '1'  # Todo : Change that to non hardcoded values
+
+        #sql = "SELECT RoomID FROM abcd_un WHERE RoomNumber = %s AND AppID = %s", [RoomNumber, AappID]  # Todo : Change that to non hardcoded values
+        uri = uri.split('/')
+        sql = "SELECT RoomID FROM " + Tablename + ' WHERE RoomName = %s', [uri[2]]
         cursor.execute(*sql)
         RoomIDS = cursor.fetchall()
+        print 'RoomName?', uri[2]
         sql = "SELECT GroupID FROM GroupApps WHERE AppID = %s", [AppID[0]]
         cursor.execute(*sql)
         GroupIDS = cursor.fetchall()
@@ -577,9 +634,9 @@ class MainHandler(BaseHandler):
         sql = "SELECT UserName FROM Users_info WHERE UserID IN %s", [UserIDS]
         cursor.execute(*sql)
         UserNames = cursor.fetchall()
-        sql = "SELECT RoomName FROM " + Tablename + " WHERE RoomID = %s", RoomIDS
-        cursor.execute(*sql)
-        RoomName = cursor.fetchone()
+        #sql = "SELECT RoomName FROM " + Tablename + " WHERE RoomID = %s", RoomIDS
+        #cursor.execute(*sql)
+        #RoomName = cursor.fetchone()
         sql = 'SELECT * FROM ' + Tablename + '_PinnedItems ORDER BY Date ASC'
         cursor.execute(sql)
         pins = cursor.fetchall() #Pinned items won't display
@@ -587,10 +644,10 @@ class MainHandler(BaseHandler):
         sql = 'SELECT * FROM ' + Tablename + '_Files WHERE ISAttached = 1'
         cursor.execute(sql)
         Filespath = cursor.fetchall()
-        pinnedcontent = self.render_string("Pinneditems.html", RoomName=RoomName[0], pins=pins, messages=messages)
-        content = self.render_string("messages.html", newday=newday, RoomName=RoomName[0], messages=messages)
+        pinnedcontent = self.render_string("Pinneditems.html", RoomName=uri[2], pins=pins, messages=messages)
+        content = self.render_string("messages.html", newday=newday, RoomName=uri[2], messages=messages)
         notifcontent = self.render_string("notifications.html", notifications=notifications)
-        self.render_default("index.html", errormessage=errormessage, Filespath=Filespath, pinnedcontent=pinnedcontent, UserNames=UserNames, RoomName=RoomName, UserName=UserName, draftcsspath=draftcsspath, userlist=userlist, AllRoomName=AllRoomName, notifcontent=notifcontent, content=content, chat=1)
+        self.render_default("index.html", errormessage=errormessage, Filespath=Filespath, pinnedcontent=pinnedcontent, UserNames=UserNames, RoomName=AllRoomName, UserName=UserName, draftcsspath=draftcsspath, userlist=userlist, AllRoomName=AllRoomName, notifcontent=notifcontent, content=content, chat=1)
         db.close()
         print 'end?'
 class ChatSocketHandler(tornado.websocket.WebSocketHandler):
@@ -822,6 +879,7 @@ class Application(tornado.web.Application):
             (r"/testpin?([^/]+)", PinItem),
             (r"/testunpin?([^/]+)", UnPinItem),
             (r"/detach?([^/]+)", DetachFile),
+            (r"/fileroom?([^/]+)", FileRoom),
             #(r"/room/([a-zA-Z0-9]*)$", MainHandler),
             #(r"/room&([^/]+)", MainHandler),
             (r"/logout", LogoutHandler),
