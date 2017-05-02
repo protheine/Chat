@@ -133,8 +133,8 @@
                         <div class="widget-content">
                             <div class="info"><span>Channel</span><!--<span class="channels-count">(5)</span><a href="#"><span class="icon-plus">--></span></a></div>
                             <ul class="channels-list">
-                                {% for row in RoomName %}
-                                <li><a href="#">{{ row[0] }}</a></li>
+                                {% for row in AllRoomName %}
+                                <li><a href="/room/{{ row[0] }}">{{ row[0] }}</a></li>
                                 {% end %}
                             </ul>
                         </div>
@@ -165,7 +165,7 @@
                         </div>
                     </div>
                     <div class="messages_footer">
-                        <form action="/upload?{{RoomName[0]}}?{{UserName[0]}}" method="POST" enctype="MULTIPART/FORM-DATA" id="testtt">
+                        <form action="/upload?{{ RoomName }}?{{UserName[0]}}" method="POST" enctype="MULTIPART/FORM-DATA" id="testtt">
                             {% raw xsrf_form_html() %}
                         </form>
                         <form id="chat-input" action="">
@@ -177,7 +177,7 @@
                                             <ul class="dropdown-menu">
 
                                                 <li><input  type="file" name="file1" form="testtt" value="blabla"></li>
-                                                    <li><input class="btn btn-link" type="submit" form="testtt">Upload File</input></li>
+                                                    <li><input class="btn btn-link" type="submit" form="testtt">{{ RoomName }}Upload File</input></li>
                                                 </form>
                                                 <li><a href="#">Attach File</a></li>
                                             </ul>
@@ -195,7 +195,7 @@
                 <div class="scrollbar-section">
                     <div class="sidebar-content info-section">
                         <div class="sidebar-header">
-                            <h3 class="title"> {{ RoomName[0] }} <a href="#"><span class="icon-notification"></span></a></h3>
+                            <h3 class="title"> {{ RoomName }} <a href="#"><span class="icon-notification"></span></a></h3>
                             <span class="description">Created by <a href="#">member</a> on August 26th</span>
                             <a href="#" class="close-panel-button"><span class="icon-close"></span></a>
                         </div>

@@ -44,10 +44,13 @@ class UploadHandler(tornado.web.RequestHandler):#tornado.web.RequestHandler):
         db = connect(host=config.SQLSERVER, user=config.SQLUSER, passwd=config.SQLPASS, db=config.SQLDB)
         cursor = db.cursor()
         uri = self.request.uri
+        print 'uri upload', uri
         url = uri.split('?')
         RoomName = url[1]
+        RoomName = tornado.escape.url_unescape(RoomName)
         UserName = url[2]
         BroswerSessionID = self.get_secure_cookie('SessionID')
+        print 'RoomName upload', RoomName
         sql = 'SELECT RoomID FROM abcd_un WHERE RoomName = %s', [RoomName]
         cursor.execute(*sql)
         RoomID = cursor.fetchone()
@@ -67,6 +70,10 @@ class UploadHandler(tornado.web.RequestHandler):#tornado.web.RequestHandler):
         AppID = cursor.fetchone()
         Tablename = AppID[1] + AppID[2]
         print 'roomid', RoomID
+        print type(RoomID)
+        # if type(RoomID) == "<type 'tuple'>":
+        #     RoomID = str(RoomID[0][0])
+        # else:
         RoomID = str(RoomID[0])
         RoomID = RoomID.decode()
         origin = self.request.protocol + "://" + self.request.host + '/room/' + url[1]# + '/' + url[3]
@@ -89,27 +96,19 @@ class UploadHandler(tornado.web.RequestHandler):#tornado.web.RequestHandler):
                 dbfilepath = dbfilepath[0]
                 print type(dbfilepath), 'content', dbfilepath
             dbfilepath = dbfilepath[0].split('/')
-            print 'dbfilepath2', dbfilepath
-            print 'originalfname', original_fname
-            print 'originalfname after split', original_fname
-            print 'dbfilepath after split', dbfilepath
             if original_fname[0] in dbfilepath[2]:
-                print 'fname after if', dbfilepath[0]
                 original_fname = dbfilepath[2]
-                print 'hey?', original_fname
             #origin += '&errorcode=100' #error codes class 1XX for all file problems
             #errorcode = '1'
             if '-' in original_fname:
                 print 'complicated one'
                 original_fname = original_fname.split('.')
                 original_fname[0] = original_fname[0].rsplit('-', 1)
-                print 'splitted fname', original_fname
                 original_fname[0][1] = int(original_fname[0][1]) + 1
                 original_fname[0][1] = str(original_fname[0][1])
                 original_fname[0][1] = '-' + original_fname[0][1]
                 filename1 = ''.join(list(chain(*original_fname[0])))
                 original_fname = filename1 + '.' + original_fname[1]
-                print 'file name is ', original_fname
                 encoded_fname = tornado.escape.url_escape(original_fname, plus=False)  # Filename must be %20 and not +
                 current_location2 = self.request.protocol + "://" + self.request.host + "/static/uploads/" + 'resized-' + encoded_fname
                 # original_fname[0][len(original_fname[0] -1)].split('-')
@@ -124,12 +123,10 @@ class UploadHandler(tornado.web.RequestHandler):#tornado.web.RequestHandler):
         else:
             original_fname = '.'.join(original_fname)
             encoded_fname = tornado.escape.url_escape(original_fname, plus=False) #Filename must be %20 and not +
-            print 'encoded_fname', encoded_fname
             current_location2 = self.request.protocol + "://" + self.request.host + "/static/uploads/" + 'resized-' + encoded_fname
         fname_tuple = original_fname.rsplit('.', 1)
         #output_file = open("static/uploads/" + original_fname, 'wb')
         output_file = open('static/uploads/' + original_fname, 'wb')
-        print 'original file name', original_fname
         output_file.write(file1['body'])
         size = 128, 128
         output_file.close()
@@ -137,7 +134,6 @@ class UploadHandler(tornado.web.RequestHandler):#tornado.web.RequestHandler):
         encoded_fname = tornado.escape.url_escape(original_fname, plus=False)  # Filename must be %20 and not +
         current_location2 = self.request.protocol + "://" + self.request.host + "/static/uploads/" + 'resized-' + encoded_fname
         fileloc = os.path.join("static/uploads/" + original_fname)
-        print fileloc
         relativefileloc = os.path.join("static/uploads/" + original_fname)
         filesize =  os.path.getsize(fileloc)
         test = mime.from_file(fileloc)
@@ -162,7 +158,6 @@ class UploadHandler(tornado.web.RequestHandler):#tornado.web.RequestHandler):
             else:
                 ratio = height / thumbheightsize
                 finalsize = width / ratio, height / ratio
-                print finalsize
                 #assert type(finalsize) == "<type 'int'>", 'type is wrong %r' % type(finalsize)
                 img = img.resize((finalsize), Image.BILINEAR)
             imgsavepath = 'static/uploads/resized-' + original_fname
@@ -199,6 +194,7 @@ class UploadHandler(tornado.web.RequestHandler):#tornado.web.RequestHandler):
             'body': file_url,
         }
         message_encoded = tornado.escape.json_encode(message)
+        print 'RoomID for message publish', RoomID
         room = RoomID #FIXME : message will land in room 1 for all upload in all rooms
         logging.info('New user for upload connected to chat room ' + room)
         client.rpush(room, message_encoded)
@@ -214,14 +210,13 @@ class UploadHandler(tornado.web.RequestHandler):#tornado.web.RequestHandler):
         time.sleep(1)
         t = Timer(0.1, client.disconnect)
         t.start()
-
-        sql = 'INSERT INTO ' + Tablename + '_Files' + ' (UserName, Date, Path, Size, Type, IsAttached) VALUES (%s, %s, %s, %s, %s, %s)', [message['from'], message['date'], str(relativefileloc), str(filesize), test, 1]
+        print origin[1]
+        sql = 'INSERT INTO ' + Tablename + '_Files' + ' (UserName, Date, Path, Size, Type, IsAttached, MessageID, RoomName) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)', [message['from'], message['date'], str(relativefileloc), str(filesize), test, 1, message2['_id'], url[1]]
         print sql
         cursor.execute(*sql)
         db.commit()
         db.close()
         #self.MainHandler.get()
-        print 'why?'
         self.redirect(origin)
         # self.finish('pouet')
         # except:
@@ -259,15 +254,17 @@ class FileRoom(BaseHandler):
         sql = "SELECT RoomName FROM " + Tablename + ' WHERE RoomName = %s', [FilePath[2]]
         cursor.execute(*sql)
         if cursor.fetchone():
-            RoomName = cursor.fetchone()
-            redirection = '/room/' + RoomName
+            print cursor._executed
+            #RoomName = cursor.fetchone()
+
+            redirection = '/room/' + FilePath[2]
             self.redirect(redirection)
         else:
             RoomID = ''.join(random.choice(string.hexdigits) for i in range(32))
             sql = 'SELECT RoomNumber, AppID FROM ' + Tablename + ' ORDER BY RoomNumber DESC LIMIT 1'
             cursor.execute(sql)
             Roomparameters = cursor.fetchone()
-            sql = 'INSERT INTO ' + Tablename + '(RoomNumber, AppID, RoomID, RoomName) VALUES (%s, %s, %s, %s)', [Roomparameters[0] +1, Roomparameters[1], RoomID, FilePath[2]]
+            sql = 'INSERT INTO ' + Tablename + '(RoomNumber, AppID, RoomID, RoomName, IsFileRoom) VALUES (%s, %s, %s, %s, 1)', [Roomparameters[0] +1, Roomparameters[1], RoomID, FilePath[2]]
             cursor.execute(*sql)
             print cursor._executed
             db.commit()
@@ -579,6 +576,7 @@ class MainHandler(BaseHandler):
         db.close()
     def pagerender(self, messages, notifications):#Renderding pages
         uri = self.request.uri
+        print 'mon uri est', uri
         try:
             url = uri.split('errorcode=')
             errorcode = url[len(url) -1]
@@ -607,7 +605,7 @@ class MainHandler(BaseHandler):
         AppID = cursor.fetchone()
         Tablename = AppID[1] + AppID[2]
         print 'Tablename', Tablename
-        sql = "SELECT RoomName FROM " + Tablename + " WHERE AppID = %s", [AppID[0]]
+        sql = "SELECT RoomName FROM " + Tablename + " WHERE AppID = %s AND ISFileRoom = 0", [AppID[0]]
         cursor.execute(*sql)
         AllRoomName = cursor.fetchall()
         sql = "SELECT Csspath FROM Templates WHERE AppID = %s  AND GroupID = %s AND IsActive = '1'", (
@@ -621,9 +619,11 @@ class MainHandler(BaseHandler):
 
         #sql = "SELECT RoomID FROM abcd_un WHERE RoomNumber = %s AND AppID = %s", [RoomNumber, AappID]  # Todo : Change that to non hardcoded values
         uri = uri.split('/')
+        uri[2] = tornado.escape.url_unescape(uri[2])
         sql = "SELECT RoomID FROM " + Tablename + ' WHERE RoomName = %s', [uri[2]]
         cursor.execute(*sql)
         RoomIDS = cursor.fetchall()
+        print 'RoomIDs', RoomIDS
         print 'RoomName?', uri[2]
         sql = "SELECT GroupID FROM GroupApps WHERE AppID = %s", [AppID[0]]
         cursor.execute(*sql)
@@ -641,13 +641,13 @@ class MainHandler(BaseHandler):
         cursor.execute(sql)
         pins = cursor.fetchall() #Pinned items won't display
         newday = ''
-        sql = 'SELECT * FROM ' + Tablename + '_Files WHERE ISAttached = 1'
-        cursor.execute(sql)
+        sql = 'SELECT * FROM ' + Tablename + '_Files WHERE ISAttached = 1 AND RoomName = %s', [uri[2]]
+        cursor.execute(*sql)
         Filespath = cursor.fetchall()
         pinnedcontent = self.render_string("Pinneditems.html", RoomName=uri[2], pins=pins, messages=messages)
         content = self.render_string("messages.html", newday=newday, RoomName=uri[2], messages=messages)
         notifcontent = self.render_string("notifications.html", notifications=notifications)
-        self.render_default("index.html", errormessage=errormessage, Filespath=Filespath, pinnedcontent=pinnedcontent, UserNames=UserNames, RoomName=AllRoomName, UserName=UserName, draftcsspath=draftcsspath, userlist=userlist, AllRoomName=AllRoomName, notifcontent=notifcontent, content=content, chat=1)
+        self.render_default("index.html", errormessage=errormessage, Filespath=Filespath, pinnedcontent=pinnedcontent, UserNames=UserNames, RoomName=uri[2], UserName=UserName, draftcsspath=draftcsspath, userlist=userlist, AllRoomName=AllRoomName, notifcontent=notifcontent, content=content, chat=1)
         db.close()
         print 'end?'
 class ChatSocketHandler(tornado.websocket.WebSocketHandler):

@@ -46,9 +46,10 @@
             <form id="testpin" action="{{ request.uri }}/testpin?{{ message['_id'] }}"></form>
             <li><a href="/testpin?{{ message['_id'] }}&{{ RoomName }}">Pin item</a></li>
             {% if message['type'] == 'file' %}
+            <input type = hidden value="{{ test = message['body'].split('/') }}
+            {{ test[3] = test[3].split('"') }}">
             <li><a href="/fileroom?{{ message['_id'] }}">Open a #fileroom</a></li>
-            {{ message }}
-            <li><a href="#" download>Download file</a></li>
+            <li><a href="../{{ test[1] }}/{{ test[2] }}/{{ test[3][0] }}" download>Download file</a></li>
             <li><a href="#">Add to filemanager</a></li>
             {% end %}
         </ul>
