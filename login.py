@@ -1,6 +1,7 @@
 # coding=UTF-8
 from MySQLdb import *
-import settings as config
+import os
+# import settings as config
 # Tornado modules.
 import tornado.web
 import tornado.escape
@@ -10,7 +11,15 @@ from base import BaseHandler
 
 # General modules.
 import logging
-
+print 'path', os.getcwd()
+dictconf = {}
+with open('./settings.cfg', 'r') as configfile:
+    for line in configfile:
+        if '#' not in line:
+            line = line.strip()
+            line = line.replace(' ', '')
+            line = line.split('=')
+            dictconf[line[0]] = line[1]
 class LoginHandler(BaseHandler):
     """
     Handler for logins with Google Open ID / OAuth
@@ -76,7 +85,7 @@ class LoginHandler(BaseHandler):
             self.render_default("index.html", content=content)
             #return None
             #return None
-        db = connect (host = settings.SQLSERVER, user = settings.SQLUSER, passwd = settings.SQLPASS, db = settings.SQLDB)
+        db = connect(host=dictconf['SQLSERVER'], user=dictconf['SQLUSER'], passwd=dictconf['SQLPASS'], db=dictconf['SQLDB'], charset='utf8mb4')
         cursor = db.cursor ()
         #SQL time
         print (user["email"])
@@ -145,7 +154,7 @@ class LoginHandler(BaseHandler):
             self.render_default("index.html", content=content)
 class LogoutHandler(BaseHandler):
     def get(self):
-        db = connect(host=config.SQLSERVER, user=config.SQLUSER, passwd=config.SQLPASS, db=config.SQLDB)
+        db = connect(host=dictconf['SQLSERVER'], user=dictconf['SQLUSER'], passwd=dictconf['SQLPASS'], db=dictconf['SQLDB'], charset='utf8mb4')
         cursor = db.cursor()
         # domain = self.request.host
         # domain = domain.split('.')
