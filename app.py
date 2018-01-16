@@ -1,10 +1,10 @@
-#
+#2017-12-27-0122
 # coding=UTF-8
 # General modules.
 #from __future__ import division
 
 from MySQLdb import *
-import settings as config
+# import settings as config
 import os, os.path
 import logging
 import sys
@@ -30,27 +30,40 @@ from base import BaseHandler
 from login import LogoutHandler
 import magic
 from itertools import chain
-
 #import settings as config
 # Define port from command line parameter.
-tornado.options.define("port", default=8888, help="run on the given port", type=int)
+#os.chdir(Destination_path)
+# # print 'path', os.getcwd()
+# time.sleep(10)
+dictconf = {}
+with open('./settings.cfg', 'r') as configfile:
+    for line in configfile:
+        if '#' not in line:
+            line = line.strip()
+            line = line.replace(' ', '')
+            line = line.split('=')
+            dictconf[line[0]] = line[1]
+tornado.options.define("port", default=dictconf['port'], help="run on the given port", type=int)
+# # print 'path', os.getcwd()
+# # print 'dictconf', dictconf
 class ChatEdit(tornado.web.RequestHandler):
     def post(self):
-        print "Placeholder"
+        pass
+        # # print "Placeholder"
 class UploadHandler(tornado.web.RequestHandler):#tornado.web.RequestHandler):
     def post(self):#, url):
         #global errormessage
         errormessage = ''
-        db = connect(host=config.SQLSERVER, user=config.SQLUSER, passwd=config.SQLPASS, db=config.SQLDB)
+        db = connect(host=dictconf['SQLSERVER'], user=dictconf['SQLUSER'], passwd=dictconf['SQLPASS'], db=dictconf['SQLDB'], charset='utf8mb4')
         cursor = db.cursor()
         uri = self.request.uri
-        print 'uri upload', uri
+        # # # print 'uri upload', uri
         url = uri.split('?')
-        RoomName = url[1]
+        RoomName = url[3]
         RoomName = tornado.escape.url_unescape(RoomName)
         UserName = url[2]
         BroswerSessionID = self.get_secure_cookie('SessionID')
-        print 'RoomName upload', RoomName
+        # # print 'RoomName upload', RoomName
         sql = 'SELECT RoomID FROM abcd_un WHERE RoomName = %s', [RoomName]
         cursor.execute(*sql)
         RoomID = cursor.fetchone()
@@ -69,8 +82,8 @@ class UploadHandler(tornado.web.RequestHandler):#tornado.web.RequestHandler):
         cursor.execute(*sql)
         AppID = cursor.fetchone()
         Tablename = AppID[1] + AppID[2]
-        print 'roomid', RoomID
-        print type(RoomID)
+        # print 'roomid', RoomID
+        # print type(RoomID)
         # if type(RoomID) == "<type 'tuple'>":
         #     RoomID = str(RoomID[0][0])
         # else:
@@ -79,29 +92,29 @@ class UploadHandler(tornado.web.RequestHandler):#tornado.web.RequestHandler):
         origin = self.request.protocol + "://" + self.request.host + '/room/' + url[1]# + '/' + url[3]
         file1 = self.request.files['file1'][0]
         original_fname = file1['filename']
-        print 'what', original_fname
+        # print 'what', original_fname
         original_fname = original_fname.split('.')
         sql = "SELECT Path FROM " + Tablename + "_Files WHERE Path LIKE %s", ("%" + str(original_fname[0]) + "%",)
-        print sql
+        # print sql
         cursor.execute(*sql)
         dbfilepath = cursor.fetchall()
-        print 'dbfilepath', dbfilepath
+        # print 'dbfilepath', dbfilepath
         if len(dbfilepath) >= 1:
             #dbfilepath = cursor.fetchall()
-            print 'dbfilepath', dbfilepath
+            # print 'dbfilepath', dbfilepath
             if len(dbfilepath) > 1:
-                print 'je suis > 1'
+                # print 'je suis > 1'
                 dbfilepath = dbfilepath[len(dbfilepath) - 1]
             elif len(dbfilepath) == 1:
                 dbfilepath = dbfilepath[0]
-                print type(dbfilepath), 'content', dbfilepath
+                # print type(dbfilepath), 'content', dbfilepath
             dbfilepath = dbfilepath[0].split('/')
             if original_fname[0] in dbfilepath[2]:
                 original_fname = dbfilepath[2]
             #origin += '&errorcode=100' #error codes class 1XX for all file problems
             #errorcode = '1'
             if '-' in original_fname:
-                print 'complicated one'
+                # print 'complicated one'
                 original_fname = original_fname.split('.')
                 original_fname[0] = original_fname[0].rsplit('-', 1)
                 original_fname[0][1] = int(original_fname[0][1]) + 1
@@ -114,7 +127,7 @@ class UploadHandler(tornado.web.RequestHandler):#tornado.web.RequestHandler):
                 # original_fname[0][len(original_fname[0] -1)].split('-')
                 # original_fname[0][len(original_fname[0] - 1)][len(original_fname[0] - 1)].split('-')
             else:
-                print 'simple one'
+                # print 'simple one'
                 original_fname = original_fname.split('.')
                 original_fname[0] = original_fname[0] + '-1'
                 original_fname = original_fname[0] + '.' + original_fname[1]
@@ -194,7 +207,7 @@ class UploadHandler(tornado.web.RequestHandler):#tornado.web.RequestHandler):
             'body': file_url,
         }
         message_encoded = tornado.escape.json_encode(message)
-        print 'RoomID for message publish', RoomID
+        # print 'RoomID for message publish', RoomID
         room = RoomID #FIXME : message will land in room 1 for all upload in all rooms
         logging.info('New user for upload connected to chat room ' + room)
         client.rpush(room, message_encoded)
@@ -210,9 +223,9 @@ class UploadHandler(tornado.web.RequestHandler):#tornado.web.RequestHandler):
         time.sleep(1)
         t = Timer(0.1, client.disconnect)
         t.start()
-        print origin[1]
+        # print origin[1]
         sql = 'INSERT INTO ' + Tablename + '_Files' + ' (UserName, Date, Path, Size, Type, IsAttached, MessageID, RoomName) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)', [message['from'], message['date'], str(relativefileloc), str(filesize), test, 1, message2['_id'], url[1]]
-        print sql
+        # print sql
         cursor.execute(*sql)
         db.commit()
         db.close()
@@ -220,14 +233,302 @@ class UploadHandler(tornado.web.RequestHandler):#tornado.web.RequestHandler):
         self.redirect(origin)
         # self.finish('pouet')
         # except:
-        #     print 'Hey, something went wrong!', sys.exc_info()
+        #     # print 'Hey, something went wrong!', sys.exc_info()
+class PrivateRoom(BaseHandler):
+    def post(self, RoomName):
+        BroswerSessionID = self.get_secure_cookie('SessionID')
+        db = connect(host=dictconf['SQLSERVER'], user=dictconf['SQLUSER'], passwd=dictconf['SQLPASS'], db=dictconf['SQLDB'], charset='utf8mb4')
+        cursor = db.cursor()
+        sql = 'SELECT UserID FROM Users WHERE SessionID = %s', [BroswerSessionID]
+        cursor.execute(*sql)
+        UserID = cursor.fetchone()
+        sql = 'SELECT UserName FROM Users_info WHERE UserID = %s', [UserID]
+        cursor.execute(*sql)
+        UserName = cursor.fetchone()
+        uri = self.request.uri
+        url = uri.split('/')
+        ## print 'url, 1', url
+        url[2] = url[2].split('&')
+        ## print len(url)
+        RoomName = url[3][0]
+        ## print 'RoomName in post1', RoomName
+        RoomName = tornado.escape.url_unescape(RoomName)
+        sql = 'SELECT RoomID FROM abcd_un_PrivateChatRooms WHERE RoomName = %s', ['@' + UserName[0]]
+        cursor.execute(*sql)
+        RoomID = cursor.fetchone()
+        ## print 'RoomID', RoomID
+        RoomID = str(RoomID[0])
+        RoomID = RoomID.decode()
+        fullurl = 'ws://' + self.request.host + '/app1/privatesocket/' + RoomID
+        db.close()
+        # # print fullurl
+        # # print type(fullurl)
+        wsurl = {
+            'url': fullurl + unicode('?') + unicode(url[2][0]),
+        }
+        wsurl_encoded = tornado.escape.json_encode(wsurl)
+        # # print 'wsurl', wsurl
+        self.write(wsurl_encoded)
+    @tornado.web.asynchronous
+    def get(self, room=None):
+        # print 'xsrf token', self.xsrf_token #DO NOT REMOVE doing that is enough to set the xsrf cookie, required by javascript to post, strange, i know
+        url = self.request.uri
+        url = url.split('/')
+        RoomName = url[3]
+        db = connect(host=dictconf['SQLSERVER'], user=dictconf['SQLUSER'], passwd=dictconf['SQLPASS'], db=dictconf['SQLDB'], charset='utf8mb4')
+        cursor = db.cursor()
+
+        sql = 'SELECT RoomID FROM abcd_un WHERE RoomName = %s', [RoomName]
+        cursor.execute(*sql)
+        RoomID = cursor.fetchone()
+        if not room:
+            #self.redirect("/room/1")
+            # print 'error, no rooms'
+            return
+        # Set chat room as instance var (should be validated).
+        self.room = RoomID
+        # Get the current user.
+        self._get_current_user(callback=self.on_auth)
+
+
+    def on_auth(self, user):
+        # Load 50 latest messages from this chat room.
+        db = connect(host=dictconf['SQLSERVER'], user=dictconf['SQLUSER'], passwd=dictconf['SQLPASS'], db=dictconf['SQLDB'], charset='utf8mb4')
+        cursor = db.cursor ()
+        """
+        Callback for third party authentication (last step).
+        """
+        if not user:
+            self.redirect("/login") # TODO: Make this hard coded value fecthable from db for flexible configuration
+        else:
+            sql = ("SELECT UserID FROM Users_info WHERE UserName = '%s'") % user #Todo: Boo, seriously, sql injection !
+            cursor.execute(sql)
+            useridresult = cursor.fetchone()
+            sql = "SELECT SessionID FROM Users WHERE UserID = %s", [useridresult]
+            cursor.execute(*sql)
+            SQLSessionID = cursor.fetchone()
+            BroswerSessionID = self.get_secure_cookie('SessionID')
+            if SQLSessionID[0] == BroswerSessionID:
+                uri = self.request.uri
+                url = uri.split('/')
+                url = url[2].split('&')
+                RoomName = url[0]
+                RoomName = RoomName.strip('?')
+                RoomName = tornado.escape.url_unescape(RoomName)
+                # # print 'RoomName', RoomName
+                sql = 'SELECT RoomID FROM abcd_un_PrivateChatRooms WHERE RoomName = %s', ['@' + user]
+                # # print 'User', user
+                cursor.execute(*sql)
+                RoomID = cursor.fetchone()
+                # # print 'RoomID', RoomID
+                RoomID = str(RoomID[0])
+                RoomID = RoomID.decode()
+                if not 'userlist' in globals():
+                    global userlist
+                    userlist = []
+                global userlist
+                if user not in userlist:
+                    userlist.append(user)
+                self.room = RoomID
+                self.application.client.lrange(self.room, -50, -1, self.stocka)
+                self.application.client.lrange(user, -5, -1, self.stockb)
+            else:
+                self.redirect("/login") # TODO: Make this hard coded value fecthable from db for flexible configuration
+    def stocka(self, result):
+        global messages
+        messages = []
+        messages = result
+        # # print messages
+    def stockb(self, result):
+        global notifications
+        notifications = []
+        notifications = result
+        self.on_conversation_found()
+    def on_conversation_found(self):
+        UserName = self.get_secure_cookie('user')
+        ## print 'user is', user
+        # # print 'private rooms def'
+        url = self.request.uri
+        url = url.split('/')
+        # #errormessage = 'Noneonconvfound'
+        # if 'errormessage' not in globals():
+        #     global errormessage
+        #     errormessage = 'None'
+        i = 0
+        global messages
+        global notifications
+        mix = messages# + notifications
+        db = connect(host=dictconf['SQLSERVER'], user=dictconf['SQLUSER'], passwd=dictconf['SQLPASS'], db=dictconf['SQLDB'], charset='utf8mb4')
+        cursor = db.cursor()
+        AppID = '1'
+        RoomNumber = '1' #Todo : Change that to non hardcoded values
+        # sql = "SELECT RoomID FROM abcd_un WHERE RoomNumber = %s AND AppID = %s", [RoomNumber, AppID] #Todo : Change that to non hardcoded values
+        # cursor.execute(*sql)
+        # RoomIDS = cursor.fetchall()
+        temp = []
+        messages = []
+        notifications = []
+        checktypevariable = str(type(mix))
+        if checktypevariable == "<type 'tuple'>":
+            messages =  'Error, you are using a non functional version of brukva, please use the one from evilkost<br><H1>Program terminated</H1>'
+            self.render("test.html", messages=messages)
+            sys.exit(1)
+        elif checktypevariable == "<type 'list'>":
+            for message in mix:
+                try:
+                    temp.append(tornado.escape.json_decode(message))
+                except:
+                    # print 'faulty message: ', message
+                    i += 1 #if a message is bad, added to number of bad messages
+                    # print 'Hey, something went wrong in message sorting!', sys.exc_info()
+                    pass
+                if len(temp) == len(mix) - i: # number of bad messages soustracted to total messages received to get correct total before processing
+                    # # print 'yep, la len est ok'
+                    # # print temp
+                    currentday = ''
+                    try:
+                        url[2] = url[2].strip('@')
+                        for message in temp:
+                            # # print 'from', message['from']
+                            if not 'to' in message.keys():
+                                # # print 'pas de to'
+                                # # print url[2]
+                                message['to'] = ''
+                            if not 'type' in message.keys():
+                                message['type'] = 'file'
+                            elif message['type'] == 'notification':
+                                notifications.append(message)
+                            elif message['type'] is not 'notification':
+                                if 'username' not in locals():
+                                    username = ''
+                                if 'lastusername' not in locals():
+                                    lastusername = ''
+                                if message['from'] == lastusername:
+                                    message['from'] = ''
+                                    #time.sleep(0.2)
+                                else:
+                                    lastusername = message['from']
+                                    #checkdate = messa
+                                    now = datetime.now()
+
+                            try:
+                                #newday = ''
+
+                                if datetime.strptime(message['date'], "%Y-%m-%d %H:%M:%S"):
+                                    splitdate = message['date'].split(' ')
+
+                                    if splitdate[0] != currentday:
+                                        currentday = splitdate[0]
+                                        message['newday'] = str(splitdate[0])
+                                        message['date'] = str(splitdate[1])
+                                    else:
+                                        message['date'] = str(splitdate[1])
+                                # else:
+                                #     pass
+                                    # # print 'date', message['date']
+                            except ValueError:
+                                # print 'value error, date is', message['date']
+                                pass
+                            if message['from'] == UserName or message['from'] == url[2]:# or message['from'] == 'Exaltia':
+                                # # print 'url[2]', url[2]
+
+                                # # print 'message', message
+                                messages.append(message)
+                    except:
+                        # print 'error is', sys.exc_info()
+                        # print 'faulty message: ', message
+                        pass
+        else:
+            logging.error('Something really wrong happened')
+            sys.exit(1)
+        self.pagerender(messages, notifications)
+        db.close()
+    def pagerender(self, messages, notifications):#Renderding pages
+        uri = self.request.uri
+        print 'mon uri est', uri
+        # print ('static', os.path.join(os.path.dirname(__file__), "static"))
+        try:
+            url = uri.split('errorcode=')
+            errorcode = url[len(url) -1]
+        except:
+            errorcode = '0'
+        if errorcode == '100':
+            errormessage = 'File not uploaded, File name already exist.'
+        else:
+            errormessage = 'None'
+        GroupID = '1'
+        db = connect(host=dictconf['SQLSERVER'], user=dictconf['SQLUSER'], passwd=dictconf['SQLPASS'], db=dictconf['SQLDB'], charset='utf8mb4')
+        cursor = db.cursor()
+        BroswerSessionID = self.get_secure_cookie('SessionID')
+        sql = "SELECT UserID FROM Users WHERE SessionID = %s", [BroswerSessionID]
+        cursor.execute(*sql)
+        UserID = cursor.fetchone()
+        sql = "SELECT UserName FROM Users_info WHERE UserID = %s", [UserID]
+        cursor.execute(*sql)
+        UserName = cursor.fetchone()
+        sql = "SELECT UserGroupID, CompanyID FROM Users_info WHERE UserID = %s", [UserID]
+        cursor.execute(*sql)
+        GroupandOwnerID = cursor.fetchone()
+        sql = "SELECT AppID, Tableprefix, AppName FROM GroupApps WHERE GroupID = %s AND OwnerID = %s", [GroupandOwnerID[0],
+                                                                                                        GroupandOwnerID[1]]
+        cursor.execute(*sql)
+        AppID = cursor.fetchone()
+        Tablename = AppID[1] + AppID[2]
+        # print 'Tablename', Tablename
+        sql = "SELECT RoomName FROM " + Tablename + " WHERE AppID = %s AND ISFileRoom = 0", [AppID[0]]
+        cursor.execute(*sql)
+        AllRoomName = cursor.fetchall()
+        sql = "SELECT Csspath FROM Templates WHERE AppID = %s  AND GroupID = %s AND IsActive = '1'", (
+            AppID[0], GroupID)
+        cursor.execute(*sql)
+        draftcsspath = cursor.fetchall()
+        draftcsspath = draftcsspath[0][0].split('css', 1)
+        draftcsspath = '../static/css' + draftcsspath[1]
+        #AappID = 1
+        #RoomNumber = '1'  # Todo : Change that to non hardcoded values
+
+        #sql = "SELECT RoomID FROM abcd_un WHERE RoomNumber = %s AND AppID = %s", [RoomNumber, AappID]  # Todo : Change that to non hardcoded values
+        uri = uri.split('/')
+        uri[2] = tornado.escape.url_unescape(uri[2])
+        sql = "SELECT RoomID FROM " + Tablename + ' WHERE RoomName = %s', [uri[3]]
+        cursor.execute(*sql)
+        RoomIDS = cursor.fetchall()
+        # print 'RoomIDs', RoomIDS
+        # print 'RoomName?', uri[2]
+        sql = "SELECT GroupID FROM GroupApps WHERE AppID = %s", [AppID[0]]
+        cursor.execute(*sql)
+        GroupIDS = cursor.fetchall()
+        sql = "SELECT UserId FROM User_Groups WHERE GroupID IN %s", [GroupIDS]
+        cursor.execute(*sql)
+        UserIDS = cursor.fetchall()
+        sql = "SELECT UserName FROM Users_info WHERE UserID IN %s", [UserIDS]
+        cursor.execute(*sql)
+        UserNames = cursor.fetchall()
+        #sql = "SELECT RoomName FROM " + Tablename + " WHERE RoomID = %s", RoomIDS
+        #cursor.execute(*sql)
+        #RoomName = cursor.fetchone()
+        sql = 'SELECT * FROM ' + Tablename + '_PinnedItems ORDER BY Date ASC'
+        cursor.execute(sql)
+        pins = cursor.fetchall() #Pinned items won't display
+        newday = ''
+        sql = 'SELECT * FROM ' + Tablename + '_Files WHERE ISAttached = 1 AND RoomName = %s', [uri[2]]
+        cursor.execute(*sql)
+        Filespath = cursor.fetchall()
+        print 'rendering'
+        pinnedcontent = self.render_string("Pinneditems.html", RoomName=uri[3], pins=pins, messages=messages)
+        content = self.render_string("messages.html", newday=newday, RoomName=uri[3], messages=messages)
+        notifcontent = self.render_string("notifications.html", notifications=notifications)
+        self.render_default("index.html", errormessage=errormessage, Filespath=Filespath, pinnedcontent=pinnedcontent, UserNames=UserNames, RoomName=uri[3], UserName=UserName, draftcsspath=draftcsspath, userlist=userlist, AllRoomName=AllRoomName, notifcontent=notifcontent, content=content, chat=1)
+        db.close()
+        # print 'end?'
+
 class FileRoom(BaseHandler):
     def get(self, truc):
         origin = self.request.uri
         origin = origin.split('?', 1)
         #origin[1] = origin[1].split('&')
-        print 'origin', origin
-        db = connect(host=config.SQLSERVER, user=config.SQLUSER, passwd=config.SQLPASS, db=config.SQLDB, charset='utf8')
+        # print 'origin', origin
+        db = connect(host=dictconf['SQLSERVER'], user=dictconf['SQLUSER'], passwd=dictconf['SQLPASS'], db=dictconf['SQLDB'], charset='utf8mb4')
         cursor = db.cursor()
         BroswerSessionID = self.get_secure_cookie('SessionID')
         sql = "SELECT UserID FROM Users WHERE SessionID = %s", [BroswerSessionID]
@@ -246,27 +547,27 @@ class FileRoom(BaseHandler):
         AppID = cursor.fetchone()
         Tablename = AppID[1] + AppID[2]
         sql = "SELECT Path FROM " + Tablename + '_Files WHERE MessageID = %s', [origin[1]]
-        print 'sql', sql
+        # print 'sql', sql
         cursor.execute(*sql)
         FilePath = cursor.fetchone()
         FilePath = FilePath[0].split('/')
-        print FilePath
+        # print FilePath
         sql = "SELECT RoomName FROM " + Tablename + ' WHERE RoomName = %s', [FilePath[2]]
         cursor.execute(*sql)
-        if cursor.fetchone():
-            print cursor._executed
+        if cursor.fetchone(): #go directly to chat room if there is already one existing
+            # print cursor._executed
             #RoomName = cursor.fetchone()
 
             redirection = '/room/' + FilePath[2]
             self.redirect(redirection)
         else:
-            RoomID = ''.join(random.choice(string.hexdigits) for i in range(32))
+            RoomID = ''.join(random.choice(string.hexdigits) for i in range(32)) #Create file chat room if does not exist
             sql = 'SELECT RoomNumber, AppID FROM ' + Tablename + ' ORDER BY RoomNumber DESC LIMIT 1'
             cursor.execute(sql)
             Roomparameters = cursor.fetchone()
             sql = 'INSERT INTO ' + Tablename + '(RoomNumber, AppID, RoomID, RoomName, IsFileRoom) VALUES (%s, %s, %s, %s, 1)', [Roomparameters[0] +1, Roomparameters[1], RoomID, FilePath[2]]
             cursor.execute(*sql)
-            print cursor._executed
+            # print cursor._executed
             db.commit()
             redirection = '/room/' + FilePath[2]
             self.redirect(redirection)
@@ -276,8 +577,8 @@ class DetachFile(BaseHandler):
         origin = self.request.uri
         origin = origin.split('?', 1)
         origin[1] = origin[1].split('&')
-        print 'origin', origin
-        db = connect(host=config.SQLSERVER, user=config.SQLUSER, passwd=config.SQLPASS, db=config.SQLDB, charset='utf8')
+        # print 'origin', origin
+        db = connect(host=dictconf['SQLSERVER'], user=dictconf['SQLUSER'], passwd=dictconf['SQLPASS'], db=dictconf['SQLDB'], charset='utf8mb4')
         cursor = db.cursor()
         BroswerSessionID = self.get_secure_cookie('SessionID')
         sql = "SELECT UserID FROM Users WHERE SessionID = %s", [BroswerSessionID]
@@ -297,7 +598,7 @@ class DetachFile(BaseHandler):
         Tablename = AppID[1] + AppID[2]
         sql = 'UPDATE ' + Tablename + "_Files SET IsAttached = '0' WHERE Path LIKE %s", ['%' + tornado.escape.url_unescape(origin[1][0]) + '%']
         cursor.execute(*sql)
-        print cursor._executed
+        # print cursor._executed
         db.commit()
         db.close()
         redirect = '/room/' + origin[1][1]
@@ -305,8 +606,8 @@ class DetachFile(BaseHandler):
 class UnPinItem(BaseHandler):
     def get(self, truc):
         origin = self.request.uri
-        #print machinuri
-        db = connect(host=config.SQLSERVER, user=config.SQLUSER, passwd=config.SQLPASS, db=config.SQLDB, charset='utf8')
+        ## print machinuri
+        db = connect(host=dictconf['SQLSERVER'], user=dictconf['SQLUSER'], passwd=dictconf['SQLPASS'], db=dictconf['SQLDB'], charset='utf8mb4')
         cursor = db.cursor()
         BroswerSessionID = self.get_secure_cookie('SessionID')
         testunpin = origin.split('?')
@@ -337,7 +638,7 @@ class UnPinItem(BaseHandler):
 class PinItem(BaseHandler):
     def search(self, result):
          machinuri = self.request.uri
-         db = connect(host=config.SQLSERVER, user=config.SQLUSER, passwd=config.SQLPASS, db=config.SQLDB, charset='utf8')
+         db = connect(host=dictconf['SQLSERVER'], user=dictconf['SQLUSER'], passwd=dictconf['SQLPASS'], db=dictconf['SQLDB'], charset='utf8mb4')
          cursor = db.cursor()
          BroswerSessionID = self.get_secure_cookie('SessionID')
          sql = "SELECT UserID FROM Users WHERE SessionID = %s", [BroswerSessionID]
@@ -360,7 +661,7 @@ class PinItem(BaseHandler):
          testpin = testpin.split('?')
          testpin = testpin[1]
          origin = '/room/' + origin[1]
-         print 'youpiurl', testpin
+         # print 'youpiurl', testpin
          i = 0
          for message in result:
             temp = (tornado.escape.json_decode(message))
@@ -382,7 +683,7 @@ class PinItem(BaseHandler):
     def get(self, result, room=None):
         url = self.request.uri
         url = url.split('&')
-        REDIS_HOST = 'localhost'
+        REDIS_HOST = 'mlvpn.exaltia.org'
         REDIS_PORT = 6379
         REDIS_PWD = None
         REDIS_USER = None
@@ -397,45 +698,74 @@ class MainHandler(BaseHandler):
     Main request handler for the root path and for chat rooms.
     """
     def post(self, RoomName):
-        db = connect(host=config.SQLSERVER, user=config.SQLUSER, passwd=config.SQLPASS, db=config.SQLDB)
-        cursor = db.cursor()
-        uri = self.request.uri
-        url = uri.split('/')
-        print 'url, 1', url
-        url[2] = url[2].split('&')
-        print len(url)
-        RoomName = url[2][0]
-        print 'RoomName in post', RoomName
-        RoomName = tornado.escape.url_unescape(RoomName)
-        sql = 'SELECT RoomID FROM abcd_un WHERE RoomName = %s', [RoomName]
-        cursor.execute(*sql)
-        RoomID = cursor.fetchone()
-        print 'RoomID', RoomID
-        RoomID = str(RoomID[0])
-        RoomID = RoomID.decode()
-        fullurl = 'ws://' + self.request.host + '/socket/' + RoomID
-        db.close()
-        wsurl = {
-            'url': fullurl,
-        }
-        wsurl_encoded = tornado.escape.json_encode(wsurl)
-        print 'wsurl', wsurl
-        self.write(wsurl_encoded)
+        if self.get_arguments('swapspace'):
+            spacename = self.get_arguments('swapspace')
+            print 'spacename', spacename
+        else:
+            db = connect(host=dictconf['SQLSERVER'], user=dictconf['SQLUSER'], passwd=dictconf['SQLPASS'], db=dictconf['SQLDB'], charset='utf8mb4')
+            cursor = db.cursor()
+            uri = self.request.uri
+            url = uri.split('/')
+            # print 'url, 1', url
+            url[2] = url[2].split('&')
+            # print len(url)
+
+            # time.sleep(20)
+            RoomName = url[3]#[0]
+            # print 'RoomName in post', RoomName
+            BroswerSessionID = self.get_secure_cookie('SessionID')
+            # sql = ("SELECT UserID FROM Users_info WHERE UserName = '%s'") % user
+            # cursor.execute(sql)
+            # useridresult = cursor.fetchone()
+            RoomName = tornado.escape.url_unescape(RoomName)
+            # sql = "SELECT RoomNumber, UserID, IsAllowed FROM abcd_un WHERE RoomName = %s", [RoomName]
+            # cursor.execute(*sql)
+            # RoomNumber = cursor.fetchone()
+            sql = 'SELECT RoomID FROM abcd_un WHERE RoomName = %s', [RoomName]
+            cursor.execute(*sql)
+            RoomID = cursor.fetchone()
+            # print 'RoomID', RoomID
+            RoomID = str(RoomID[0])
+            RoomID = RoomID.decode()
+            fullurl = 'ws://' + self.request.host + '/app1/socket/' + RoomID
+            db.close()
+            wsurl = {
+                'url': fullurl,
+            }
+            wsurl_encoded = tornado.escape.json_encode(wsurl)
+            # print '-----------------------------------------------------------------------------'
+            # print 'wsurl', wsurl
+            # time.sleep(10)
+            self.write(wsurl_encoded)
     @tornado.web.asynchronous
     def get(self, room=None):
-        print 'xsrf token', self.xsrf_token #DO NOT REMOVE doing that is enough to set the xsrf cookie, required by javascript to post, strange, i know
+        # print 'xsrf token', self.xsrf_token #DO NOT REMOVE doing that is enough to set the xsrf cookie, required by javascript to post, strange, i know
         url = self.request.uri
-        url = url.split('/')
-        RoomName = url[2]
-        db = connect(host=config.SQLSERVER, user=config.SQLUSER, passwd=config.SQLPASS, db=config.SQLDB)
+        db = connect(host=dictconf['SQLSERVER'], user=dictconf['SQLUSER'], passwd=dictconf['SQLPASS'],
+                     db=dictconf['SQLDB'], charset='utf8mb4')
         cursor = db.cursor()
+        # print 'full url', url
+        url = url.split('/')
+        # print 'url get', url
+        try:
+            RoomName = url[3]
+        except:
+            #     db = connect(host=dictconf['SQLSERVER'], user=dictconf['SQLUSER'], passwd=dictconf['SQLPASS'],
+            #                  db=dictconf['SQLDB'], charset='utf8mb4')
+            #     cursor = db.cursor()
+            #     sql = 'SELECT RoomNAme FROM '
+            #     self.redirect()
+
+            pass
+        # print 'roomnameget', RoomName
+
 
         sql = 'SELECT RoomID FROM abcd_un WHERE RoomName = %s', [RoomName]
         cursor.execute(*sql)
         RoomID = cursor.fetchone()
         if not room:
             #self.redirect("/room/1")
-            print 'error, no rooms'
+            # print 'error, no rooms'
             return
         # Set chat room as instance var (should be validated).
         self.room = RoomID
@@ -445,7 +775,7 @@ class MainHandler(BaseHandler):
 
     def on_auth(self, user):
         # Load 50 latest messages from this chat room.
-        db = connect (host = config.SQLSERVER, user = config.SQLUSER, passwd = config.SQLPASS, db = config.SQLDB)
+        db = connect(host=dictconf['SQLSERVER'], user=dictconf['SQLUSER'], passwd=dictconf['SQLPASS'], db=dictconf['SQLDB'], charset='utf8mb4')
         cursor = db.cursor ()
         """
         Callback for third party authentication (last step).
@@ -453,7 +783,7 @@ class MainHandler(BaseHandler):
         if not user:
             self.redirect("/login") # TODO: Make this hard coded value fecthable from db for flexible configuration
         else:
-            sql = ("SELECT UserID FROM Users_info WHERE UserName = '%s'") % user
+            sql = ("SELECT UserID FROM Users_info WHERE UserName = '%s'") % user #TODO : INJECTION!!!!!!
             cursor.execute(sql)
             useridresult = cursor.fetchone()
             sql = "SELECT SessionID FROM Users WHERE UserID = %s", [useridresult]
@@ -463,11 +793,13 @@ class MainHandler(BaseHandler):
             if SQLSessionID[0] == BroswerSessionID:
                 uri = self.request.uri
                 url = uri.split('/')
-                url = url[2].split('&')
-                RoomName = url[0]
+                # print 'url', url
+                #url = url[2].split('&')
+                RoomName = url[3]
+                # print 'Roomname on_auth', RoomName
                 RoomName = RoomName.strip('?')
                 RoomName = tornado.escape.url_unescape(RoomName)
-                print 'RoomName', RoomName
+                # print 'RoomName', RoomName
                 sql = 'SELECT RoomID FROM abcd_un WHERE RoomName = %s', [RoomName]
                 cursor.execute(*sql)
                 RoomID = cursor.fetchone()
@@ -502,7 +834,7 @@ class MainHandler(BaseHandler):
         global messages
         global notifications
         mix = messages# + notifications
-        db = connect(host=config.SQLSERVER, user=config.SQLUSER, passwd=config.SQLPASS, db=config.SQLDB)
+        db = connect(host=dictconf['SQLSERVER'], user=dictconf['SQLUSER'], passwd=dictconf['SQLPASS'], db=dictconf['SQLDB'], charset='utf8mb4')
         cursor = db.cursor()
         AppID = '1'
         RoomNumber = '1' #Todo : Change that to non hardcoded values
@@ -522,9 +854,9 @@ class MainHandler(BaseHandler):
                 try:
                     temp.append(tornado.escape.json_decode(message))
                 except:
-                    print 'faulty message: ', message
+                    # print 'faulty message: ', message
                     i += 1 #if a message is bad, added to number of bad messages
-                    print 'Hey, something went wrong in message sorting!', sys.exc_info()
+                    # print 'Hey, something went wrong in message sorting!', sys.exc_info()
                     pass
                 if len(temp) == len(mix) - i: # number of bad messages soustracted to total messages received to get correct total before processing
                     currentday = ''
@@ -560,14 +892,15 @@ class MainHandler(BaseHandler):
                                     else:
                                         message['date'] = str(splitdate[1])
                                 else:
-                                    print 'date', message['date']
+                                    pass
+                                    # print 'date', message['date']
                             except ValueError:
-                                print 'value error, date is', message['date']
+                                # print 'value error, date is', message['date']
                                 pass
                             messages.append(message)
                     except:
-                        print 'error is', sys.exc_info()
-                        print 'faulty message: ', message
+                        # print 'error is', sys.exc_info()
+                        # print 'faulty message: ', message
                         pass
         else:
             logging.error('Something really wrong happened')
@@ -576,7 +909,8 @@ class MainHandler(BaseHandler):
         db.close()
     def pagerender(self, messages, notifications):#Renderding pages
         uri = self.request.uri
-        print 'mon uri est', uri
+        # print 'mon uri est', uri
+        uri = uri.split('/')
         try:
             url = uri.split('errorcode=')
             errorcode = url[len(url) -1]
@@ -587,8 +921,16 @@ class MainHandler(BaseHandler):
         else:
             errormessage = 'None'
         GroupID = '1'
-        db = connect(host=config.SQLSERVER, user=config.SQLUSER, passwd=config.SQLPASS, db=config.SQLDB, charset='utf8mb4')
+        db = connect(host=dictconf['SQLSERVER'], user=dictconf['SQLUSER'], passwd=dictconf['SQLPASS'], db=dictconf['SQLDB'], charset='utf8mb4')
         cursor = db.cursor()
+        sql = "SELECT DISTINCT SpaceID FROM SpaceGroups WHERE GroupID = %s", [GroupID]
+        cursor.execute(*sql)
+        SpaceIDS = cursor.fetchall()
+        sql = 'SELECT SpaceName FROM Spaces WHERE SpaceID IN %s', [SpaceIDS]
+        cursor.execute(*sql)
+        SpaceNames = cursor.fetchall()
+        # print 'SpaceNamesSQL', cursor._executed
+        # print 'SpaceNamesResult', SpaceNames
         BroswerSessionID = self.get_secure_cookie('SessionID')
         sql = "SELECT UserID FROM Users WHERE SessionID = %s", [BroswerSessionID]
         cursor.execute(*sql)
@@ -599,58 +941,88 @@ class MainHandler(BaseHandler):
         sql = "SELECT UserGroupID, CompanyID FROM Users_info WHERE UserID = %s", [UserID]
         cursor.execute(*sql)
         GroupandOwnerID = cursor.fetchone()
-        sql = "SELECT AppID, Tableprefix, AppName FROM GroupApps WHERE GroupID = %s AND OwnerID = %s", [GroupandOwnerID[0],
-                                                                                                        GroupandOwnerID[1]]
+        # print 'uri', uri
+        sql = "SELECT SpaceID FROM Spaces WHERE SpaceName = %s", [uri[1]]
         cursor.execute(*sql)
-        AppID = cursor.fetchone()
-        Tablename = AppID[1] + AppID[2]
-        print 'Tablename', Tablename
-        sql = "SELECT RoomName FROM " + Tablename + " WHERE AppID = %s AND ISFileRoom = 0", [AppID[0]]
+        MySpaceID = cursor.fetchall()
+        # print 'myspaceid', MySpaceID
+        sql = "SELECT AppID FROM GroupApps WHERE SpaceID = %s", MySpaceID
         cursor.execute(*sql)
-        AllRoomName = cursor.fetchall()
-        sql = "SELECT Csspath FROM Templates WHERE AppID = %s  AND GroupID = %s AND IsActive = '1'", (
-            AppID[0], GroupID)
+        AppIDS = cursor.fetchall()
+        sql = "SELECT AppID, Tableprefix, AppName FROM GroupApps WHERE GroupID = %s AND OwnerID = %s", [GroupandOwnerID[0], GroupandOwnerID[1]]
         cursor.execute(*sql)
-        draftcsspath = cursor.fetchall()
-        draftcsspath = draftcsspath[0][0].split('css', 1)
-        draftcsspath = '../static/css' + draftcsspath[1]
+        #AppID = cursor.fetchone()
+        testAppIDS = cursor.fetchall()
+        # # print 'testAppIDS', testAppIDS
+        appdict = {}
+        ## print 'Tablename', Tablename
+        for row in testAppIDS:
+            # # print 'rowtestappIDS', row
+            Tablename = row[1] + row[2]
+            # time.sleep(15)
+            try:
+                sql = "SELECT RoomName FROM " + Tablename + " WHERE RoomNumber = %s AND AppID = %s AND ISFileRoom = 0", [
+                '1', row[0]]
+                cursor.execute(*sql)
+                AllRoomName = cursor.fetchall()
+                AllRoomName = list(chain(*AllRoomName))
+                # print 'AllRoomName', AllRoomName
+                appdict[row[2]] = AllRoomName
+            except:
+                pass
+        # print 'appdict', appdict
+        # sql = "SELECT Csspath FROM Templates WHERE AppID = %s  AND GroupID = %s AND IsActive = '1'", (
+        #     AppID[0], GroupID)
+        # cursor.execute(*sql)
+        # draftcsspath = cursor.fetchall()
+        # draftcsspath = draftcsspath[0][0].split('css', 1)
+        # draftcsspath = '../static/css' + draftcsspath[1]
         #AappID = 1
         #RoomNumber = '1'  # Todo : Change that to non hardcoded values
 
         #sql = "SELECT RoomID FROM abcd_un WHERE RoomNumber = %s AND AppID = %s", [RoomNumber, AappID]  # Todo : Change that to non hardcoded values
-        uri = uri.split('/')
+        #uri = uri.split('/')
         uri[2] = tornado.escape.url_unescape(uri[2])
-        sql = "SELECT RoomID FROM " + Tablename + ' WHERE RoomName = %s', [uri[2]]
-        cursor.execute(*sql)
-        RoomIDS = cursor.fetchall()
-        print 'RoomIDs', RoomIDS
-        print 'RoomName?', uri[2]
-        sql = "SELECT GroupID FROM GroupApps WHERE AppID = %s", [AppID[0]]
-        cursor.execute(*sql)
-        GroupIDS = cursor.fetchall()
-        sql = "SELECT UserId FROM User_Groups WHERE GroupID IN %s", [GroupIDS]
-        cursor.execute(*sql)
-        UserIDS = cursor.fetchall()
-        sql = "SELECT UserName FROM Users_info WHERE UserID IN %s", [UserIDS]
-        cursor.execute(*sql)
-        UserNames = cursor.fetchall()
-        #sql = "SELECT RoomName FROM " + Tablename + " WHERE RoomID = %s", RoomIDS
-        #cursor.execute(*sql)
-        #RoomName = cursor.fetchone()
-        sql = 'SELECT * FROM ' + Tablename + '_PinnedItems ORDER BY Date ASC'
-        cursor.execute(sql)
-        pins = cursor.fetchall() #Pinned items won't display
-        newday = ''
-        sql = 'SELECT * FROM ' + Tablename + '_Files WHERE ISAttached = 1 AND RoomName = %s', [uri[2]]
-        cursor.execute(*sql)
-        Filespath = cursor.fetchall()
-        pinnedcontent = self.render_string("Pinneditems.html", RoomName=uri[2], pins=pins, messages=messages)
-        content = self.render_string("messages.html", newday=newday, RoomName=uri[2], messages=messages)
+        try:
+            sql = "SELECT RoomID FROM " + Tablename + ' WHERE RoomName = %s', [uri[2]]
+            cursor.execute(*sql)
+            RoomIDS = cursor.fetchall()
+            # print 'RoomIDs', RoomIDS
+            # print 'RoomName?', uri[2]
+            sql = "SELECT AppName FROM SpaceApps WHERE SpaceID = %s", []
+
+            sql = "SELECT GroupID FROM GroupApps WHERE AppID = %s", [AppID[0]]
+            cursor.execute(*sql)
+            GroupIDS = cursor.fetchall()
+            sql = "SELECT UserId FROM User_Groups WHERE GroupID IN %s", [GroupIDS]
+            cursor.execute(*sql)
+            UserIDS = cursor.fetchall()
+            sql = "SELECT UserName FROM Users_info WHERE UserID IN %s", [UserIDS]
+            cursor.execute(*sql)
+            UserNames = cursor.fetchall()
+            #sql = "SELECT RoomName FROM " + Tablename + " WHERE RoomID = %s", RoomIDS
+            #cursor.execute(*sql)
+            #RoomName = cursor.fetchone()
+            sql = 'SELECT * FROM ' + Tablename + '_PinnedItems ORDER BY Date ASC'
+            cursor.execute(sql)
+            pins = cursor.fetchall() #Pinned items won't display
+            newday = ''
+            sql = 'SELECT * FROM ' + Tablename + '_Files WHERE ISAttached = 1 AND RoomName = %s', [uri[3]]
+            cursor.execute(*sql)
+            Filespath = cursor.fetchall()
+        except:
+            UserNames = Filespath = pins = newday = ''
+            pass
+        draftcsspath = ''
+	iconvariable = 'icon-menu'
+        pinnedcontent = self.render_string("Pinneditems.html", RoomName=uri[3], pins=pins, messages=messages)
+        content = self.render_string("messages.html", newday=newday, RoomName=uri[3], messages=messages)
         notifcontent = self.render_string("notifications.html", notifications=notifications)
-        self.render_default("index.html", errormessage=errormessage, Filespath=Filespath, pinnedcontent=pinnedcontent, UserNames=UserNames, RoomName=uri[2], UserName=UserName, draftcsspath=draftcsspath, userlist=userlist, AllRoomName=AllRoomName, notifcontent=notifcontent, content=content, chat=1)
+        #machin serve as a check if user does not have access to the chat room, or if there isn't any TODO: refactor that stupid variable name
+        self.render_default("index.html", iconvariable=iconvariable, appdict=appdict, testAppIDS=testAppIDS, SpaceNames=SpaceNames, machintruc='ok', errormessage=errormessage, Filespath=Filespath, pinnedcontent=pinnedcontent, UserNames=UserNames, RoomName=uri[3], UserName=UserName, draftcsspath=draftcsspath, userlist=userlist, AllRoomName=AllRoomName, notifcontent=notifcontent, content=content, chat=1)
         db.close()
-        print 'end?'
-class ChatSocketHandler(tornado.websocket.WebSocketHandler):
+        # print 'end?'
+class PrivateChatSocketHandler(tornado.websocket.WebSocketHandler):
     """
     Handler for dealing with websockets. It receives, stores and distributes new messages.
 
@@ -687,7 +1059,317 @@ class ChatSocketHandler(tornado.websocket.WebSocketHandler):
         self.client.listen(self.on_messages_published)
         BroswerSessionID = self.get_secure_cookie('SessionID')
         user = self.get_secure_cookie('user')
-        db = connect(host=config.SQLSERVER, user=config.SQLUSER, passwd=config.SQLPASS, db=config.SQLDB)
+        db = connect(host=dictconf['SQLSERVER'], user=dictconf['SQLUSER'], passwd=dictconf['SQLPASS'], db=dictconf['SQLDB'], charset='utf8mb4')
+        cursor = db.cursor()
+        sql = "SELECT UserID From Users WHERE SessionID = %s", [BroswerSessionID]
+        cursor.execute(*sql)
+        UserID = cursor.fetchone()
+        sql = "SELECT UserName FROM Users_info WHERE UserID = %s", [UserID]
+        cursor.execute(*sql)
+        UserName = cursor.fetchone()
+        self.client.subscribe(user)
+        self.subscribed = True
+        self.client.listen(self.on_messages_published)
+        logging.info('New user connected to chat room ' + room)
+
+
+    def on_messages_published(self, message):
+        """
+        Callback for listening to subscribed chat room based on Redis Pub/Sub. When a new message is stored
+        in the given Redis chanel this method will be called.
+        """
+        BroswerSessionID = self.get_secure_cookie('SessionID')
+        db = connect(host=dictconf['SQLSERVER'], user=dictconf['SQLUSER'], passwd=dictconf['SQLPASS'], db=dictconf['SQLDB'], charset='utf8mb4')
+        cursor = db.cursor()
+        # sql = 'SELECT RoomID FROM abcd_un WHERE RoomName = %s', [uri[1]]
+        # cursor.execute(*sql)
+        # RoomID = cursor.fetchone()
+        sql = "SELECT UserID FROM Users WHERE SessionID = %s", [BroswerSessionID]
+        cursor.execute(*sql)
+        UserID = cursor.fetchone()
+        sql = "SELECT UserName FROM Users_info WHERE UserID = %s", [UserID]
+        cursor.execute(*sql)
+        UserName = cursor.fetchone()
+        # print 'UserName from on_message_published: ', UserName
+        url = self.request.uri
+        url = url.split('@')
+        # print 'url from on_message_published: ', url[1]
+        # print 'message?', message
+        #
+        try:
+            if 'body' in dir(message):
+                m = tornado.escape.json_decode(message.body)
+                # print 'mmmm type', type(m)
+                # print m
+                # print 'from', m['from'], 'to', m['to']
+                if m['from'] == UserName[0] or m['from'] == url[1]:
+                    # print 'yep'
+                    # Send messages to other clients and finish connection.
+                    self.write_message(dict(messages=[m]))
+                else:
+                    pass
+                    # print 'nope'
+        except :
+            # print 'message is:', dir(message)
+            self.on_close()
+            # print 'Hey, something went wrong in section on_messages_published!', sys.exc_info()
+
+
+    def on_message(self, data):
+        uri = self.request.uri
+        uri = uri.split('?')
+        UserName = uri[1].split('@')
+        # print 'username is', UserName
+        """
+        Callback when new message received vie the socket.
+        """
+        datadecoded = tornado.escape.json_decode(data)
+        what = str(datadecoded['user'])
+
+        rightdatadecoded = what.split('"', 1)
+        rightdatadecoded = str(rightdatadecoded[1]) # Workaround because #tornado.escape.json_decode(data) keeps an unwanted leading " : [W 160909 14:32:41 web:2659] #Invalid cookie signature '"ZXhhbHRpYQ==|1473424358|015bc4923b6db19a0a7c084cdc60b81952868c12'
+        #                          ^There
+        #coded(JSON) example message is : #{"body":"222","_xsrf":"b8f28cd1a8184afeb9296d48bb943d0a","user":"\"ZXhhbHRpYQ==|1473424358|015b#c4923b6db19a0a7c084cdc60b81952868c12"} wich seems right
+        messagetype = 'regular'
+        myuser = self.get_secure_cookie('user', rightdatadecoded)
+        # print 'to is', UserName[1]
+        message = {
+            '_id': ''.join(random.choice(string.ascii_uppercase) for i in range(12)),
+            'date': time.strftime("%Y-%m-d %H:%M:%S"),
+            'type': messagetype,
+            'from': self.get_secure_cookie('user', rightdatadecoded),
+            'to': UserName[1],
+            'body': tornado.escape.linkify(datadecoded["body"]),
+        }
+        textandsmyley = ''
+        if 'emojioneemoji' in message['body']:
+            Smileys = True
+            templistmessagebody = datadecoded['body'].split('<')
+            templistmessagebody = filter(None, templistmessagebody)
+            Convertall = False
+            for i, row in enumerate(templistmessagebody):
+                if 'img' in templistmessagebody[i]:
+                    templistmessagebody[i] = '<' + templistmessagebody[i]
+                    # print 'message number', i, templistmessagebody[i]
+                    if not templistmessagebody[i].startswith('<img') or not templistmessagebody[i].endswith('>'):
+                        #if not 'emojioneemoji' in templistmessagebody[i]:
+                        Convertall = True
+                        pos = templistmessagebody[i].find('>')
+                        # print 'ca passe'
+                        # for i, row in enumerate(templistmessagebody):
+            if Convertall == True:
+                for i, row in enumerate(templistmessagebody):
+                    if templistmessagebody[i].startswith('<img'):
+                        pos = templistmessagebody[i].find('>')
+                        templistmessagebody[i] = templistmessagebody[i][:pos] + ' width="32" ' + templistmessagebody[i][pos:]
+                        # print 'hihi', i
+            else:
+                if not datadecoded['body'].startswith('<img'):
+                    # print 'ok'
+                    for i, row in enumerate(templistmessagebody):
+                        # print 'content', templistmessagebody[i]
+                        if 'img' in templistmessagebody[i]:
+                            # print 'img found'
+                            pos = templistmessagebody[i].find('>')
+                            templistmessagebody[i] = templistmessagebody[i][:pos] + ' width="32" ' + templistmessagebody[i][
+                                                                                                     pos:]
+            textandsmyley = textandsmyley.join(templistmessagebody)
+            message = {
+                '_id': ''.join(random.choice(string.ascii_uppercase) for i in range(12)),
+                'date': time.strftime("%Y-%m-%d %H:%M:%S"),
+                'type': messagetype,
+                'from': self.get_secure_cookie('user', rightdatadecoded),
+                'to': UserName[1],
+                'body': textandsmyley,
+            }
+        else:
+            # print 'je tape dans le else'
+            message = {
+                '_id': ''.join(random.choice(string.ascii_uppercase) for i in range(12)),
+                'date': time.strftime("%Y-%m-%d %H:%M:%S"),
+                'type': messagetype,
+                'from': self.get_secure_cookie('user', rightdatadecoded),
+                'to': UserName[1],
+                'body': datadecoded["body"],
+            }
+        notificationcheck = message['body'].split(' ')[0]
+        notificationcheck = notificationcheck.split('@')
+        notificationcheck = filter(None, notificationcheck)
+        if '&nbsp' in notificationcheck[0]:
+            notificationcheck[0].split('&nbsp')
+            notificationcheck = notificationcheck[0]
+        if message['body'].startswith('@' + notificationcheck[0]):
+            listmessagebody = message['body'].split(' ')[0]
+            listmessagebody = listmessagebody.split('@')
+            message2 = {
+                '_id': ''.join(random.choice(string.ascii_uppercase) for i in range(12)),
+                'date': time.strftime("%Y-%m-%d %H:%M:%S"),
+                'type': 'notification',
+                'from': self.get_secure_cookie('user', rightdatadecoded),
+                'to': UserName[1],
+                'body': 'You were directly mentionned',
+            }
+            message2_encoded = tornado.escape.json_encode(message2)
+            self.write_message(message2_encoded)
+            # Persistently store message in Redis.
+            self.application.client.rpush(str(listmessagebody[1]), message2_encoded)
+            # Publish message in Redis channel.
+            self.application.client.publish(str(listmessagebody[1]), message2_encoded)
+        if not message['from']:
+            logging.warning("Error: Authentication missing")
+            message['from'] = 'Guest'
+
+        # Save message and publish in Redis.
+        #try:
+        # Convert to JSON-literal.
+        uri = self.request.uri
+        uri = uri.split('?')
+        # print len(uri)
+        # print uri
+        db = connect(host=dictconf['SQLSERVER'], user=dictconf['SQLUSER'], passwd=dictconf['SQLPASS'], db=dictconf['SQLDB'], charset='utf8mb4')
+        cursor = db.cursor()
+
+        sql = 'SELECT RoomID From abcd_un_PrivateChatRooms WHERE RoomName = %s', [uri[1]]
+        cursor.execute(*sql)
+        ForeignRoomID = cursor.fetchone()
+        if not ForeignRoomID:
+            BroswerSessionID = self.get_secure_cookie('SessionID')
+            # sql = 'SELECT RoomID FROM abcd_un WHERE RoomName = %s', [uri[1]]
+            # cursor.execute(*sql)
+            # RoomID = cursor.fetchone()
+            sql = "SELECT UserID FROM Users WHERE SessionID = %s", [BroswerSessionID]
+            cursor.execute(*sql)
+            UserID = cursor.fetchone()
+            sql = "SELECT UserName FROM Users_info WHERE UserID = %s", [UserID]
+            cursor.execute(*sql)
+            UserName = cursor.fetchone()
+            sql = "SELECT UserGroupID, CompanyID FROM Users_info WHERE UserID = %s", [UserID]
+            cursor.execute(*sql)
+            GroupandOwnerID = cursor.fetchone()
+            sql = "SELECT AppID, Tableprefix, AppName FROM GroupApps WHERE GroupID = %s AND OwnerID = %s", [
+                GroupandOwnerID[0],
+                GroupandOwnerID[1]]
+            cursor.execute(*sql)
+            AppID = cursor.fetchone()
+            Tablename = AppID[1] + AppID[2]
+            sql = "SELECT AppID, Tableprefix, AppName FROM GroupApps WHERE GroupID = %s AND OwnerID = %s", [
+                GroupandOwnerID[0],
+                GroupandOwnerID[1]]
+            cursor.execute(*sql)
+            AppID = cursor.fetchone()
+            Tablename = AppID[1] + AppID[2]
+            # print 'ya pas'
+            RoomID = ''.join(random.choice(string.hexdigits) for i in range(32))
+            # sql = 'SELECT RoomNumber, AppID FROM ' + Tablename + ' ORDER BY RoomNumber DESC LIMIT 1'
+            # cursor.execute(sql)
+            # Roomparameters = cursor.fetchone()
+
+            sql = 'INSERT INTO ' + Tablename + '_PrivateChatRooms (RoomID, RoomName) VALUES (%s, %s)', [RoomID,
+                                                                                                        uri[1]]
+            cursor.execute(*sql)
+            # print cursor._executed
+            db.commit()
+            sql = 'SELECT RoomID From abcd_un_PrivateChatRooms WHERE RoomName = %s', [uri[1]]
+            cursor.execute(*sql)
+            ForeignRoomID = cursor.fetchone()
+            # print 'ForeignRoomID else', ForeignRoomID
+        # print ForeignRoomID
+        message_encoded = tornado.escape.json_encode(message)
+        self.write_message(message_encoded)
+        # Persistently store message in Redis.
+        # print ForeignRoomID
+        self.application.client.rpush(self.room, message_encoded)
+        if message['from'] != message['to']:
+            self.application.client.rpush(ForeignRoomID[0], message_encoded)
+        # Publish message in Redis channel, redefining message content, to not handle the display in the javascript.
+        splitdate =  message['date'].split(' ')
+        message = {
+            '_id': message['_id'],
+            'date': splitdate[1],
+            'type': messagetype,
+            'to':   UserName[1],
+            'from': self.get_secure_cookie('user', rightdatadecoded),
+        }
+        if 'Smileys' in locals():
+            if Smileys == True:
+                message['body'] = textandsmyley
+                Smileys == False
+        else:
+            message['body'] = datadecoded["body"]
+            #Smileys == False
+        message_encoded = tornado.escape.json_encode(message)
+        self.application.client.publish(self.room, message_encoded)
+        if message['from'] != message['to']:
+            self.application.client.publish(ForeignRoomID[0], message_encoded)
+        # except Exception, err:
+        #     err = str(sys.exc_info()[0])
+        #     # Send an error back to client.
+        #     self.write_message({'error': 1, 'textStatus': 'Error writing to database: ' + str(err)})
+        #     return
+        # # Send message through the socket to indicate a successful operation.
+        ## print 'mmmmmmmmessage!', message
+        self.write_message(message)
+        return
+    def on_close(self):
+        """
+        Callback when the socket is closed. Frees up resource related to this socket.
+        """
+        logging.info("socket closed, cleaning up resources now")
+        if hasattr(self, 'client'):
+            myuser = self.get_secure_cookie('user')
+            userlist.remove(myuser)
+            # Unsubscribe if not done yet.
+            if self.subscribed:
+                self.client.unsubscribe(self.room) #Todo: unsuscribe from username room
+                self.subscribed = False
+            # Disconnect connection after delay due to this issue:
+            # https://github.com/evilkost/brukva/issues/25
+            t = Timer(0.1, self.client.disconnect) #Todo : remove user from userlist
+            t.start()
+# class TempTestHandler(BaseHandler):
+#     def get(self, r):
+#         print 'yes'
+class ChatSocketHandler(tornado.websocket.WebSocketHandler):
+    # print 'class ChatSocketHandler'
+    # time.sleep(3)
+    """
+    Handler for dealing with websockets. It receives, stores and distributes new messages.
+
+    TODO: Not proper authentication handling!
+    """
+    def fileinfo(self):
+        logging.info("i'm in")
+        message = 'File ' + original_fname + ' has been uploaded'
+        message_encoded = tornado.escape.json_encode(message)
+        self.write_message(message_encoded)
+        # Persistently store message in Redis.
+        self.application.client.rpush(self.room, message_encoded)
+        # Publish message in Redis channel.
+        self.application.client.publish(self.room, message_encoded)
+        fileflag = ''
+        logging.info("i'm out")
+    @gen.engine
+    def open(self, room='root'):
+        print 'socket opening'
+        """
+        Called when socket is opened. It will subscribe for the given chat room based on Redis Pub/Sub.
+        """
+        # Check if room is set.
+        if not room:
+            self.write_message({'error': 1, 'textStatus': 'Error: No room specified'})
+            self.close()
+            return
+        self.room = str(room)
+        self.new_message_send = False
+        # Create a Redis connection.
+        self.client = redis_connect()
+        # Subscribe to the given chat room.
+        self.client.subscribe(self.room)
+        self.subscribed = True
+        self.client.listen(self.on_messages_published)
+        BroswerSessionID = self.get_secure_cookie('SessionID')
+        user = self.get_secure_cookie('user')
+        db = connect(host=dictconf['SQLSERVER'], user=dictconf['SQLUSER'], passwd=dictconf['SQLPASS'], db=dictconf['SQLDB'], charset='utf8mb4')
         cursor = db.cursor()
         sql = "SELECT UserID From Users WHERE SessionID = %s", [BroswerSessionID]
         cursor.execute(*sql)
@@ -712,11 +1394,12 @@ class ChatSocketHandler(tornado.websocket.WebSocketHandler):
                 # Send messages to other clients and finish connection.
                 self.write_message(dict(messages=[m]))
         except :
-            print 'message is:', dir(message)
+            # # print 'message is:', dir(message)
             self.on_close()
-            print 'Hey, something went wrong in section on_messages_published!', sys.exc_info()
+            # # print 'Hey, something went wrong in section on_messages_published!', sys.exc_info()
 
     def on_message(self, data):
+        # print self.request.uri
         """
         Callback when new message received vie the socket.
         """
@@ -741,37 +1424,37 @@ class ChatSocketHandler(tornado.websocket.WebSocketHandler):
             Smileys = True
             templistmessagebody = datadecoded['body'].split('<')
             templistmessagebody = filter(None, templistmessagebody)
-            print templistmessagebody
+            # # print templistmessagebody
             Convertall = False
             for i, row in enumerate(templistmessagebody):
                 if 'img' in templistmessagebody[i]:
                     templistmessagebody[i] = '<' + templistmessagebody[i]
-                    print 'message number', i, templistmessagebody[i]
+                    # # print 'message number', i, templistmessagebody[i]
                     if not templistmessagebody[i].startswith('<img') or not templistmessagebody[i].endswith('>'):
                         #if not 'emojioneemoji' in templistmessagebody[i]:
                         Convertall = True
                         pos = templistmessagebody[i].find('>')
-                        print 'ca passe'
+                        # # print 'ca passe'
                         # for i, row in enumerate(templistmessagebody):
             if Convertall == True:
                 for i, row in enumerate(templistmessagebody):
                     if templistmessagebody[i].startswith('<img'):
                         pos = templistmessagebody[i].find('>')
                         templistmessagebody[i] = templistmessagebody[i][:pos] + ' width="32" ' + templistmessagebody[i][pos:]
-                        print 'hihi', i
+                        # # print 'hihi', i
             else:
                 if not datadecoded['body'].startswith('<img'):
-                    print 'ok'
+                    # # print 'ok'
                     for i, row in enumerate(templistmessagebody):
-                        print 'content', templistmessagebody[i]
+                        # # print 'content', templistmessagebody[i]
                         if 'img' in templistmessagebody[i]:
-                            print 'img found'
+                            # # print 'img found'
                             pos = templistmessagebody[i].find('>')
                             templistmessagebody[i] = templistmessagebody[i][:pos] + ' width="32" ' + templistmessagebody[i][
                                                                                                      pos:]
             textandsmyley = textandsmyley.join(templistmessagebody)
-            print '1', templistmessagebody
-            print '2', textandsmyley
+            # # print '1', templistmessagebody
+            # # print '2', textandsmyley
             message = {
                 '_id': ''.join(random.choice(string.ascii_uppercase) for i in range(12)),
                 'date': time.strftime("%Y-%m-%d %H:%M:%S"),
@@ -780,7 +1463,7 @@ class ChatSocketHandler(tornado.websocket.WebSocketHandler):
                 'body': textandsmyley,
             }
         else:
-            print 'je tape dans le else'
+            # # print 'je tape dans le else'
             message = {
                 '_id': ''.join(random.choice(string.ascii_uppercase) for i in range(12)),
                 'date': time.strftime("%Y-%m-%d %H:%M:%S"),
@@ -818,7 +1501,7 @@ class ChatSocketHandler(tornado.websocket.WebSocketHandler):
         try:
             # Convert to JSON-literal.
             message_encoded = tornado.escape.json_encode(message)
-            print 'message encoded', message_encoded
+            # # print 'message encoded', message_encoded
             self.write_message(message_encoded)
             # Persistently store message in Redis.
             self.application.client.rpush(self.room, message_encoded)
@@ -838,7 +1521,7 @@ class ChatSocketHandler(tornado.websocket.WebSocketHandler):
                 message['body'] = datadecoded["body"]
                 #Smileys == False
             message_encoded = tornado.escape.json_encode(message)
-            print 'message encoded step 2', message_encoded
+            # # print 'message encoded step 2', message_encoded
             self.application.client.publish(self.room, message_encoded)
         except Exception, err:
             err = str(sys.exc_info()[0])
@@ -874,8 +1557,9 @@ class Application(tornado.web.Application):
     def __init__(self):
         # Handlers defining the url routing.
         handlers = [
-            (r"/", MainHandler),
+            (r"/swapspace", MainHandler),
             (r"/room/([^/]+)", MainHandler),
+            (r"/privateroom/([^/]+)", PrivateRoom),
             (r"/testpin?([^/]+)", PinItem),
             (r"/testunpin?([^/]+)", UnPinItem),
             (r"/detach?([^/]+)", DetachFile),
@@ -885,10 +1569,13 @@ class Application(tornado.web.Application):
             (r"/logout", LogoutHandler),
             (r"/socket", ChatSocketHandler),
             (r"/socket/([a-zA-Z0-9]*)$", ChatSocketHandler),
+            (r"/privatesocket", PrivateChatSocketHandler),
+            (r"/privatesocket/([a-zA-Z0-9]*)$", PrivateChatSocketHandler),
             #(r"/upload?([^/]+)", UploadHandler),
             (r"/upload", UploadHandler),
             (r"/uploads", MainHandler),
             (r"/save", ChatEdit),
+            (r"/(.*)", MainHandler), #This line must stay at the end, or it intercept to urls who are handler by other code sections
         ]
 
 
@@ -926,7 +1613,7 @@ def redis_connect():
     # Get Redis connection settings for Heroku with fallback to defaults.
     redistogo_url = os.getenv('REDISTOGO_URL', None)
     if redistogo_url == None:
-        REDIS_HOST = 'localhost'
+        REDIS_HOST = '10.42.42.1'
         REDIS_PORT = 6379
         REDIS_PWD = None
         REDIS_USER = None
