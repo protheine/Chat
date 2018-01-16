@@ -10,8 +10,15 @@ from base import BaseHandler
 
 # General modules.
 import logging
-import settings #Todo : Reading regular file instead
-
+# import settings #Todo : Reading regular file instead
+dictconf = {}
+with open('./settings.cfg', 'r') as configfile:
+    for line in configfile:
+        if '#' not in line:
+            line = line.strip()
+            line = line.replace(' ', '')
+            line = line.split('=')
+            dictconf[line[0]] = line[1]
 
 class LoginHandler(BaseHandler, tornado.auth.GoogleMixin):
     """
@@ -26,7 +33,7 @@ class LoginHandler(BaseHandler, tornado.auth.GoogleMixin):
             else:
                 self._on_auth(user)
     def _on_auth(self, user):
-        db = connect (host = settings.SQLSERVER, user = settings.SQLUSER, passwd = settings.SQLPASS, db = settings.SQLDB)
+        db = connect(host=dictconf['SQLSERVER'], user=dictconf['SQLUSER'], passwd=dictconf['SQLPASS'], db=dictconf['SQLDB'], charset='utf8mb4')
         cursor = db.cursor()
         """
         Callback for third party authentication (last step).

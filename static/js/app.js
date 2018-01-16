@@ -41,7 +41,10 @@ $(document).ready(function() {
     };
 
     $.post(window.location.pathname, function (data) {
+        console.log(window.location.pathname);
+        console.log(data)
         truc = JSON.parse(data);
+        console.log(truc.url);
         ws = new WebSocket(truc.url);
         // Websocket callbacks:
         ws.onopen = function () {
@@ -144,7 +147,7 @@ $(document).ready(function() {
             if (message.type == 'file') {
                 console.log('je suis un fichier')
                 $(".messages_container").append('<div class="message-container"> \
-                <a href="#" class="thumbnail user-avatar"><img src="../static/images/user-avatar.png" alt=""></a> \
+                <a href="#" class="thumbnail user-avatar"><img src="../../static/images/user-avatar.png" alt=""></a> \
                 <div class="message"> \
                     <h6 id="username" hidden>' + message.from + '</a><span class="info">' + message.date + '</span></div> \
                <div class="content-message">' + message.body + '</div> \
@@ -175,7 +178,7 @@ $(document).ready(function() {
             if (message.type == 'regular' && $('.message:last').find('#username:last').html() != message.from) {
                 console.log('regular');
                 $(".day-messages").append('<div class="message-container"> \
-                    <a href="#" class="thumbnail user-avatar"><img src="../static/images/user-avatar.png" alt=""></a> \
+                    <a href="#" class="thumbnail user-avatar"><img src="../../static/images/user-avatar.png" alt=""></a> \
                     <div class="message"> \
                     <h6 id="username" hidden>' + message.from + '</h6> \
                 <div class="info"><a href="#" class="user-name">' + message.from + '</a><span class="info">' + message.date + '</span></div> \

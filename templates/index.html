@@ -12,29 +12,27 @@
     <title>Title</title>
 
     <!-- Icons set -->
-    <link rel="stylesheet" href="../static/css/fonts.css">
+    <link rel="stylesheet" href="../../static/css/fonts.css">
 
     <!-- Fonts -->
     <link href="https://fonts.googleapis.com/css?family=Open+Sans:400,400i,600,600i,700,700i" rel="stylesheet">
-    <link rel="stylesheet" href="../static/css/font-awesome.min.css">
+    <link rel="stylesheet" href="../../static/css/font-awesome.min.css">
 
-    <link rel="stylesheet" href="../static/css/normalize.css">
-    <link rel="stylesheet" href="../static/css/bootstrap.min.css">
-    <link rel="stylesheet" href="../static/css/jquery.mCustomScrollbar.min.css">
-    <link rel="stylesheet" href="../static/css/emojionearea.min.css">
-    <link rel="stylesheet" href="../static/css/lightbox.css">
-    <link rel="stylesheet" href="../static/css/styles.css">
-    <link rel="stylesheet" href="../static/css/daydate.css">
+    <link rel="stylesheet" href="../../static/css/normalize.css">
+    <link rel="stylesheet" href="../../static/css/bootstrap.min.css">
+    <link rel="stylesheet" href="../../static/css/jquery.mCustomScrollbar.min.css">
+    <link rel="stylesheet" href="../../static/css/emojionearea.min.css">
+    <link rel="stylesheet" href="../../static/css/lightbox.css">
+    <link rel="stylesheet" href="../../static/css/styles.css">
+    <link rel="stylesheet" href="../../static/css/daydate.css">
 
 
     <!-- Media styles -->
-    <link rel="stylesheet" href="../static/css/media.css">
+    <link rel="stylesheet" href="../../static/css/media.css">
     <link rel="stylesheet" href="{{ draftcsspath }}">
 </head>
 <body>
-
 <div class="top-bar">
-
     <div class="first-section top-bar-section">
         <nav class="nav-menu settings-menu">
             <ul>
@@ -79,7 +77,7 @@
 
         <div class="user-section">
             <a href="#" class="user-avatar thumbnail">
-                <img src="../static/images/user-avatar.png" alt="">
+                <img src="../../static/images/user-avatar.png" alt="">
             </a>
         </div>
 
@@ -98,10 +96,11 @@
             <aside id="left_sidebar" class="sidebar left-sidebar">
                 <div class="space-menu">
                     <div class="scrollbar-section">
+
                         <ul class="users-list self-avatar">
                             <li>
-                                <a href="#" class="thumbnail user-avatar">
-                                    <img src="../static/images/user-avatar.png" alt="">
+                                <a href="#" class="thumbnail user-avatar">a
+                                    <img src="../../static/images/user-avatar.png" alt="">
                                 </a>
                             </li>
                         </ul>
@@ -112,11 +111,16 @@
                             <li><a href="#" class="icon-wrapper"><span class="icon-check"></span></a></li>
                         </ul>
                         <ul class="users-list">
-                            <li>
-                                <a href="#" class="thumbnail user-avatar">
-                                    <img src="../static/images/user-avatar.png" alt="">
-                                </a>
-                            </li>
+                            <form method="POST" action="./swapspace">
+                                {% raw xsrf_form_html() %}
+                                {% for row in SpaceNames %}
+                                <li>
+                                    <button name="swapspace" value="{{ row[0] }}" class="thumbnail user-avatar">
+                                        <img src="../../static/images/user-avatar.png" alt="{{ row }}">
+                                    </button>
+                                </li>
+                                {% end %}
+                            </form>
                         </ul>
                         <a href="#" class="icon-wrapper"><span class="icon-plus"></span></a>
                     </div>
@@ -125,19 +129,23 @@
             <aside class="app-menu">
                 <div class="scrollbar-section">
                     <div class="channels-widget">
+                        {% for key in appdict %}
                         <div class="title">
-                            <span class="icon-comment"></span>
-                            <span>Chat</span>
+                            <span class={{ iconvariable }}></span>
+                            <span>{{ key }}</span>
                             <!--<span class="badge">999 <span class="plus">+</span></span>-->
                         </div>
+
                         <div class="widget-content">
                             <div class="info"><span>Channel</span><!--<span class="channels-count">(5)</span><a href="#"><span class="icon-plus">--></span></a></div>
                             <ul class="channels-list">
-                                {% for row in AllRoomName %}
-                                <li><a href="/room/{{ row[0] }}">{{ row[0] }}</a></li>
+                                {% for row in appdict[key] %}
+                                <li><a href="/room/{{ row }}">{{ row }}</a></li>
                                 {% end %}
+
                             </ul>
                         </div>
+                        {% end %}
                     </div>
                     <!--<div class="dates-widget">
                         <div class="title">
@@ -151,6 +159,7 @@
                     </div>
                 </div>-->
             </aside>
+            {% if machintruc != 'vtff' %}
             <div class="content_container">
                 <div id="messages_container" class="messages_container">
                     <div class="messages_subcontainer">
@@ -191,11 +200,13 @@
                     </div>
                 </div>
             </div>
+            {% end %}
             <aside id="right_sidebar" class="sidebar right-sidebar">
                 <div class="scrollbar-section">
                     <div class="sidebar-content info-section">
                         <div class="sidebar-header">
                             <h3 class="title"> {{ RoomName }} <a href="#"><span class="icon-notification"></span></a></h3>
+                            <input type="hidden" name="title2" value="{{ RoomName }}">
                             <span class="description">Created by <a href="#">member</a> on August 26th</span>
                             <a href="#" class="close-panel-button"><span class="icon-close"></span></a>
                         </div>
@@ -232,7 +243,7 @@
                                                                     <input id="checkbox-user-1" type="checkbox" class="checkbox-user-1" />
                                                                     <span class="icon-check"></span>
                                                                 </span>
-                                                                <span class="thumbnail user-avatar "><img src="../static/images/user-avatar.png" alt=""></span>
+                                                                <span class="thumbnail user-avatar "><img src="../../static/images/user-avatar.png" alt=""></span>
                                                                 <span class="user-name">User 1</span>
                                                                 <span class="user-status online"></span>
                                                             </label>
@@ -243,7 +254,7 @@
                                                                     <input id="checkbox-user-2" type="checkbox" class="checkbox-user-2" />
                                                                     <span class="icon-check"></span>
                                                                 </span>
-                                                                <span class="thumbnail user-avatar "><img src="../static/images/user-avatar.png" alt=""></span>
+                                                                <span class="thumbnail user-avatar "><img src="../../static/images/user-avatar.png" alt=""></span>
                                                                 <span class="user-name">User 2</span>
                                                                 <span class="user-status"></span>
                                                             </label>
@@ -254,7 +265,7 @@
                                                                     <input id="checkbox-user-3" type="checkbox" class="checkbox-user-3" />
                                                                     <span class="icon-check"></span>
                                                                 </span>
-                                                                <span class="thumbnail user-avatar "><img src="../static/images/user-avatar.png" alt=""></span>
+                                                                <span class="thumbnail user-avatar "><img src="../../static/images/user-avatar.png" alt=""></span>
                                                                 <span class="user-name">User 3</span>
                                                                 <span class="user-status online"></span>
                                                             </label>
@@ -265,7 +276,7 @@
                                                                     <input id="checkbox-user-4" type="checkbox" class="checkbox-user-4" />
                                                                     <span class="icon-check"></span>
                                                                 </span>
-                                                                <span class="thumbnail user-avatar "><img src="../static/images/user-avatar.png" alt=""></span>
+                                                                <span class="thumbnail user-avatar "><img src="../../static/images/user-avatar.png" alt=""></span>
                                                                 <span class="user-name">User 4</span>
                                                                 <span class="user-status"></span>
                                                             </label>
@@ -276,7 +287,7 @@
                                                                     <input id="checkbox-user-5" type="checkbox" class="checkbox-user-5" />
                                                                     <span class="icon-check"></span>
                                                                 </span>
-                                                                <span class="thumbnail user-avatar "><img src="../static/images/user-avatar.png" alt=""></span>
+                                                                <span class="thumbnail user-avatar "><img src="../../static/images/user-avatar.png" alt=""></span>
                                                                 <span class="user-name">User 5</span>
                                                                 <span class="user-status online"></span>
                                                             </label>
@@ -287,7 +298,7 @@
                                                                     <input id="checkbox-user-6" type="checkbox" class="checkbox-user-6" />
                                                                     <span class="icon-check"></span>
                                                                 </span>
-                                                                <span class="thumbnail user-avatar "><img src="../static/images/user-avatar.png" alt=""></span>
+                                                                <span class="thumbnail user-avatar "><img src="../../static/images/user-avatar.png" alt=""></span>
                                                                 <span class="user-name">User 6</span>
                                                                 <span class="user-status online"></span>
                                                             </label>
@@ -304,7 +315,7 @@
                                     <div class="widget-content">
                                         <ul class="users-list">
                                             {% for row in UserNames %}
-                                            <li><a href="#" class="thumbnail user-avatar"><img src="../static/images/user-avatar.png" alt=""></a><span>{{ row[0] }}</span></li>
+                                            <li><a href="/privateroom/@{{ row[0] }}" class="thumbnail user-avatar"><img src="../../static/images/user-avatar.png" alt=""></a><span>{{ row[0] }}</span></li>
                                             {% end %}
                                         </ul>
                                     </div>
@@ -321,11 +332,11 @@
                                     <input type = "hidden" value="{{ fname = row[4].split('/') }}">
                                     <div class="widget-content">
                                         <div class="widget-item uploaded-file-wrapper">
-                                            <a href="../../{{ row[4] }}" class="uploaded-file" data-lightbox="../../{{ row[4] }}">
+                                            <a href="../../../../{{ row[4] }}" class="uploaded-file" data-lightbox="../../../../{{ row[4] }}">
                                                 {% if str(row[6]).startswith('image') %}
-                                                    <img src="../../{{ row[4] }}" alt="">
+                                                    <img src="../../../../{{ row[4] }}" alt="">
                                                 {% else %}
-                                                    <img src="../static/images/user-avatar.png">
+                                                    <img src="../../static/images/user-avatar.png">
                                                 {% end %}
                                             </a>
                                             <div class="description">
@@ -354,7 +365,7 @@
                                                         <li role="separator" class="divider"></li>
                                                         <li><a href="/detach?{{ fname[2] }}&{{ RoomName[0] }}">Detach the file</a></li>
                                                         <li><a href="#">Open a #fileroom</a></li>
-                                                        <li><a href="../../{{ row[4] }}" download>Download file</a></li>
+                                                        <li><a href="../../../../{{ row[4] }}" download>Download file</a></li>
                                                         <li><a href="#">Add to filemanager</a></li>
                                                     </ul>
                                                 </div>
@@ -375,7 +386,7 @@
                                     <div class="widget-content">
                                         <div class="widget-item link-item">
                                             <a href="#" class="link-preview uploaded-file">
-                                                <img src="../static/images/uploaded-img.png" alt="">
+                                                <img src="../../static/images/uploaded-img.png" alt="">
                                             </a>
                                             <div class="description">
                                                 <div class="title"><a href="#">Test du kit Bluetens : l’objet con Test du kit Bluetens</a></div>
@@ -417,19 +428,19 @@
 </div>
 
 <!-- Scripts -->
-<script type="text/javascript" src="../static/js/jquery-3.1.1.min.js"></script>
-<script type="text/javascript" src="../static/js/jquery-ui.js"></script>
-<script type="text/javascript" src="../static/js/bootstrap.min.js"></script>
-<script type="text/javascript" src="../static/js/jquery.mCustomScrollbar.concat.min.js"></script>
-<script type="text/javascript" src="../static/js/emojionearea.min.js"></script>
-<script type="text/javascript" src="../static/js/jquery.dataTables.min.js"></script>
-<script type="text/javascript" src="../static/js/dataTables.bootstrap.min.js"></script>
-<script type="text/javascript" src="../static/js/bootstrap-select.min.js"></script>
-<script type="text/javascript" src="../static/js/bootstrap-colorpicker.min.js"></script>
-<script type="text/javascript" src="../static/js/table-filter.js"></script>
-<script type="text/javascript" src="../static/js/core.js"></script>
-<script type="text/javascript" src="../static/js/app.js"></script>
-<script type="text/javascript" src="../static/js/lightbox.js"></script>
+<script type="text/javascript" src="../../static/js/jquery-3.1.1.min.js"></script>
+<script type="text/javascript" src="../../static/js/jquery-ui.js"></script>
+<script type="text/javascript" src="../../static/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="../../static/js/jquery.mCustomScrollbar.concat.min.js"></script>
+<script type="text/javascript" src="../../static/js/emojionearea.min.js"></script>
+<script type="text/javascript" src="../../static/js/jquery.dataTables.min.js"></script>
+<script type="text/javascript" src="../../static/js/dataTables.bootstrap.min.js"></script>
+<script type="text/javascript" src="../../static/js/bootstrap-select.min.js"></script>
+<script type="text/javascript" src="../../static/js/bootstrap-colorpicker.min.js"></script>
+<script type="text/javascript" src="../../static/js/table-filter.js"></script>
+<script type="text/javascript" src="../../static/js/core.js"></script>
+<script type="text/javascript" src="../../static/js/app.js"></script>
+<!--<script type="text/javascript" src="../../static/js/lightbox.js"></script>-->
 
 </body>
 </html>
