@@ -58,15 +58,15 @@ class UploadHandler(tornado.web.RequestHandler):#tornado.web.RequestHandler):
         cursor = db.cursor()
         uri = self.request.uri
         # # # print 'uri upload', uri
-        url = uri.split('?')
+        url = uri.split('/')
         RoomName = url[3]
         RoomName = tornado.escape.url_unescape(RoomName)
         UserName = url[2]
         BroswerSessionID = self.get_secure_cookie('SessionID')
         # # print 'RoomName upload', RoomName
-        sql = 'SELECT RoomID FROM abcd_un WHERE RoomName = %s', [RoomName]
+        sql = "SELECT SpaceID FROM Spaces WHERE SpaceName = %s", [url[1]]
         cursor.execute(*sql)
-        RoomID = cursor.fetchone()
+        MySpaceID = cursor.fetchall()
         sql = "SELECT UserID FROM Users WHERE SessionID = %s", [BroswerSessionID]
         cursor.execute(*sql)
         UserID = cursor.fetchone()
@@ -82,6 +82,9 @@ class UploadHandler(tornado.web.RequestHandler):#tornado.web.RequestHandler):
         cursor.execute(*sql)
         AppID = cursor.fetchone()
         Tablename = AppID[1] + AppID[2]
+        sql = 'SELECT RoomID FROM ' + Tablename + ' WHERE RoomName = %s', [RoomName]
+        cursor.execute(*sql)
+        RoomID = cursor.fetchone()
         # print 'roomid', RoomID
         # print type(RoomID)
         # if type(RoomID) == "<type 'tuple'>":
@@ -89,7 +92,7 @@ class UploadHandler(tornado.web.RequestHandler):#tornado.web.RequestHandler):
         # else:
         RoomID = str(RoomID[0])
         RoomID = RoomID.decode()
-        origin = self.request.protocol + "://" + self.request.host + '/room/' + url[1]# + '/' + url[3]
+        origin = self.request.protocol + "://" + self.request.host + Tablename + MySpaceID + '/room/' + url[1]# + '/' + url[3]
         file1 = self.request.files['file1'][0]
         original_fname = file1['filename']
         # print 'what', original_fname
@@ -208,7 +211,7 @@ class UploadHandler(tornado.web.RequestHandler):#tornado.web.RequestHandler):
         }
         message_encoded = tornado.escape.json_encode(message)
         # print 'RoomID for message publish', RoomID
-        room = RoomID #FIXME : message will land in room 1 for all upload in all rooms
+        room = RoomID
         logging.info('New user for upload connected to chat room ' + room)
         client.rpush(room, message_encoded)
         #Publish message in Redis channel
@@ -252,14 +255,36 @@ class PrivateRoom(BaseHandler):
         ## print len(url)
         RoomName = url[3][0]
         ## print 'RoomName in post1', RoomName
+        BroswerSessionID = self.get_secure_cookie('SessionID')
+        sql = "SELECT UserID FROM Users WHERE SessionID = %s", [BroswerSessionID]
+        cursor.execute(*sql)
+        UserID = cursor.fetchone()
+        sql = "SELECT UserName FROM Users_info WHERE UserID = %s", [UserID]
+        cursor.execute(*sql)
+        UserName = cursor.fetchone()
+        sql = "SELECT UserGroupID, CompanyID FROM Users_info WHERE UserID = %s", [UserID]
+        cursor.execute(*sql)
+        print cursor._executed
+        GroupandOwnerID = cursor.fetchone()
+        # print 'uri', uri
+        sql = "SELECT SpaceID FROM Spaces WHERE SpaceName = %s", [url[1]]
+        cursor.execute(*sql)
+        MySpaceID = cursor.fetchall()
+        print '2 ', cursor._executed
+        sql = "SELECT AppID, Tableprefix, AppName FROM GroupApps WHERE GroupID = %s AND OwnerID = %s", [
+            GroupandOwnerID[0], GroupandOwnerID[1]]
+        cursor.execute(*sql)
+        print '3 ', cursor._executed
+        testappid = cursor.fetchone()
+        tablename = testappid[1] + testappid[2]
         RoomName = tornado.escape.url_unescape(RoomName)
-        sql = 'SELECT RoomID FROM abcd_un_PrivateChatRooms WHERE RoomName = %s', ['@' + UserName[0]]
+        sql = 'SELECT RoomID FROM ' + tablename + '_PrivateChatRooms WHERE RoomName = %s', ['@' + UserName[0]]
         cursor.execute(*sql)
         RoomID = cursor.fetchone()
         ## print 'RoomID', RoomID
         RoomID = str(RoomID[0])
         RoomID = RoomID.decode()
-        fullurl = 'ws://' + self.request.host + '/app1/privatesocket/' + RoomID
+        fullurl = 'ws://' + self.request.host + testappid[2] + url[1] + '/privatesocket/' + RoomID
         db.close()
         # # print fullurl
         # # print type(fullurl)
@@ -277,8 +302,29 @@ class PrivateRoom(BaseHandler):
         RoomName = url[3]
         db = connect(host=dictconf['SQLSERVER'], user=dictconf['SQLUSER'], passwd=dictconf['SQLPASS'], db=dictconf['SQLDB'], charset='utf8mb4')
         cursor = db.cursor()
-
-        sql = 'SELECT RoomID FROM abcd_un WHERE RoomName = %s', [RoomName]
+        BroswerSessionID = self.get_secure_cookie('SessionID')
+        sql = "SELECT UserID FROM Users WHERE SessionID = %s", [BroswerSessionID]
+        cursor.execute(*sql)
+        UserID = cursor.fetchone()
+        sql = "SELECT UserName FROM Users_info WHERE UserID = %s", [UserID]
+        cursor.execute(*sql)
+        UserName = cursor.fetchone()
+        sql = "SELECT UserGroupID, CompanyID FROM Users_info WHERE UserID = %s", [UserID]
+        cursor.execute(*sql)
+        print cursor._executed
+        GroupandOwnerID = cursor.fetchone()
+        # print 'uri', uri
+        sql = "SELECT SpaceID FROM Spaces WHERE SpaceName = %s", [url[1]]
+        cursor.execute(*sql)
+        MySpaceID = cursor.fetchall()
+        print '2 ', cursor._executed
+        sql = "SELECT AppID, Tableprefix, AppName FROM GroupApps WHERE GroupID = %s AND OwnerID = %s", [
+            GroupandOwnerID[0], GroupandOwnerID[1]]
+        cursor.execute(*sql)
+        print '3 ', cursor._executed
+        testappid = cursor.fetchone()
+        tablename = testappid[1] + testappid[2]
+        sql = 'SELECT RoomID FROM' + tablename + ' WHERE RoomName = %s', [RoomName]
         cursor.execute(*sql)
         RoomID = cursor.fetchone()
         if not room:
@@ -308,6 +354,27 @@ class PrivateRoom(BaseHandler):
             cursor.execute(*sql)
             SQLSessionID = cursor.fetchone()
             BroswerSessionID = self.get_secure_cookie('SessionID')
+            sql = "SELECT UserID FROM Users WHERE SessionID = %s", [BroswerSessionID]
+            cursor.execute(*sql)
+            UserID = cursor.fetchone()
+            sql = "SELECT UserName FROM Users_info WHERE UserID = %s", [UserID]
+            cursor.execute(*sql)
+            UserName = cursor.fetchone()
+            sql = "SELECT UserGroupID, CompanyID FROM Users_info WHERE UserID = %s", [UserID]
+            cursor.execute(*sql)
+            print cursor._executed
+            GroupandOwnerID = cursor.fetchone()
+            # print 'uri', uri
+            sql = "SELECT SpaceID FROM Spaces WHERE SpaceName = %s", [url[1]]
+            cursor.execute(*sql)
+            MySpaceID = cursor.fetchall()
+            print '2 ', cursor._executed
+            sql = "SELECT AppID, Tableprefix, AppName FROM GroupApps WHERE GroupID = %s AND OwnerID = %s", [
+                GroupandOwnerID[0], GroupandOwnerID[1]]
+            cursor.execute(*sql)
+            print '3 ', cursor._executed
+            testappid = cursor.fetchone()
+            tablename = testappid[1] + testappid[2]
             if SQLSessionID[0] == BroswerSessionID:
                 uri = self.request.uri
                 url = uri.split('/')
@@ -316,7 +383,7 @@ class PrivateRoom(BaseHandler):
                 RoomName = RoomName.strip('?')
                 RoomName = tornado.escape.url_unescape(RoomName)
                 # # print 'RoomName', RoomName
-                sql = 'SELECT RoomID FROM abcd_un_PrivateChatRooms WHERE RoomName = %s', ['@' + user]
+                sql = 'SELECT RoomID FROM ' + tablename + '_PrivateChatRooms WHERE RoomName = %s', ['@' + user]
                 # # print 'User', user
                 cursor.execute(*sql)
                 RoomID = cursor.fetchone()
@@ -699,8 +766,9 @@ class MainHandler(BaseHandler):
     """
     def post(self, RoomName):
         if self.get_arguments('swapspace'):
-            spacename = self.get_arguments('swapspace')
-            print 'spacename', spacename
+            # spacename = self.get_arguments('swapspace')
+            # print 'spacename', spacename
+            pass
         else:
             db = connect(host=dictconf['SQLSERVER'], user=dictconf['SQLUSER'], passwd=dictconf['SQLPASS'], db=dictconf['SQLDB'], charset='utf8mb4')
             cursor = db.cursor()
@@ -721,13 +789,36 @@ class MainHandler(BaseHandler):
             # sql = "SELECT RoomNumber, UserID, IsAllowed FROM abcd_un WHERE RoomName = %s", [RoomName]
             # cursor.execute(*sql)
             # RoomNumber = cursor.fetchone()
-            sql = 'SELECT RoomID FROM abcd_un WHERE RoomName = %s', [RoomName]
+            BroswerSessionID = self.get_secure_cookie('SessionID')
+            sql = "SELECT UserID FROM Users WHERE SessionID = %s", [BroswerSessionID]
+            cursor.execute(*sql)
+            UserID = cursor.fetchone()
+            sql = "SELECT UserName FROM Users_info WHERE UserID = %s", [UserID]
+            cursor.execute(*sql)
+            UserName = cursor.fetchone()
+            sql = "SELECT UserGroupID, CompanyID FROM Users_info WHERE UserID = %s", [UserID]
+            cursor.execute(*sql)
+            print cursor._executed
+            GroupandOwnerID = cursor.fetchone()
+            # print 'uri', uri
+            sql = "SELECT SpaceID FROM Spaces WHERE SpaceName = %s", [url[1]]
+            cursor.execute(*sql)
+            MySpaceID = cursor.fetchall()
+            print '2 ', cursor._executed
+            sql = "SELECT AppID, Tableprefix, AppName FROM GroupApps WHERE GroupID = %s AND OwnerID = %s", [
+                GroupandOwnerID[0], GroupandOwnerID[1]]
+            cursor.execute(*sql)
+            print '3 ', cursor._executed
+            testappid = cursor.fetchone()
+            tablename = testappid[1] + testappid[2]
+            print 'testappid, tablename, GroupandOwnerID, uri', testappid, tablename, GroupandOwnerID, url[1]
+            sql = 'SELECT RoomID FROM ' + tablename +  ' WHERE RoomName = %s', [RoomName]
             cursor.execute(*sql)
             RoomID = cursor.fetchone()
             # print 'RoomID', RoomID
             RoomID = str(RoomID[0])
             RoomID = RoomID.decode()
-            fullurl = 'ws://' + self.request.host + '/app1/socket/' + RoomID
+            fullurl = 'ws://' + self.request.host + '/' + str(testappid[2]) + '/socket/' + RoomID
             db.close()
             wsurl = {
                 'url': fullurl,
@@ -758,9 +849,28 @@ class MainHandler(BaseHandler):
 
             pass
         # print 'roomnameget', RoomName
-
-
-        sql = 'SELECT RoomID FROM abcd_un WHERE RoomName = %s', [RoomName]
+        BroswerSessionID = self.get_secure_cookie('SessionID')
+        sql = "SELECT UserID FROM Users WHERE SessionID = %s", [BroswerSessionID]
+        cursor.execute(*sql)
+        UserID = cursor.fetchone()
+        sql = "SELECT UserName FROM Users_info WHERE UserID = %s", [UserID]
+        cursor.execute(*sql)
+        UserName = cursor.fetchone()
+        sql = "SELECT UserGroupID, CompanyID FROM Users_info WHERE UserID = %s", [UserID]
+        cursor.execute(*sql)
+        print cursor._executed
+        GroupandOwnerID = cursor.fetchone()
+        # print 'uri', uri
+        sql = "SELECT SpaceID FROM Spaces WHERE SpaceName = %s", [url[1]]
+        cursor.execute(*sql)
+        MySpaceID = cursor.fetchall()
+        print '2 ', cursor._executed
+        sql = "SELECT AppID, Tableprefix, AppName FROM GroupApps WHERE GroupID = %s AND OwnerID = %s", [
+            GroupandOwnerID[0], GroupandOwnerID[1]]
+        cursor.execute(*sql)
+        testappid = cursor.fetchone()
+        tablename = testappid[1] + testappid[2]
+        sql = 'SELECT RoomID FROM ' + tablename + ' WHERE RoomName = %s', [RoomName]
         cursor.execute(*sql)
         RoomID = cursor.fetchone()
         if not room:
@@ -800,7 +910,28 @@ class MainHandler(BaseHandler):
                 RoomName = RoomName.strip('?')
                 RoomName = tornado.escape.url_unescape(RoomName)
                 # print 'RoomName', RoomName
-                sql = 'SELECT RoomID FROM abcd_un WHERE RoomName = %s', [RoomName]
+                BroswerSessionID = self.get_secure_cookie('SessionID')
+                sql = "SELECT UserID FROM Users WHERE SessionID = %s", [BroswerSessionID]
+                cursor.execute(*sql)
+                UserID = cursor.fetchone()
+                sql = "SELECT UserName FROM Users_info WHERE UserID = %s", [UserID]
+                cursor.execute(*sql)
+                UserName = cursor.fetchone()
+                sql = "SELECT UserGroupID, CompanyID FROM Users_info WHERE UserID = %s", [UserID]
+                cursor.execute(*sql)
+                print cursor._executed
+                GroupandOwnerID = cursor.fetchone()
+                # print 'uri', uri
+                sql = "SELECT SpaceID FROM Spaces WHERE SpaceName = %s", [url[1]]
+                cursor.execute(*sql)
+                MySpaceID = cursor.fetchall()
+                print '2 ', cursor._executed
+                sql = "SELECT AppID, Tableprefix, AppName FROM GroupApps WHERE GroupID = %s AND OwnerID = %s", [
+                    GroupandOwnerID[0], GroupandOwnerID[1]]
+                cursor.execute(*sql)
+                testappid = cursor.fetchone()
+                tablename = testappid[1] + testappid[2]
+                sql = 'SELECT RoomID FROM ' + tablename + ' WHERE RoomName = %s', [RoomName]
                 cursor.execute(*sql)
                 RoomID = cursor.fetchone()
                 RoomID = str(RoomID[0])
@@ -833,14 +964,37 @@ class MainHandler(BaseHandler):
         i = 0
         global messages
         global notifications
+        url = self.request.uri
+        url = url.split('/')
         mix = messages# + notifications
         db = connect(host=dictconf['SQLSERVER'], user=dictconf['SQLUSER'], passwd=dictconf['SQLPASS'], db=dictconf['SQLDB'], charset='utf8mb4')
         cursor = db.cursor()
-        AppID = '1'
-        RoomNumber = '1' #Todo : Change that to non hardcoded values
-        sql = "SELECT RoomID FROM abcd_un WHERE RoomNumber = %s AND AppID = %s", [RoomNumber, AppID] #Todo : Change that to non hardcoded values
+        #AppID = '1'
+        #RoomNumber = '1' #Todo : Change that to non hardcoded values
+        BroswerSessionID = self.get_secure_cookie('SessionID')
+        sql = "SELECT UserID FROM Users WHERE SessionID = %s", [BroswerSessionID]
         cursor.execute(*sql)
-        RoomIDS = cursor.fetchall()
+        UserID = cursor.fetchone()
+        sql = "SELECT UserName FROM Users_info WHERE UserID = %s", [UserID]
+        cursor.execute(*sql)
+        UserName = cursor.fetchone()
+        sql = "SELECT UserGroupID, CompanyID FROM Users_info WHERE UserID = %s", [UserID]
+        cursor.execute(*sql)
+        print cursor._executed
+        GroupandOwnerID = cursor.fetchone()
+        # print 'uri', uri
+        sql = "SELECT SpaceID FROM Spaces WHERE SpaceName = %s", [url[1]]
+        cursor.execute(*sql)
+        MySpaceID = cursor.fetchall()
+        print '2 ', cursor._executed
+        sql = "SELECT AppID, Tableprefix, AppName FROM GroupApps WHERE GroupID = %s AND OwnerID = %s", [
+            GroupandOwnerID[0], GroupandOwnerID[1]]
+        cursor.execute(*sql)
+        testappid = cursor.fetchone()
+        tablename = testappid[1] + testappid[2]
+        # sql = 'SELECT RoomID FROM ' + tablename + ' WHERE RoomNumber = %s AND AppID = %s', [RoomNumber, AppID] #Todo : Change that to non hardcoded values
+        # cursor.execute(*sql)
+        # RoomIDS = cursor.fetchall()
         temp = []
         messages = []
         notifications = []
@@ -952,7 +1106,7 @@ class MainHandler(BaseHandler):
         sql = "SELECT AppID, Tableprefix, AppName FROM GroupApps WHERE GroupID = %s AND OwnerID = %s", [GroupandOwnerID[0], GroupandOwnerID[1]]
         cursor.execute(*sql)
         #AppID = cursor.fetchone()
-        testAppIDS = cursor.fetchall()
+        testAppIDS = cursor.fetchall() #Todo: change this variable name
         # # print 'testAppIDS', testAppIDS
         appdict = {}
         ## print 'Tablename', Tablename
@@ -970,7 +1124,7 @@ class MainHandler(BaseHandler):
                 appdict[row[2]] = AllRoomName
             except:
                 pass
-        # print 'appdict', appdict
+        print 'appdict', appdict
         # sql = "SELECT Csspath FROM Templates WHERE AppID = %s  AND GroupID = %s AND IsActive = '1'", (
         #     AppID[0], GroupID)
         # cursor.execute(*sql)
@@ -1228,8 +1382,28 @@ class PrivateChatSocketHandler(tornado.websocket.WebSocketHandler):
         # print uri
         db = connect(host=dictconf['SQLSERVER'], user=dictconf['SQLUSER'], passwd=dictconf['SQLPASS'], db=dictconf['SQLDB'], charset='utf8mb4')
         cursor = db.cursor()
-
-        sql = 'SELECT RoomID From abcd_un_PrivateChatRooms WHERE RoomName = %s', [uri[1]]
+        BroswerSessionID = self.get_secure_cookie('SessionID')
+        sql = "SELECT UserID FROM Users WHERE SessionID = %s", [BroswerSessionID]
+        cursor.execute(*sql)
+        UserID = cursor.fetchone()
+        sql = "SELECT UserName FROM Users_info WHERE UserID = %s", [UserID]
+        cursor.execute(*sql)
+        UserName = cursor.fetchone()
+        sql = "SELECT UserGroupID, CompanyID FROM Users_info WHERE UserID = %s", [UserID]
+        cursor.execute(*sql)
+        print cursor._executed
+        GroupandOwnerID = cursor.fetchone()
+        # print 'uri', uri
+        sql = "SELECT SpaceID FROM Spaces WHERE SpaceName = %s", [url[1]]
+        cursor.execute(*sql)
+        MySpaceID = cursor.fetchall()
+        print '2 ', cursor._executed
+        sql = "SELECT AppID, Tableprefix, AppName FROM GroupApps WHERE GroupID = %s AND OwnerID = %s", [
+            GroupandOwnerID[0], GroupandOwnerID[1]]
+        cursor.execute(*sql)
+        testappid = cursor.fetchone()
+        tablename = testappid[1] + testappid[2]
+        sql = 'SELECT RoomID From ' + tablename + '_PrivateChatRooms WHERE RoomName = %s', [uri[1]]
         cursor.execute(*sql)
         ForeignRoomID = cursor.fetchone()
         if not ForeignRoomID:
@@ -1268,9 +1442,9 @@ class PrivateChatSocketHandler(tornado.websocket.WebSocketHandler):
                                                                                                         uri[1]]
             cursor.execute(*sql)
             # print cursor._executed
-            db.commit()
-            sql = 'SELECT RoomID From abcd_un_PrivateChatRooms WHERE RoomName = %s', [uri[1]]
-            cursor.execute(*sql)
+            #db.commit()
+            # sql = 'SELECT RoomID From abcd_un_PrivateChatRooms WHERE RoomName = %s', [uri[1]]
+            # cursor.execute(*sql)
             ForeignRoomID = cursor.fetchone()
             # print 'ForeignRoomID else', ForeignRoomID
         # print ForeignRoomID
