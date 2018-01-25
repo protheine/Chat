@@ -583,7 +583,7 @@ class PrivateRoom(BaseHandler):
         Filespath = cursor.fetchall()
         print 'rendering'
         pinnedcontent = self.render_string("Pinneditems.html", RoomName=uri[3], pins=pins, messages=messages)
-        content = self.render_string("messages.html", newday=newday, RoomName=uri[3], messages=messages)
+        content = self.render_string("messages.html", Appname=AppID[2], newday=newday, RoomName=uri[3], messages=messages)
         notifcontent = self.render_string("notifications.html", notifications=notifications)
         self.render_default("index.html", errormessage=errormessage, Filespath=Filespath, pinnedcontent=pinnedcontent, UserNames=UserNames, RoomName=uri[3], UserName=UserName, draftcsspath=draftcsspath, userlist=userlist, AllRoomName=AllRoomName, notifcontent=notifcontent, content=content, chat=1)
         db.close()
@@ -705,6 +705,8 @@ class UnPinItem(BaseHandler):
 class PinItem(BaseHandler):
     def search(self, result):
          machinuri = self.request.uri
+         buttonarg = self.get_arguments('pinning')
+         print '2', buttonarg
          db = connect(host=dictconf['SQLSERVER'], user=dictconf['SQLUSER'], passwd=dictconf['SQLPASS'], db=dictconf['SQLDB'], charset='utf8mb4')
          cursor = db.cursor()
          BroswerSessionID = self.get_secure_cookie('SessionID')
@@ -723,11 +725,12 @@ class PinItem(BaseHandler):
          cursor.execute(*sql)
          AppID = cursor.fetchone()
          Tablename = AppID[1] + AppID[2]
-         origin = machinuri.split('&', 1)
+         print 'TableName', Tablename
+         origin = buttonarg[0].split('/', 1)
          testpin = origin[0]
-         testpin = testpin.split('?')
-         testpin = testpin[1]
-         origin = '/room/' + origin[1]
+         #testpin = testpin.split('?')
+         #testpin = testpin[1]
+         # origin = '/room/' + origin[1]
          # print 'youpiurl', testpin
          i = 0
          for message in result:
@@ -736,21 +739,31 @@ class PinItem(BaseHandler):
                 sql = 'SELECT MessageID FROM ' + Tablename + '_PinnedItems' + ' WHERE MessageID = %s', [temp[u'_id']]
                 cursor.execute(*sql)
                 if cursor.fetchone():
-                    break
+                    self.redirect(origin[1])
                 else:
                     sql = 'INSERT INTO '  + Tablename + '_PinnedItems' + '(MessageID, Date, UserName, Body) VALUES (%s, %s, %s, %s)', [temp['_id'], temp['date'], temp['from'], temp['body']]
                     cursor.execute(*sql)
                     db.commit()
                     db.close
-                break
+                    self.redirect(origin[1])
     def on_result(self, result):
         assert result != 'n', 'Result is fucked up'
         result = '-' + str(result) #We need a negative start position for redis
+        print 'result', result
         self.application.client.lrange('82c42a73b26dc109f681618ef297ef89', result, -1, self.search)
-    def get(self, result, room=None):
-        url = self.request.uri
-        url = url.split('&')
-        REDIS_HOST = 'mlvpn.exaltia.org'
+    def post(self, result, room=None):
+        buttonarg = self.get_arguments('pinning')
+        # with open('./settings.cfg', 'r') as configfile:
+        #     for line in configfile:
+        #         if '#' not in line:
+        #             line = line.strip()
+        #             line = line.replace(' ', '')
+        #             line = line.split('=')
+        #             dictconf[line[0]] = line[1]
+        print 'PinItem get'
+        # splittedurl = url = self.request.uri
+        splittedurl = buttonarg[0].split('/', 1)
+        REDIS_HOST = '10.42.42.1'
         REDIS_PORT = 6379
         REDIS_PWD = None
         REDIS_USER = None
@@ -758,8 +771,11 @@ class PinItem(BaseHandler):
         client.connect()
         client.listen(self)
         self.application.client.llen('82c42a73b26dc109f681618ef297ef89', self.on_result)  # Todo : Boooh, hardcoded value
-        redirection = 'room/' + url[1]
-        self.redirect(redirection)
+        #redirection = 'room/' + splittedurl[1]
+        # url = '/' + dictconf['appname'] + url
+        print 'url', splittedurl
+        print 'buttonarg', buttonarg
+        self.redirect(splittedurl[1])
 class MainHandler(BaseHandler):
     """
     Main request handler for the root path and for chat rooms.
@@ -1063,7 +1079,12 @@ class MainHandler(BaseHandler):
         db.close()
     def pagerender(self, messages, notifications):#Renderding pages
         uri = self.request.uri
-        # print 'mon uri est', uri
+        print 'mon uri est', uri
+        print 'path', self.request.path
+        print 'full', self.request.full_url()
+        testhiddenvalue = self.get_arguments('testhiddenvalue')
+        print 'testhiddenvalue', testhiddenvalue
+        print 'appname', dictconf['appname']
         uri = uri.split('/')
         try:
             url = uri.split('errorcode=')
@@ -1107,7 +1128,7 @@ class MainHandler(BaseHandler):
         cursor.execute(*sql)
         #AppID = cursor.fetchone()
         testAppIDS = cursor.fetchall() #Todo: change this variable name
-        # # print 'testAppIDS', testAppIDS
+        print 'testAppIDS', testAppIDS
         appdict = {}
         ## print 'Tablename', Tablename
         for row in testAppIDS:
@@ -1170,10 +1191,10 @@ class MainHandler(BaseHandler):
         draftcsspath = ''
 	iconvariable = 'icon-menu'
         pinnedcontent = self.render_string("Pinneditems.html", RoomName=uri[3], pins=pins, messages=messages)
-        content = self.render_string("messages.html", newday=newday, RoomName=uri[3], messages=messages)
+        content = self.render_string("messages.html", Appname=dictconf['appname'], url=self.request.uri, newday=newday, RoomName=uri[3], messages=messages)
         notifcontent = self.render_string("notifications.html", notifications=notifications)
         #machin serve as a check if user does not have access to the chat room, or if there isn't any TODO: refactor that stupid variable name
-        self.render_default("index.html", iconvariable=iconvariable, appdict=appdict, testAppIDS=testAppIDS, SpaceNames=SpaceNames, machintruc='ok', errormessage=errormessage, Filespath=Filespath, pinnedcontent=pinnedcontent, UserNames=UserNames, RoomName=uri[3], UserName=UserName, draftcsspath=draftcsspath, userlist=userlist, AllRoomName=AllRoomName, notifcontent=notifcontent, content=content, chat=1)
+        self.render_default("index.html", Appname=dictconf['appname'], iconvariable=iconvariable, appdict=appdict, testAppIDS=testAppIDS, SpaceNames=SpaceNames, machintruc='ok', errormessage=errormessage, Filespath=Filespath, pinnedcontent=pinnedcontent, UserNames=UserNames, RoomName=uri[3], UserName=UserName, draftcsspath=draftcsspath, userlist=userlist, AllRoomName=AllRoomName, notifcontent=notifcontent, content=content, chat=1)
         db.close()
         # print 'end?'
 class PrivateChatSocketHandler(tornado.websocket.WebSocketHandler):

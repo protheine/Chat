@@ -157,7 +157,7 @@ $(document).ready(function() {
                     <ul class="dropdown-menu users-checklist-dropdown dropdown-menu-right"> \
                         <li class="menu-visibility-option"><a href="#">Hide/Show #fileroom <i class="fa fa-eye" aria-hidden="true"></i><i class="fa fa-eye-slash" aria-hidden="true"></i></a></li> \
                         <li role="separator" class="divider"></li> \
-                        <li><a href="/testpin?' + message._id + '&' + Roonname + '">Pin item</a></li> \
+                        <li><a href="../../testpin?' + message._id + '&' + Roonname + '">Pin itemc</a></li> \
                         <li><a href="#">Open a #fileroom</a></li> \
                         <li><a href="#">Download file</a></li> \
                         <li><a href="#">Add to filemanager</a></li> \
@@ -189,7 +189,7 @@ $(document).ready(function() {
                 <ul class="dropdown-menu users-checklist-dropdown dropdown-menu-right"> \
                     <li class="menu-visibility-option"><a href="#">Hide/Show #fileroom <i class="fa fa-eye" aria-hidden="true"></i><i class="fa fa-eye-slash" aria-hidden="true"></i></a></li> \
                     <li role="separator" class="divider"></li> \
-                    <li><a href="/testpin?' + message._id + '&' + Roomname + '">Pin item</a></li> \
+                    <li><a href="../../testpin?' + message._id + '&' + Roomname + '">Pin itemb</a></li> \
                     <li><a href="#">Open a #fileroom</a></li> \
                     <li><a href="#">Download file</a></li> \
                     <li><a href="#">Add to filemanager</a></li> \
@@ -214,7 +214,7 @@ $(document).ready(function() {
                 <ul class="dropdown-menu users-checklist-dropdown dropdown-menu-right"> \
                     <li class="menu-visibility-option"><a href="#">Hide/Show #fileroom <i class="fa fa-eye" aria-hidden="true"></i><i class="fa fa-eye-slash" aria-hidden="true"></i></a></li> \
                     <li role="separator" class="divider"></li> \
-                    <li><a href="/testpin?' + message._id + '&' + Roomname + '">Pin item</a></li> \
+                    <li><a href="../../testpin?' + message._id + '&' + Roomname + '">Pin itema</a></li> \
                     <li><a href="#">Open a #fileroom</a></li> \
                     <li><a href="#">Download file</a></li> \
                     <li><a href="#">Add to filemanager</a></li> \
