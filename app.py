@@ -782,8 +782,10 @@ class MainHandler(BaseHandler):
     """
     def post(self, RoomName):
         if self.get_arguments('swapspace'):
-            # spacename = self.get_arguments('swapspace')
-            # print 'spacename', spacename
+            print 'yup, swap space'
+
+            spacename = self.get_arguments('swapspace')
+            print 'spacename', spacename
             pass
         else:
             db = connect(host=dictconf['SQLSERVER'], user=dictconf['SQLUSER'], passwd=dictconf['SQLPASS'], db=dictconf['SQLDB'], charset='utf8mb4')
@@ -1079,6 +1081,7 @@ class MainHandler(BaseHandler):
         db.close()
     def pagerender(self, messages, notifications):#Renderding pages
         uri = self.request.uri
+        urldict = {}
         print 'mon uri est', uri
         print 'path', self.request.path
         print 'full', self.request.full_url()
@@ -1098,14 +1101,6 @@ class MainHandler(BaseHandler):
         GroupID = '1'
         db = connect(host=dictconf['SQLSERVER'], user=dictconf['SQLUSER'], passwd=dictconf['SQLPASS'], db=dictconf['SQLDB'], charset='utf8mb4')
         cursor = db.cursor()
-        sql = "SELECT DISTINCT SpaceID FROM SpaceGroups WHERE GroupID = %s", [GroupID]
-        cursor.execute(*sql)
-        SpaceIDS = cursor.fetchall()
-        sql = 'SELECT SpaceName FROM Spaces WHERE SpaceID IN %s', [SpaceIDS]
-        cursor.execute(*sql)
-        SpaceNames = cursor.fetchall()
-        # print 'SpaceNamesSQL', cursor._executed
-        # print 'SpaceNamesResult', SpaceNames
         BroswerSessionID = self.get_secure_cookie('SessionID')
         sql = "SELECT UserID FROM Users WHERE SessionID = %s", [BroswerSessionID]
         cursor.execute(*sql)
@@ -1116,6 +1111,30 @@ class MainHandler(BaseHandler):
         sql = "SELECT UserGroupID, CompanyID FROM Users_info WHERE UserID = %s", [UserID]
         cursor.execute(*sql)
         GroupandOwnerID = cursor.fetchone()
+        sql = "SELECT DISTINCT SpaceID FROM SpaceGroups WHERE GroupID = %s", [GroupID]
+        cursor.execute(*sql)
+        SpaceIDS = cursor.fetchall()
+        sql = 'SELECT SpaceName FROM Spaces WHERE SpaceID IN %s', [SpaceIDS]
+        cursor.execute(*sql)
+        SpaceNames = cursor.fetchall()
+        for row in SpaceIDS:
+            try:
+                sql  = 'SELECT SpaceName FROM Spaces WHERE SpaceID IN %s', [row]
+                cursor.execute(*sql)
+                one_space_name = cursor.fetchone()
+                sql = "SELECT AppID, Tableprefix, AppName FROM GroupApps WHERE SpaceID = %s AND OwnerID = %s", [row, GroupandOwnerID[1]]
+                cursor.execute(*sql)
+            # AppID = cursor.fetchone()
+                oneapp = cursor.fetchone()
+                Tablename = oneapp[1] + oneapp[2]
+                sql = "SELECT RoomName FROM " + Tablename + " WHERE AppID = %s AND ISFileRoom = 0 ORDER BY RoomNumber ASC LIMIT 1", [oneapp[0]]
+                cursor.execute(*sql)
+                One_Room = cursor.fetchone()
+                urldict[one_space_name] =  oneapp[1], oneapp[2], 'room', One_Room
+            # print 'SpaceNamesSQL', cursor._executed
+            # print 'SpaceNamesResult', SpaceNames
+            except:
+                pass
         # print 'uri', uri
         sql = "SELECT SpaceID FROM Spaces WHERE SpaceName = %s", [uri[1]]
         cursor.execute(*sql)
@@ -1194,7 +1213,7 @@ class MainHandler(BaseHandler):
         content = self.render_string("messages.html", Appname=dictconf['appname'], url=self.request.uri, newday=newday, RoomName=uri[3], messages=messages)
         notifcontent = self.render_string("notifications.html", notifications=notifications)
         #machin serve as a check if user does not have access to the chat room, or if there isn't any TODO: refactor that stupid variable name
-        self.render_default("index.html", Appname=dictconf['appname'], iconvariable=iconvariable, appdict=appdict, testAppIDS=testAppIDS, SpaceNames=SpaceNames, machintruc='ok', errormessage=errormessage, Filespath=Filespath, pinnedcontent=pinnedcontent, UserNames=UserNames, RoomName=uri[3], UserName=UserName, draftcsspath=draftcsspath, userlist=userlist, AllRoomName=AllRoomName, notifcontent=notifcontent, content=content, chat=1)
+        self.render_default("index.html", urldict=urldict, Appname=dictconf['appname'], iconvariable=iconvariable, appdict=appdict, testAppIDS=testAppIDS, SpaceNames=SpaceNames, machintruc='ok', errormessage=errormessage, Filespath=Filespath, pinnedcontent=pinnedcontent, UserNames=UserNames, RoomName=uri[3], UserName=UserName, draftcsspath=draftcsspath, userlist=userlist, AllRoomName=AllRoomName, notifcontent=notifcontent, content=content, chat=1)
         db.close()
         # print 'end?'
 class PrivateChatSocketHandler(tornado.websocket.WebSocketHandler):

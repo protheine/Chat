@@ -113,11 +113,11 @@
                         <ul class="users-list">
                             <form method="POST" action="./swapspace">
                                 {% raw xsrf_form_html() %}
-                                {% for row in SpaceNames %}
+                                {% for key in urldict %}
                                 <li>
-                                    <button name="swapspace" value="{{ row[0] }}" class="thumbnail user-avatar">
-                                        <img src="../../static/images/user-avatar.png" alt="{{ row }}">
-                                    </button>
+                                    <a href="/{{ urldict[key][1] }}/{{ key[0] }}/{{ urldict[key][2]}}/{{ urldict[key][3][0] }}" class="thumbnail user-avatar">
+                                        <img src="../../static/images/user-avatar.png" alt="{{ key }}">
+                                    </a>
                                 </li>
                                 {% end %}
                             </form>
