@@ -30,13 +30,17 @@ from base import BaseHandler
 from login import LogoutHandler
 import magic
 from itertools import chain
+from time import sleep
+from setproctitle import setproctitle
+
+
 #import settings as config
 # Define port from command line parameter.
 #os.chdir(Destination_path)
 # # print 'path', os.getcwd()
 # time.sleep(10)
 dictconf = {}
-with open('./settings.cfg', 'r') as configfile:
+with open('./settings.cfg', 'r') as configfile: #Todo: Change this for ini style configparser
     for line in configfile:
         if '#' not in line:
             line = line.strip()
@@ -81,6 +85,7 @@ class UploadHandler(tornado.web.RequestHandler):#tornado.web.RequestHandler):
             GroupandOwnerID[1]]
         cursor.execute(*sql)
         AppID = cursor.fetchone()
+
         Tablename = AppID[1] + AppID[2]
         sql = 'SELECT RoomID FROM ' + Tablename + ' WHERE RoomName = %s', [RoomName]
         cursor.execute(*sql)
@@ -878,7 +883,8 @@ class MainHandler(BaseHandler):
         cursor.execute(*sql)
         print cursor._executed
         GroupandOwnerID = cursor.fetchone()
-        # print 'uri', uri
+        print 'uri', url
+        # sleep(10)
         sql = "SELECT SpaceID FROM Spaces WHERE SpaceName = %s", [url[1]]
         cursor.execute(*sql)
         MySpaceID = cursor.fetchall()
@@ -888,6 +894,8 @@ class MainHandler(BaseHandler):
         cursor.execute(*sql)
         testappid = cursor.fetchone()
         tablename = testappid[1] + testappid[2]
+        if testappid[2] != dictconf['appname']: #Check if i am really that app
+            self.send_error(403)
         sql = 'SELECT RoomID FROM ' + tablename + ' WHERE RoomName = %s', [RoomName]
         cursor.execute(*sql)
         RoomID = cursor.fetchone()
@@ -1114,12 +1122,13 @@ class MainHandler(BaseHandler):
         sql = "SELECT DISTINCT SpaceID FROM SpaceGroups WHERE GroupID = %s", [GroupID]
         cursor.execute(*sql)
         SpaceIDS = cursor.fetchall()
+        print 'All Spaces IDS', SpaceIDS
         sql = 'SELECT SpaceName FROM Spaces WHERE SpaceID IN %s', [SpaceIDS]
         cursor.execute(*sql)
         SpaceNames = cursor.fetchall()
         for row in SpaceIDS:
             try:
-                sql  = 'SELECT SpaceName FROM Spaces WHERE SpaceID IN %s', [row]
+                sql  = 'SELECT SpaceName FROM Spaces WHERE SpaceID = %s', [row]
                 cursor.execute(*sql)
                 one_space_name = cursor.fetchone()
                 sql = "SELECT AppID, Tableprefix, AppName FROM GroupApps WHERE SpaceID = %s AND OwnerID = %s", [row, GroupandOwnerID[1]]
@@ -1127,13 +1136,17 @@ class MainHandler(BaseHandler):
             # AppID = cursor.fetchone()
                 oneapp = cursor.fetchone()
                 Tablename = oneapp[1] + oneapp[2]
-                sql = "SELECT RoomName FROM " + Tablename + " WHERE AppID = %s AND ISFileRoom = 0 ORDER BY RoomNumber ASC LIMIT 1", [oneapp[0]]
-                cursor.execute(*sql)
+                print 'current tablename', Tablename
+                print 'oneapp, pos 0', oneapp[0]
+                sql = "SELECT RoomName FROM " + Tablename + " WHERE ISFileRoom = 0 ORDER BY RoomNumber ASC LIMIT 1"#, [oneapp[0]]
+                cursor.execute(sql)
                 One_Room = cursor.fetchone()
                 urldict[one_space_name] =  oneapp[1], oneapp[2], 'room', One_Room
+                print 'current dict entry', urldict[one_space_name]
             # print 'SpaceNamesSQL', cursor._executed
             # print 'SpaceNamesResult', SpaceNames
             except:
+                print 'error', sys.exc_info()
                 pass
         # print 'uri', uri
         sql = "SELECT SpaceID FROM Spaces WHERE SpaceName = %s", [uri[1]]
@@ -1849,12 +1862,27 @@ def main():
     Main function to run the chat application.
     """
      # This line will setup default options.
-    tornado.options.parse_command_line()
+    print('heh?')
+    print 'pid is', os.getpid()
+    # myoptions = tornado.options
+    # print myoptions.options
+    # myoptions = tornado.options.parse_command_line()
+    # items = tornado.options.options.items()
+    # print tornado.options.options.items()
+    # print items
+    # sleep(10)
     # Create an instance of the main application.
     application = Application()
     # Start application by listening to desired port and starting IOLoop.
+    # proctitle = 'AppChat ' + dictconf['uniqueID']
+    # print 'proctitle', proctitle
+    arguments = sys.argv
+    if 'waitforit' in arguments:
+        sleep(5)
+    setproctitle('AppChat ' + dictconf['uniqueID'])
     application.listen(tornado.options.options.port)
     tornado.ioloop.IOLoop.instance().start()
+
 
 if __name__ == "__main__":
     main()
