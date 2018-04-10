@@ -1,6 +1,6 @@
 import tornado.ioloop
-import tornado.web
-import tornado.options
+from tornado.web import RequestHandler
+# import tornado.options
 from setproctitle import setproctitle
 from subprocess import call, Popen
 import sys
@@ -83,7 +83,7 @@ with open('./settings.cfg', 'r') as configfile: #Todo: Change this for ini style
             line = line.replace(' ', '')
             line = line.split('=')
             dictconf[line[0]] = line[1]
-tornado.options.define("port", default=dictconf['port'], help="run on the given port", type=int)
+# tornado.options.define("port", default=dictconf['port'], help="run on the given port", type=int)
 
 # def redis_connect():
 #     """
@@ -116,14 +116,14 @@ def main():
      # This line will setup default options.
     # print('heh?')
     # print 'pid is', os.getpid()
-    tornado.options.parse_command_line()
+    # tornado.options.parse_command_line()
     # Create an instance of the main application.
     application = Application()
     # Start application by listening to desired port and starting IOLoop.
     # proctitle = 'AppChat ' + dictconf['uniqueID']
     # print 'proctitle', proctitle
     setproctitle('AppChat sleeping ' + dictconf['uniqueID'])
-    application.listen(tornado.options.options.port)
+    application.listen(dictconf['port'])
     tornado.ioloop.IOLoop.instance().start()
 
 

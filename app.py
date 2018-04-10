@@ -32,7 +32,7 @@ import magic
 from itertools import chain
 from time import sleep
 from setproctitle import setproctitle
-
+import signal
 
 #import settings as config
 # Define port from command line parameter.
@@ -1855,13 +1855,16 @@ def redis_connect():
     client.connect()
     return client
 
-
+def signal_handler(signal, frame):
+    print 'signal ', signal, ' was received'
 
 def main():
     """
     Main function to run the chat application.
     """
      # This line will setup default options.
+    signal.signal(signal.SIGUSR1, signal_handler)
+
     print('heh?')
     print 'pid is', os.getpid()
     # myoptions = tornado.options
