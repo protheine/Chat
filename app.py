@@ -959,6 +959,7 @@ class MainHandler(BaseHandler):
                 tablename = testappid[1] + testappid[2]
                 sql = 'SELECT RoomID FROM ' + tablename + ' WHERE RoomName = %s', [RoomName]
                 cursor.execute(*sql)
+                print 'tablename is', tablename, 'and roomName is ', RoomName
                 RoomID = cursor.fetchone()
                 RoomID = str(RoomID[0])
                 RoomID = RoomID.decode()
@@ -1157,6 +1158,7 @@ class MainHandler(BaseHandler):
         cursor.execute(*sql)
         AppIDS = cursor.fetchall()
         sql = "SELECT AppID, Tableprefix, AppName FROM GroupApps WHERE GroupID = %s AND OwnerID = %s", [GroupandOwnerID[0], GroupandOwnerID[1]]
+        #Todo : correct thoses sql queries as user could belong to multiple groups
         cursor.execute(*sql)
         #AppID = cursor.fetchone()
         testAppIDS = cursor.fetchall() #Todo: change this variable name
@@ -1857,8 +1859,35 @@ def redis_connect():
 
 def signal_handler(signal, frame):
     print 'signal ', signal, ' was received'
+    if signal == 10:
+        print('if ok')
+        print dictconf['OwnerID']
+        db = connect(host=dictconf['SQLSERVER'], user=dictconf['SQLUSER'], passwd=dictconf['SQLPASS'], db=dictconf['SQLDB'],
+                     charset='utf8mb4')
+        cursor = db.cursor()
+        # BroswerSessionID = self.get_secure_cookie('SessionID')
+        # sql = "SELECT OwnerID FROM Users WHERE SessionID = %s", BroswerSessionID
+        # cursor.execute(*sql)
+        # OwnerID = cursor.fetchone()
+        sql = "UPDATE GroupApps SET State = '1' WHERE UniqueID = %s AND OwnerID = %s", [dictconf['uniqueID'], dictconf['OwnerID']]
+        cursor.execute(*sql)
+        db.commit() #Todo: Move commit and close to a try, and close app only if there is no except
+        db.close()
+        sys.exit(0)
+
+
+
 
 def main():
+    db = connect(host=dictconf['SQLSERVER'], user=dictconf['SQLUSER'], passwd=dictconf['SQLPASS'], db=dictconf['SQLDB'],
+                 charset='utf8mb4')
+    cursor = db.cursor()
+    sql = "SELECT State FROM GroupApps WHERE UniqueID = %s AND OwnerID = %s", [dictconf['uniqueID'], dictconf['OwnerID']]
+    cursor.execute(*sql)
+    AppState = cursor.fetchone()
+    if AppState == 1:
+        print('i should not have started, bye')
+        sys.exit(1) #Todo : Add log why app exited by itself, in this case : because app should not have been started
     """
     Main function to run the chat application.
     """
