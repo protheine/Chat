@@ -587,7 +587,7 @@ class PrivateRoom(BaseHandler):
         cursor.execute(*sql)
         Filespath = cursor.fetchall()
         print 'rendering'
-        pinnedcontent = self.render_string("Pinneditems.html", RoomName=uri[3], pins=pins, messages=messages)
+        pinnedcontent = self.render_string("../templates/Pinneditems.html", RoomName=uri[3], pins=pins, messages=messages)
         content = self.render_string("messages.html", Appname=AppID[2], newday=newday, RoomName=uri[3], messages=messages)
         notifcontent = self.render_string("notifications.html", notifications=notifications)
         self.render_default("index.html", errormessage=errormessage, Filespath=Filespath, pinnedcontent=pinnedcontent, UserNames=UserNames, RoomName=uri[3], UserName=UserName, draftcsspath=draftcsspath, userlist=userlist, AllRoomName=AllRoomName, notifcontent=notifcontent, content=content, chat=1)
@@ -1222,15 +1222,27 @@ class MainHandler(BaseHandler):
         except:
             UserNames = Filespath = pins = newday = ''
             pass
-        draftcsspath = ''
+        draftcsspath = 'Aucun'
 	iconvariable = 'icon-menu'
-        pinnedcontent = self.render_string("Pinneditems.html", RoomName=uri[3], pins=pins, messages=messages)
-        content = self.render_string("messages.html", Appname=dictconf['appname'], url=self.request.uri, newday=newday, RoomName=uri[3], messages=messages)
-        notifcontent = self.render_string("notifications.html", notifications=notifications)
+        pinnedcontent = self.render_string("../templates/Pinneditems.html", RoomName=uri[3], pins=pins, messages=messages)
+        # print 'ok1'
+        content = self.render_string("../templates/messages.html", Appname=dictconf['appname'], url=self.request.uri, newday=newday, RoomName=uri[3], messages=messages)
+        # print 'ok2'
+        notifcontent = self.render_string("../templates/notifications.html", notifications=notifications)
+        # print 'ok3'
         #machin serve as a check if user does not have access to the chat room, or if there isn't any TODO: refactor that stupid variable name
-        self.render_default("index.html", urldict=urldict, Appname=dictconf['appname'], iconvariable=iconvariable, appdict=appdict, testAppIDS=testAppIDS, SpaceNames=SpaceNames, machintruc='ok', errormessage=errormessage, Filespath=Filespath, pinnedcontent=pinnedcontent, UserNames=UserNames, RoomName=uri[3], UserName=UserName, draftcsspath=draftcsspath, userlist=userlist, AllRoomName=AllRoomName, notifcontent=notifcontent, content=content, chat=1)
+        # self.render_default("index.html", urldict=urldict, Appname=dictconf['appname'], iconvariable=iconvariable, appdict=appdict, testAppIDS=testAppIDS, SpaceNames=SpaceNames, machintruc='ok', errormessage=errormessage, Filespath=Filespath, pinnedcontent=pinnedcontent, UserNames=UserNames, RoomName=uri[3], UserName=UserName, draftcsspath=draftcsspath, userlist=userlist, AllRoomName=AllRoomName, notifcontent=notifcontent, content=content, chat=1)
+        self.render_default("default/html/template.twig", urldict=urldict, Appname=dictconf['appname'], iconvariable=iconvariable,
+                            appdict=appdict, testAppIDS=testAppIDS, SpaceNames=SpaceNames, machintruc='ok',
+                            errormessage=errormessage, Filespath=Filespath, pinnedcontent=pinnedcontent,
+                            UserNames=UserNames, RoomName=uri[3], UserName=UserName, draftcsspath=draftcsspath,
+                            userlist=userlist, AllRoomName=AllRoomName, notifcontent=notifcontent, content=content,
+                            chat=1)
+        # print settings['template_path']
+        # self.render_default("default/html/template.twig")
+        # self.send_error(499)
         db.close()
-        # print 'end?'
+        print 'end?'
 class PrivateChatSocketHandler(tornado.websocket.WebSocketHandler):
     """
     Handler for dealing with websockets. It receives, stores and distributes new messages.
@@ -1812,7 +1824,7 @@ class Application(tornado.web.Application):
         settings = dict(
             cookie_secret = "43osdETzKXasdQAGaYdkL5gEmGeJJFuYh7EQnp2XdTP1o/Vo=", #BAAAD, according to some devs, this cookie secret is as important as a ssl private key, so must be put outside of code
             login_url = "/login",
-            template_path=os.path.join(os.path.dirname(__file__), "templates"),
+            template_path=os.path.join(os.path.dirname(__file__), "themes"),
             static_path=os.path.join(os.path.dirname(__file__), "static"),
             xsrf_cookies= True,
             autoescape="xhtml_escape",
@@ -1823,7 +1835,6 @@ class Application(tornado.web.Application):
             autoreload=True,
             debug=True,
         )
-
         # Call super constructor.
         tornado.web.Application.__init__(self, handlers, **settings)
 
