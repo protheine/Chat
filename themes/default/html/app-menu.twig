@@ -1,0 +1,34 @@
+<aside class="app-menu">
+                <div class="scrollbar-section">
+                    <div class="channels-widget" >
+                        {% for key in appdict %}
+                        <div class="title collapse-control" href="#{{ key }}" data-toggle="collapse">
+                            <span class={{ iconvariable }}></span>
+                            <span>{{ key }}</span>
+                            <span class="collapse-icon icon-arrow-top"></span>
+                            <!--<span class="badge">999 <span class="plus">+</span></span>-->
+                        </div>
+
+                        <div class="widget-content collapsible-section collapse in" id="{{ key }}">
+                            <div class="info"><span>Channel<span class="icon-members icon-channels-list"></span><!--<span class="channels-count">(5)</span><a href="#"><span class="icon-plus"></span></a>--></div>
+                            <ul class="channels-list">
+                                {% for row in appdict[key] %}
+                                <li><a  href="/room/{{ row }}">{{ row }}</a><span class="icon-members channels-list li a:hover"></span></li>
+                                {% end %}
+
+                            </ul>
+                        </div>
+                        {% end %}
+                    </div>
+                    <!--<div class="dates-widget">
+                        <div class="title">
+                            <span class="icon-calendar"></span>
+                            <span>Agenda</span>
+                        </div>
+                        <ul class="dates-list">
+                            <li><a href="#"><span class="icon-check"></span><span>Liste 1</span></a></li>
+                            <li><a href="#"><span class="icon-check"></span><span>Liste 2</span></a></li>
+                        </ul>
+                    </div>
+                </div>-->
+            </aside>

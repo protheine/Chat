@@ -12,7 +12,7 @@
         <h6 id="username" hidden>{{ message["from"] }}</h6>
         <h6 id="msgid" hidden>{{ message['_id'] }}</h6>
         <div class="info"><a href="#" class="user-name">{{ message["from"] }}</a><span class="info">{% if message.get("date") %}{{ message["date"] }}{% end %}</span></div>
-        <div class="content-message">{% module Template("message.html", message=message) %}</div>
+        <div class="content-message">{% module Template("../templates/message.html", message=message) %}</div>
     </div>
     <div class="dropdown btn-group">
         <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="fa fa-ellipsis-h"></i></a>
@@ -36,7 +36,7 @@
         <h6 id="username" hidden>{{ message["from"] }}</h6>
         <h6 id="msgid" hidden>{{ message['_id'] }}</h6>
         <div class="info"><a href="#" class="user-name">{{ message["from"] }}</a><span class="info">{% if message.get("date") %}{{ message["date"] }}{% end %}</span></div>
-        <div class="content-message">{% module Template("message.html", message=message) %}</div>
+        <div class="content-message">{% module Template("../templates/message.html", message=message) %}</div>
     </div>
     <div class="dropdown btn-group">
         <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="fa fa-ellipsis-h"></i></a>

@@ -1825,7 +1825,8 @@ class Application(tornado.web.Application):
             cookie_secret = "43osdETzKXasdQAGaYdkL5gEmGeJJFuYh7EQnp2XdTP1o/Vo=", #BAAAD, according to some devs, this cookie secret is as important as a ssl private key, so must be put outside of code
             login_url = "/login",
             template_path=os.path.join(os.path.dirname(__file__), "themes"),
-            static_path=os.path.join(os.path.dirname(__file__), "static"),
+            static_path=os.path.join(os.path.dirname(__file__), "themes"),
+            # static_url_prefix=os.path.join(os.path.dirname(__file__), "themes"),
             xsrf_cookies= True,
             autoescape="xhtml_escape",
             # Set this to your desired database name.
@@ -1837,7 +1838,6 @@ class Application(tornado.web.Application):
         )
         # Call super constructor.
         tornado.web.Application.__init__(self, handlers, **settings)
-
         # Stores user names.
         self.usernames = {}
 

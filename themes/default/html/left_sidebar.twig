@@ -1,0 +1,33 @@
+<aside id="left_sidebar" class="sidebar left-sidebar">
+                <div class="space-menu">
+                    <div class="scrollbar-section">
+
+                        <ul class="users-list self-avatar">
+                            <li>
+                                <a href="#" class="thumbnail user-avatar">a
+                                    <img src="./../../static/default/assets/images/user-avatar.png" alt="">
+                                </a>
+                            </li>
+                        </ul>
+                        <ul class="menu-list">
+                            <li><a href="#" class="icon-wrapper"><span class="icon-comment"></span></a></li>
+                            <li><a href="#" class="icon-wrapper"><span class="icon-calendar"></span></a></li>
+                            <li><a href="#" class="icon-wrapper"><span class="icon-check"></span></a></li>
+                            <li><a href="#" class="icon-wrapper"><span class="icon-check"></span></a></li>
+                        </ul>
+                        <ul class="users-list">
+                            <form method="POST" action="./swapspace">
+                                {% raw xsrf_form_html() %}
+                                {% for key in urldict %}
+                                <li>
+                                    <a href="/{{ urldict[key][1] }}/{{ key[0] }}/{{ urldict[key][2]}}/{{ urldict[key][3][0] }}" class="thumbnail user-avatar">
+                                        <img src="./../../static/default/assets/images/user-avatar.png" alt="{{ key }}">
+                                    </a>
+                                </li>
+                                {% end %}
+                            </form>
+                        </ul>
+                        <a href="#" class="icon-wrapper"><span class="icon-plus"></span></a>
+                    </div>
+                </div>
+            </aside>

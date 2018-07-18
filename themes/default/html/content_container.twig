@@ -1,0 +1,40 @@
+<div class="content_container">
+                <div id="messages_container" class="messages_container">
+                    <div class="messages_subcontainer">
+                        <div class="messages_wrapper scrollbar-section">
+                            <div class="day-divider">
+                                <span>1 Septembre 2016</span>
+                            </div>
+                            <div class="day-messages">
+                                {% raw content %}
+                            </div>
+
+                        </div>
+                    </div>
+                    <div class="messages_footer">
+                        <form action="/upload?{{ RoomName }}?{{UserName[0]}}" method="POST" enctype="MULTIPART/FORM-DATA" id="testtt">
+                            {% raw xsrf_form_html() %}
+                        </form>
+                        <form id="chat-input" action="">
+                            <div class="form-group">
+                                <div class="input-group">
+                                    <span class="input-group-addon" id="basic-addon1">
+                                        <span class="btn-group dropup">
+                                            <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="icon-paperclip"></i></a>
+                                            <ul class="dropdown-menu">
+
+                                                <li><input  type="file" name="file1" form="testtt" value="blabla"></li>
+                                                    <li><input class="btn btn-link" type="submit" form="testtt">{{ RoomName }}Upload File</input></li>
+                                                </form>
+                                                <li><a href="#">Attach File</a></li>
+                                            </ul>
+                                        </span>
+                                    </span>
+                                    <textarea id="messageArea" class="form-control disabled" rows="1" placeholder="Enter a message in #chatname" aria-describedby="basic-addon1"></textarea>
+                                </div>
+                                <span class="input-description">@member  #channel  [app]  /Task ID</span>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
