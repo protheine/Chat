@@ -1078,6 +1078,13 @@ a.remove-btn {
     position: relative;
 }
 
+.icon-category-list:before {
+    position: absolute;
+    top: 7px;
+    right: -6px;
+    content: "\e815";
+}
+
 .channels-widget .info:hover a.remove-btn {
     display: inline-block !important;
 }
