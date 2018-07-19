@@ -1078,12 +1078,6 @@ a.remove-btn {
     position: relative;
 }
 
-.icon-category-list:before {
-    position: absolute;
-    top: 7px;
-    right: -6px;
-    content: "\e815";
-}
 
 .channels-widget .info:hover a.remove-btn {
     display: inline-block !important;
@@ -1126,6 +1120,24 @@ a.remove-btn {
     text-decoration: none;
     color: #fff;
     content: "\e811";
+}
+/* Cogwheel on mouse hover of the instance name*/
+
+.channels-widget .info i:before{
+    display: none;
+    position: absolute;
+    top: 7px;
+    right: -6px;
+    /*width: 100%;*/
+    content: "";
+}
+
+.channels-widget .info:hover i:before {
+    display: inline;
+    position: absolute;
+    top: 7px;
+    right: -6px;
+    content: "\e815";
 }
 
 /**
