@@ -10,16 +10,81 @@
                         </div>
 
                         <div class="widget-content collapsible-section collapse in" id="{{ key }}">
-                            <div class="info"><span>Channel</span><i class="icon-settings"></i><!--<span class="channels-count">(5)</span><a href="#"><span class="icon-plus"></span></a>--></div>
+<a href="#addCategory" class="dropdown-item" data-toggle="modal" data-target="#addCategory">Add a bla</a><br /><!-- Modal popup in a dropdown doesn't work, must use directcall via jquery-->
+                            <div class="info"><span>Channel</span>
+                                    {#<li class="dropdown ">#}
+
+                                    <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="icon-settings"></i></a>
+                                    <ul class="dropdown-menu" role="menu"><!--<span class="channels-count">(5)</span><a href="#"><span class="icon-plus"></span></a>-->
+                                        <div class="wrapper">
+                                        <a href="javascript:$('#addCategory').modal('show')" class="dropdown-item" data-toggle="modal" data-target="#exampleModal">Add a category</a><br /><!-- Modal popup in a dropdown doesn't work, must use directcall via jquery-->
+                                        <a href="#exampleModal" class="dropdown-item" data-toggle="modal" data-target="#exampleModal">Rename category</a><br />
+                                        <a href="#exampleModal" class="dropdown-item" data-toggle="modal" data-target="#exampleModal">Add #Channel</a><br />
+                                        <a href="#exampleModal" class="dropdown-item" data-toggle="modal" data-target="#exampleModal">Delete category</a><br />
+
+                                    </ul>
+
+                                </div>
                             <ul class="channels-list">
+
                                 {% for row in appdict[key] %}
                                 <li><a  href="/room/{{ row }}">{{ row }}</a><span class="icon-members channels-list li a:hover"></span></li>
                                 {% end %}
 
                             </ul>
-                        </div>
+
+
+                                    </div>
                         {% end %}
                     </div>
+                    {% block modal %}
+                        <div class="modal fade create-group" id="addCategory" role="dialog"">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <div class="modal-body">
+                                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                                        <h4 class="modal-title">Create new group</h4>
+                                        <form id="form" action="http://espace1.exaltia.org/un/groupsearch" method="post">
+                                            {% module xsrf_form_html() %}
+                                            <label>Group name</label>
+                                            <input type="text" name="groupname" class="verif_content"/>
+                                            {#<input type="text" id="json-ajax" name="users"/>#}
+                                        </form>
+                                        <label>Add users to this group <span>(optional)</span></label>
+                                        <select name="userselect" id="userselect" class="select-ajax" data-url-ajax="http://espace1.exaltia.org/un/groupsearch" data-select-template="formatAjaxObject" data-append-template="insertAjaxObject" multiple="">
+                                        </select>
+                                        <div form="form" id="userselect" class="new_members ajax-result">
+                                        </div>
+                                        <div class="actions_modal">
+                                            <button type="submit" name="edit" form="form" class="btn btn-primary">Create group and edit</button>
+                                            <button type="submit" name="create" form="form" class="btn btn-primary">Done</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% end %}
+                    {#<div class="modal fade" id="addCategory" role="dialog" aria-labelledby="AddCategoryLabel" aria-hidden="true">#}
+                              {#<div class="modal-dialog" role="document">#}
+                                {#<div class="modal-content">#}
+                                  {#<div class="modal-header">#}
+                                    {#<h5 class="modal-title" id="exampleModalLabel">Create a new #channel</h5>#}
+                                    {#<button type="button" class="close" data-dismiss="modal" aria-label="Close">#}
+                                      {#<span aria-hidden="true">&times;</span>#}
+                                    {#</button>#}
+                                  {#</div>#}
+                                  {#<div class="modal-body">#}
+                                    {#<h3>Create a new #channel</h3>#}
+                                      {#Add a name to your #channel and add users or groups to it.<br>#}
+                                      {#<input type="text" class="verif_content">#}
+                                  {#</div>#}
+                                  {#<div class="modal-footer">#}
+                                    {#<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>#}
+                                    {#<button type="button" class="btn btn-primary">Done</button>#}
+                                  {#</div>#}
+                                {#</div>#}
+                              {#</div>#}
+                        {#</div>#}
                     <!--<div class="dates-widget">
                         <div class="title">
                             <span class="icon-calendar"></span>

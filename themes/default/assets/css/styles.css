@@ -1138,6 +1138,7 @@ a.remove-btn {
     top: 7px;
     right: -6px;
     content: "\e815";
+    color: #000000;
 }
 
 /**
@@ -2084,3 +2085,128 @@ span#basic-addon1 {
     left: 100%;
     top: 0;
 }
+/*
+modal select user
+ */
+input[type="text"].verif_content {
+  border: 0;
+  text-shadow: 0;
+  box-shadow: none;
+  outline: none;
+  border-bottom: 3px solid #f00;
+  margin-bottom: 10px;
+  width: 200px; }
+  input[type="text"].verif_content.checked {
+    border-bottom-color: #3dbc5d; }
+  .select2-search {
+  padding-top: 3px; }
+  .select2-search::before {
+    color: #aba9a9;
+    margin: 4px 5px;
+    display: inline-block; }
+  .select2-search input {
+    width: calc(100% - 50px) !important; }
+
+.select2-container--default .select2-selection--multiple {
+  border-radius: 0;
+  border-color: #aba9a9 !important; }
+
+.select2-results .ajax-item {
+  padding: 5px; }
+select2-container--default .select2-search--inline .select2-search__field {
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-style: italic; }
+/*
+Modal gloabl? #Todo: Move it to a separate file
+ */
+.modal .modal-cs {
+  width: 700px; }
+
+.modal .modal-content {
+  border-radius: 0; }
+  .modal .modal-content h4 {
+    font-size: 20px;
+    text-align: center;
+    margin-top: 20px;
+    margin-bottom: 30px;
+    font-weight: bold; }
+  .modal .modal-content label {
+    color: #aba9a9;
+    display: block; }
+    .modal .modal-content label span {
+      font-style: italic; }
+  .modal .modal-content .actions_modal {
+    text-align: right; }
+
+.modal.create-group .legend span {
+  white-space: nowrap;
+  font-weight: bold; }
+
+.modal.create-group table {
+  margin-top: 20px; }
+  .modal.create-group table th {
+    color: #aba9a9; }
+  .modal.create-group table th,
+  .modal.create-group table td {
+    padding: 5px; }
+
+.modal.create-group .actions_user {
+  margin-top: 20px;
+  margin-bottom: 20px; }
+  .modal.create-group .actions_user .add_more {
+    color: #aba9a9;
+    font-style: italic;
+    font-weight: bold; }
+/*
+Ajax result? #Todo: Move it to a separate file, not used atm
+ */
+.ajax-result {
+  border: 1px solid #aba9a9;
+  height: 200px;
+  overflow-y: auto;
+  margin-bottom: 20px; }
+
+.select2-container .select2-selection--single .select2-selection__rendered {
+  display: block;
+  padding-left: 8px;
+  padding-right: 20px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap; }
+
+.select2-search {
+  padding-top: 3px; }
+  .select2-search::before {
+    color: #aba9a9;
+    margin: 4px 5px;
+    display: inline-block; }
+  .select2-search input {
+    width: calc(100% - 50px) !important; }
+  .select2-container .select2-search--inline {
+  float: left; }
+
+.select2-container .select2-search--inline .select2-search__field {
+  box-sizing: border-box;
+  border: none;
+  font-size: 100%;
+  margin-top: 5px;
+  padding: 0; }
+
+.select2-container .select2-search--inline .select2-search__field::-webkit-search-cancel-button {
+  -webkit-appearance: none; }
+.select2-container--default[dir="rtl"] .select2-selection--multiple .select2-selection__choice, .select2-container--default[dir="rtl"] .select2-selection--multiple .select2-selection__placeholder, .select2-container--default[dir="rtl"] .select2-selection--multiple .select2-search--inline {
+  float: right; }
+.select2-container--default .select2-search--inline .select2-search__field {
+  background: transparent;
+  border: none;
+  outline: 0;
+  box-shadow: none;
+  -webkit-appearance: textfield; }
+.select2-container--classic .select2-search--inline .select2-search__field {
+  outline: 0;
+  box-shadow: none; }
+.select2-container--default .select2-search--inline .select2-search__field {
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-style: italic; }
+
+
