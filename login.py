@@ -129,7 +129,7 @@ class LoginHandler(BaseHandler):
                 # dbuser = tornado.escape.json_decode(result)
                 # dbuser.update(user)
                 # user = dbuser
-                self.set_secure_cookie("user", username)
+                self.set_secure_cookie("user", username, domain='.exaltia.org')
                 self.application.usernames[user["email"]] = username or user.get(username)#user.get("name") or
                 print "4"
                 print result

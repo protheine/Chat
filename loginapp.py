@@ -21,6 +21,7 @@ import brukva
 from base2 import BaseHandler
 from login import LoginHandler
 from login import LogoutHandler
+# from app import Truc
 # Define port from command line parameter.
 tornado.options.define("port", default=8880, help="run on the given port", type=int)
 #ioloop.IOLoop.instance().start()
@@ -61,14 +62,15 @@ class Application(tornado.web.Application):
 
 		# Handlers defining the url routing.
 		handlers = [
-			(r"/", MainHandler),
 			(r"/login", LoginHandler),
 			(r"/logout", LogoutHandler),
+			(r"/", MainHandler),
 		]
 		print "1"
 
 		# Settings:
 		settings = dict(
+			debug=True,
 			cookie_secret = "43osdETzKXasdQAGaYdkL5gEmGeJJFuYh7EQnp2XdTP1o/Vo=", #BAAAD, according to some devs, this cookie secret is as important as a ssl private key, so must be put outside of code
 			login_url = "/login",
 			template_path=os.path.join(os.path.dirname(__file__), "templates"),
@@ -79,6 +81,7 @@ class Application(tornado.web.Application):
 			db_name = 'chat',
 			# apptitle used as page title in the template.
 			apptitle = 'Chat example: Tornado, Redis, brukva, Websockets',
+
 		)
 		print "2"
 		# Call super constructor.

@@ -50,6 +50,114 @@ with open('./settings.cfg', 'r') as configfile: #Todo: Change this for ini style
 tornado.options.define("port", default=dictconf['port'], help="run on the given port", type=int)
 # # print 'path', os.getcwd()
 # # print 'dictconf', dictconf
+class Truc(tornado.web.RequestHandler):
+    def get(self):
+        print 'Truuuuuuuc!'
+class JsonSearch(tornado.web.RequestHandler):
+    def render_from_string(self, tmpl, **kwargs):
+        namespace = self.get_template_namespace()
+        namespace.update(kwargs)
+        return Template(tmpl).generate(**namespace)
+    def post(self, args):
+        if self.get_arguments('edit'):
+            myvalues = self.get_arguments('edit')
+            print 'values are ', myvalues
+    def get(self, args):
+        print 'JsonSearch ok'
+        json_results = {}
+        OwnerID = 1
+        url = self.request.uri
+        args = url.split('q=')
+        args = args[1]
+        print 'args are', args
+        db = connect(host=dictconf['SQLSERVER'], user=dictconf['SQLUSER'], passwd=dictconf['SQLPASS'],
+                     db=dictconf['SQLDB'], charset='utf8mb4')
+        cursor = db.cursor()
+        BroswerSessionID = self.get_secure_cookie('SessionID')
+        print 'SessionID is', BroswerSessionID
+        # sleep(5)
+        sql = "SELECT UserID FROM Users WHERE SessionID = %s", [BroswerSessionID]
+        cursor.execute(*sql)
+        UserID = cursor.fetchone()
+        sql = "SELECT UserName FROM Users_info WHERE UserID = %s", [UserID]
+        cursor.execute(*sql)
+        UserName = cursor.fetchone()
+        sql = "SELECT CompanyID FROM Users_info WHERE UserID = %s", [UserID]
+        cursor.execute(*sql)
+        OwnerID = cursor.fetchone()
+        print 'OwnerID is', OwnerID
+        # sleep(3)
+        sql = "SELECT UserID FROM Users_info WHERE CompanyID = %s AND UserName LIKE %s ", [OwnerID[0], args + '%'] #For building userlist
+        cursor.execute(*sql)
+        #print 'sql', sql
+        print cursor._executed
+        UserIDS = cursor.fetchall()
+        # sql = "SELECT UserID FROM Users_info WHERE UserName IN %s AND CompanyID = %s", [UserNames, OwnerID]  # For building userlist
+        # cursor.execute(*sql)
+        # UserIDS = cursor.fetchall()
+        print 'UserIDS', UserIDS
+        json_results = {}
+        for row in UserIDS:
+            sql = "SELECT UserName FROM Users_info WHERE CompanyID = %s AND UserID = %s", [OwnerID[0], row]
+            cursor.execute(*sql)
+            UserNames = cursor.fetchone()
+            #json_results[str(row[0])] = UserNames
+            usernames_dict = {'Username': UserNames[0]}
+            sql = "SELECT ContactID FROM Users_info WHERE UserID = %s", [row]
+            cursor.execute(*sql)
+            ContactIDS = cursor.fetchall()
+            sql = "SELECT Content FROM Contact_infos WHERE ContactType = 'Firstname' AND ContactID = %s", [ContactIDS[0]] # For building userlist
+
+            cursor.execute(*sql)
+            print cursor._executed
+            firstname = cursor.fetchone()
+            firstname_dict = {'Firstname': firstname[0]}
+            sql = "SELECT Content FROM Contact_infos WHERE ContactType = 'LastName' AND ContactID = %s", [ContactIDS[0]]  # For building userlist
+
+            cursor.execute(*sql)
+            print cursor._executed
+            lastname = cursor.fetchone()
+            lastname_dict = {'Lastname': lastname[0]}
+            #json_results[str(row[0])] += Contact_INFOS
+            #print 'Contact Infos', Contact_INFOS
+        #for row in UserIDS:
+            print 'row ', row[0]
+            sql = "SELECT GroupID FROM User_Groups WHERE UserID = %s", [row[0]]  # For building userlist
+            cursor.execute(*sql)
+            GroupIDS = cursor.fetchall()
+            #print 'GroupIDS ', GroupIDS
+            sql = "SELECT GroupName FROM Groups WHERE GroupID IN %s", [GroupIDS]
+            #print 'sql', sql
+            cursor.execute(*sql)
+            GroupNames = cursor.fetchall()
+            #json_results[str(row[0])] += GroupNames
+            groupnames_dict = {'GroupNames': GroupNames}
+            #json_results = {str(row[0]): usernames_dict, firstname_dict, lastname_dict, groupnames_dict}
+            #json_results = {str(row[0]): usernames_dict}
+            #json_results.update(usernames_dict)
+            json_results[str(row[0])] = usernames_dict, firstname_dict, lastname_dict, groupnames_dict
+        print json_results
+        # sql = "SELECT GroupID, GroupName from Groups WHERE GroupID IN %s AND CompanyID = %s", [GroupIDS, OwnerID]
+        # cursor.execute(*sql)
+        # GroupNames = cursor.fetchall()
+        print 'json result ', json_results
+        #print 'all sql results', UserNames, UserIDS, GroupIDS, GroupNames
+        # content = {'items'}
+        content = []
+        #content = [{'infos': 'Groupe2, Groupe1, Croupe3, Groupe4, Groupe5, Groupe6', 'id': 1, 'img': '/static/default/assets/images/user-avatar.png', 'name': 'Member 1'}, {'infos': 'Grerzoupe2, Groupe1, Croupe3, Groupe4, Groupe5, Groupe6', 'id': 1, 'img': '/static/default/assets/images/user-avatar.png', 'name': 'Merezrember 1'}]
+        for key in json_results.keys():
+            print 'key', key
+            content.append({
+                'id': key,
+                'img': '/static/default/assets/images/user-avatar.png',
+                'name': json_results[key][0]['Username'] + '(' + json_results[key][1]['Firstname'] + ' ' + json_results[key][2]['Lastname'] + ')' ,
+                'infos': json_results[key][3]['GroupNames'],
+            })
+        print content
+        encoded_content = tornado.escape.json_encode(content)
+        print 'encoded', encoded_content
+        self.write(encoded_content)
+        # self.finish()
 class ChatEdit(tornado.web.RequestHandler):
     def post(self):
         pass
@@ -1798,6 +1906,8 @@ class Application(tornado.web.Application):
     def __init__(self):
         # Handlers defining the url routing.
         handlers = [
+            (r"/truc", Truc),
+            (r"/groupsearch?([^/]+)", JsonSearch),
             (r"/swapspace", MainHandler),
             (r"/room/([^/]+)", MainHandler),
             (r"/privateroom/([^/]+)", PrivateRoom),
