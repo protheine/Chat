@@ -13,8 +13,9 @@
         {#{% block menu %}{% end %}#}
         {#{% module Template( "../themes/default/html//menu.twig", menu=var_menu) %}#}
         <div class="app-container">
+
             {% module Template("default/html/left_sidebar.twig", urldict=urldict) %}
-            {% module Template("default/html/app-menu.twig", appdict=appdict, iconvariable=iconvariable) %}
+            {% module Template("default/html/app-menu.twig", AllUserNames=AllUserNames, appdict=appdict, iconvariable=iconvariable) %}
             {% module Template("default/html/content_container.twig", content=content, RoomName=RoomName, UserName=UserName) %}
             {% module Template("default/html/right_sidebar.twig", RoomName=RoomName, UserNames=UserNames, Filespath=Filespath, pinnedcontent=pinnedcontent) %}
             {#<div class="container-fluid">#}

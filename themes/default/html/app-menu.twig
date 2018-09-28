@@ -1,7 +1,10 @@
 <aside class="app-menu">
+
                 <div class="scrollbar-section">
                     <div class="channels-widget" >
+                        {#{{ appdict }}#}
                         {% for key in appdict %}
+                            {% for row in appdict[key] %}
                         <div class="title collapse-control" href="#{{ key }}" data-toggle="collapse">
                             <span class={{ iconvariable }}></span>
                             <span>{{ key }}</span>
@@ -10,59 +13,77 @@
                         </div>
 
                         <div class="widget-content collapsible-section collapse in" id="{{ key }}">
-<a href="#addCategory" class="dropdown-item" data-toggle="modal" data-target="#addCategory">Add a bla</a><br /><!-- Modal popup in a dropdown doesn't work, must use directcall via jquery-->
-                            <div class="info"><span>Channel</span>
+                        {#<a href="#addCategory" class="dropdown-item" data-toggle="modal" data-target="#addCategory">Add a bla</a><br /><!-- Modal popup in a dropdown doesn't work, must use directcall via jquery-->#}
+
+                            <div class="info"><span>{{ row }}</span>
                                     {#<li class="dropdown ">#}
 
                                     <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="icon-settings"></i></a>
                                     <ul class="dropdown-menu" role="menu"><!--<span class="channels-count">(5)</span><a href="#"><span class="icon-plus"></span></a>-->
                                         <div class="wrapper">
-                                        <a href="javascript:$('#addCategory').modal('show')" class="dropdown-item" data-toggle="modal" data-target="#exampleModal">Add a category</a><br /><!-- Modal popup in a dropdown doesn't work, must use directcall via jquery-->
-                                        <a href="#exampleModal" class="dropdown-item" data-toggle="modal" data-target="#exampleModal">Rename category</a><br />
-                                        <a href="#exampleModal" class="dropdown-item" data-toggle="modal" data-target="#exampleModal">Add #Channel</a><br />
+                                        <a href="javascript:$('#modal{{ key }}').modal('show')" class="dropdown-item" data-toggle="modal" data-target="#modal">Add a #Channel</a><br /><!-- Modal popup in a dropdown doesn't work, must use directcall via jquery-->
+                                        <a href="#exampleModal" class="dropdown-item" data-toggle="modal" data-target="#exampleModal">Add category</a><br />
+                                        <a href="#exampleModal" class="dropdown-item" data-toggle="modal" data-target="#exampleModal">Rename category #Channel</a><br />
                                         <a href="#exampleModal" class="dropdown-item" data-toggle="modal" data-target="#exampleModal">Delete category</a><br />
 
                                     </ul>
 
                                 </div>
+                            {#{% end %}#}
                             <ul class="channels-list">
 
-                                {% for row in appdict[key] %}
-                                <li><a  href="/room/{{ row }}">{{ row }}</a><span class="icon-members channels-list li a:hover"></span></li>
+
+                                {#bloup{{ appdict[key][row] }}#}
+                                {#appdict key{{ appdict[key] }}#}
+                                {#{% for entry in row[key] %}#}
+                                {% for entry in appdict[key][row] %}
+                                <li><a  href="./{{ entry }}">{{ entry }}</a><span class="icon-members channels-list li a:hover"></span></li>
+                                {% end %}
                                 {% end %}
 
                             </ul>
 
 
+
                                     </div>
                         {% end %}
-                    </div>
-                    {% block modal %}
-                        <div class="modal fade create-group" id="addCategory" role="dialog"">
+
+                    {% for key in appdict %}
+                    {#{% block modal %}#}
+                        <div class="modal fade create-group" id="modal{{ key }}" role="dialog">
                             <div class="modal-dialog">
                                 <div class="modal-content">
                                     <div class="modal-body">
                                         <button type="button" class="close" data-dismiss="modal">&times;</button>
                                         <h4 class="modal-title">Create new group</h4>
-                                        <form id="form" action="http://espace1.exaltia.org/un/groupsearch" method="post">
+                                        <form id="{{ key }}form" action="http://espace1.exaltia.org/{{ key }}/groupsearch" method="post">
                                             {% module xsrf_form_html() %}
                                             <label>Group name</label>
-                                            <input type="text" name="groupname" class="verif_content"/>
+                                            <input type="text" name="groupname" class="verif content"/>
+                                            <input type ="hidden" name="appname" value="{{ key }}">
                                             {#<input type="text" id="json-ajax" name="users"/>#}
                                         </form>
                                         <label>Add users to this group <span>(optional)</span></label>
-                                        <select name="userselect" id="userselect" class="select-ajax" data-url-ajax="http://espace1.exaltia.org/un/groupsearch" data-select-template="formatAjaxObject" data-append-template="insertAjaxObject" multiple="">
+                                        {#<select name="userselect" id="userselect" class="select-ajax" data-url-ajax="http://espace1.exaltia.org/un/groupsearch" data-select-template="formatAjaxObject" data-append-template="insertAjaxObject" multiple="">#}
                                         </select>
-                                        <div form="form" id="userselect" class="new_members ajax-result">
+                                        <div form="{{ key }}form" id="userselect" class="new_members ajax-result">
+                                                {%  for row in AllUserNames %}
+                                                     <input type="checkbox" form="{{ key }}form" name="userlist" value="{{ row[0] }}"/> {{ row[0] }}<br />
+                                                {% end %}
+                                        {#<div class="actions_modal">#}
+                                            {#<button type="submit" name="edit" form="form" class="btn btn-primary">Create group and edit</button>#}
+                                            {#<button type="submit" name="create" form="form" class="btn btn-primary">Done</button>#}
+                                        {#</div>#}
                                         </div>
-                                        <div class="actions_modal">
-                                            <button type="submit" name="edit" form="form" class="btn btn-primary">Create group and edit</button>
-                                            <button type="submit" name="create" form="form" class="btn btn-primary">Done</button>
+                                        <div class="modal-footer">
+                                            <button type="button" name="close" form="{{ key }}form" class="btn btn-secondary" data-dismiss="modal">close</button>
+                                            <button type="submit" name="edit" form="{{ key }}form" class="btn btn-primary">Done</button>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
+                    {#{% end %}#}
                     {% end %}
                     {#<div class="modal fade" id="addCategory" role="dialog" aria-labelledby="AddCategoryLabel" aria-hidden="true">#}
                               {#<div class="modal-dialog" role="document">#}
@@ -78,10 +99,7 @@
                                       {#Add a name to your #channel and add users or groups to it.<br>#}
                                       {#<input type="text" class="verif_content">#}
                                   {#</div>#}
-                                  {#<div class="modal-footer">#}
-                                    {#<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>#}
-                                    {#<button type="button" class="btn btn-primary">Done</button>#}
-                                  {#</div>#}
+
                                 {#</div>#}
                               {#</div>#}
                         {#</div>#}

@@ -59,9 +59,53 @@ class JsonSearch(tornado.web.RequestHandler):
         namespace.update(kwargs)
         return Template(tmpl).generate(**namespace)
     def post(self, args):
+        print 'je post jsonsearch'
+        # sleep(2)
         if self.get_arguments('edit'):
-            myvalues = self.get_arguments('edit')
-            print 'values are ', myvalues
+            groupname = self.get_arguments('groupname') #Refactor this, this is not a group name, but a room name
+            users = self.get_arguments('userlist')
+            appname = self.get_arguments('appname')
+            print 'values are ', groupname, users, appname
+            db = connect(host=dictconf['SQLSERVER'], user=dictconf['SQLUSER'], passwd=dictconf['SQLPASS'],
+                         db=dictconf['SQLDB'], charset='utf8mb4')
+            cursor = db.cursor()
+            BroswerSessionID = self.get_secure_cookie('SessionID')
+            sql = "SELECT UserID FROM Users WHERE SessionID = %s", [BroswerSessionID]
+            cursor.execute(*sql)
+            UserID = cursor.fetchone()
+            sql = "SELECT CompanyID FROM Users_info WHERE UserID = %s", [UserID]
+            cursor.execute(*sql)
+            OwnerID = cursor.fetchone()
+            sql = "SELECT AppID, Tableprefix FROM GroupApps WHERE AppName = %s AND OwnerID = %s", [appname, OwnerID]
+            cursor.execute(*sql)
+            Tableprefix = cursor.fetchone()
+            print 'appname', appname
+            # sleep(30)
+            Tablename = Tableprefix[1] + appname[0] #Even with only one entry, appname is an list of unicode entries
+            print 'Tablename is ', Tablename
+            RoomID = ''.join(random.choice(string.hexdigits) for i in range(32)) #Todo: Add check to be sure that the roomID is unique
+            # print self.request.path
+            sql = "INSERT INTO " + Tablename + " (RoomNumber, AppID, RoomID, RoomName, IsFileRoom) SELECT RoomNumber+1, %s, %s, %s, %s FROM " + Tablename + " ORDER BY RoomNumber DESC LIMIT 1", [Tableprefix[0], RoomID, groupname, '0']
+            print 'sql ', sql
+            cursor.execute(*sql)
+            # db.commit()
+            sql = "SELECT RoomNumber FROM " + Tablename + " WHERE RoomID = %s", [RoomID]
+            cursor.execute(*sql)
+            RoomNumber = cursor.fetchone()
+            # for row in users:
+            format_strings = ','.join(['%s'] * len(users))
+            sql = "SELECT UserID FROM Users_info WHERE UserName IN (%s)" % format_strings, users
+            cursor.execute(*sql)
+            UserIDS = cursor.fetchall()
+            for row in UserIDS:
+                sql = "INSERT INTO "  + Tablename + '_user_rights' + " (RoomNumber, UserID, IsAllowed) VALUES (%s, %s, %s)", [RoomNumber, row, '1']
+                cursor.execute(*sql)
+            db.commit()
+
+            # sleep(20)
+        else:
+            print'dans les choux'
+            # sleep(5)
     def get(self, args):
         print 'JsonSearch ok'
         json_results = {}
@@ -1271,6 +1315,8 @@ class MainHandler(BaseHandler):
         #AppID = cursor.fetchone()
         testAppIDS = cursor.fetchall() #Todo: change this variable name
         print 'testAppIDS', testAppIDS
+        # sleep(40)
+        # print 'testAppIDS', testAppIDS
         appdict = {}
         ## print 'Tablename', Tablename
         for row in testAppIDS:
@@ -1278,16 +1324,36 @@ class MainHandler(BaseHandler):
             Tablename = row[1] + row[2]
             # time.sleep(15)
             try:
-                sql = "SELECT RoomName FROM " + Tablename + " WHERE RoomNumber = %s AND AppID = %s AND ISFileRoom = 0", [
-                '1', row[0]]
-                cursor.execute(*sql)
-                AllRoomName = cursor.fetchall()
-                AllRoomName = list(chain(*AllRoomName))
-                # print 'AllRoomName', AllRoomName
-                appdict[row[2]] = AllRoomName
+                # sql = "SELECT RoomName FROM " + Tablename + " WHERE RoomNumber = %s AND AppID = %s AND ISFileRoom = 0", ['1', row[0]]
+                # print 'row0 ?', row[0]
+                # sleep(7)
+                sql = "SELECT ID, Name FROM " +  Tablename + "_categories"
+                cursor.execute(sql)
+                categories = cursor.fetchall()
+                appdict[row[2]] = {}
+                for entry in categories:
+                    # print 'entry', entry
+                    # sleep(10)
+                    sql = "SELECT RoomName FROM " + Tablename + " WHERE ISFileRoom = 0 AND CategoryID = %s", [entry[0]] #AND CategoryID = %s [variable[0]]
+                    #sql = "SELECT RoomName FROM " + Tablename + " WHERE AppID = %s AND ISFileRoom = 0 AND CategoryID = %s", [row[0], entry[0]] #AND CategoryID = %s [variable[0]] #Old query
+                    # print 'sql is', sql
+                    cursor.execute(*sql)
+                    AllRoomName = cursor.fetchall()
+                    print 'AllRoomName', AllRoomName
+                    # sleep(3)
+                    AllRoomName = list(chain(*AllRoomName))
+                    # print 'AllRoomName', AllRoomName
+                    appdict[row[2]][entry[1]] = AllRoomName
+                    print 'appdict', appdict
+                    # sleep(3)
+
+                # appdict[row[2]] = AllRoomName
             except:
+                print('ca marche pas')
+                print sys.exc_info()
                 pass
         print 'appdict', appdict
+        # sleep(30)
         # sql = "SELECT Csspath FROM Templates WHERE AppID = %s  AND GroupID = %s AND IsActive = '1'", (
         #     AppID[0], GroupID)
         # cursor.execute(*sql)
@@ -1301,37 +1367,48 @@ class MainHandler(BaseHandler):
         #uri = uri.split('/')
         uri[2] = tornado.escape.url_unescape(uri[2])
         try:
-            sql = "SELECT RoomID FROM " + Tablename + ' WHERE RoomName = %s', [uri[2]]
+            AllUserNames = UserNames = Filespath = pins = newday = ''
+            # sql = "SELECT RoomID FROM " + Tablename + ' WHERE RoomName = %s', [uri[2]]
+            # cursor.execute(*sql)
+            # RoomIDS = cursor.fetchall()
+            # # print 'RoomIDs', RoomIDS
+            # # print 'RoomName?', uri[2]
+            # sql = "SELECT AppName FROM SpaceApps WHERE SpaceID = %s", []
+            #
+            # sql = "SELECT GroupID FROM GroupApps WHERE AppID = %s", [AppID[0]]
+            # cursor.execute(*sql)
+            # GroupIDS = cursor.fetchall()
+            # sql = "SELECT UserId FROM User_Groups WHERE GroupID IN %s", [GroupIDS]
+            # cursor.execute(*sql)
+            # UserIDS = cursor.fetchall()
+            # sql = "SELECT UserName FROM Users_info WHERE UserID IN %s", [UserIDS]
+            # cursor.execute(*sql)
+            # UserNames = cursor.fetchall()
+            # #sql = "SELECT RoomName FROM " + Tablename + " WHERE RoomID = %s", RoomIDS
+            # #cursor.execute(*sql)
+            # #RoomName = cursor.fetchone()
+            # sql = 'SELECT * FROM ' + Tablename + '_PinnedItems ORDER BY Date ASC'
+            # cursor.execute(sql)
+            # pins = cursor.fetchall() #Pinned items won't display
+            # newday = ''
+            # sql = 'SELECT * FROM ' + Tablename + '_Files WHERE ISAttached = 1 AND RoomName = %s', [uri[3]]
+            # cursor.execute(*sql)
+            # Filespath = cursor.fetchall()
+            sql = 'SELECT UserName FROM Users_info WHERE CompanyID = %s', [GroupandOwnerID[1]]
             cursor.execute(*sql)
-            RoomIDS = cursor.fetchall()
-            # print 'RoomIDs', RoomIDS
-            # print 'RoomName?', uri[2]
-            sql = "SELECT AppName FROM SpaceApps WHERE SpaceID = %s", []
-
-            sql = "SELECT GroupID FROM GroupApps WHERE AppID = %s", [AppID[0]]
-            cursor.execute(*sql)
-            GroupIDS = cursor.fetchall()
-            sql = "SELECT UserId FROM User_Groups WHERE GroupID IN %s", [GroupIDS]
-            cursor.execute(*sql)
-            UserIDS = cursor.fetchall()
-            sql = "SELECT UserName FROM Users_info WHERE UserID IN %s", [UserIDS]
-            cursor.execute(*sql)
-            UserNames = cursor.fetchall()
-            #sql = "SELECT RoomName FROM " + Tablename + " WHERE RoomID = %s", RoomIDS
-            #cursor.execute(*sql)
-            #RoomName = cursor.fetchone()
-            sql = 'SELECT * FROM ' + Tablename + '_PinnedItems ORDER BY Date ASC'
-            cursor.execute(sql)
-            pins = cursor.fetchall() #Pinned items won't display
-            newday = ''
-            sql = 'SELECT * FROM ' + Tablename + '_Files WHERE ISAttached = 1 AND RoomName = %s', [uri[3]]
-            cursor.execute(*sql)
-            Filespath = cursor.fetchall()
+            AllUserNames = cursor.fetchall()
+            print 'all user names?', AllUserNames
+            # sleep(5)
         except:
-            UserNames = Filespath = pins = newday = ''
+            print 'je except'
+            print sys.exc_info()
+            AllUserNames = UserNames = Filespath = pins = newday = ''
             pass
         draftcsspath = 'Aucun'
+
 	iconvariable = 'icon-menu'
+        # print 'all app rooms?', appdict[2]
+
         pinnedcontent = self.render_string("../templates/Pinneditems.html", RoomName=uri[3], pins=pins, messages=messages)
         # print 'ok1'
         content = self.render_string("../templates/messages.html", Appname=dictconf['appname'], url=self.request.uri, newday=newday, RoomName=uri[3], messages=messages)
@@ -1340,12 +1417,12 @@ class MainHandler(BaseHandler):
         # print 'ok3'
         #machin serve as a check if user does not have access to the chat room, or if there isn't any TODO: refactor that stupid variable name
         # self.render_default("index.html", urldict=urldict, Appname=dictconf['appname'], iconvariable=iconvariable, appdict=appdict, testAppIDS=testAppIDS, SpaceNames=SpaceNames, machintruc='ok', errormessage=errormessage, Filespath=Filespath, pinnedcontent=pinnedcontent, UserNames=UserNames, RoomName=uri[3], UserName=UserName, draftcsspath=draftcsspath, userlist=userlist, AllRoomName=AllRoomName, notifcontent=notifcontent, content=content, chat=1)
-        self.render_default("default/html/template.twig", urldict=urldict, Appname=dictconf['appname'], iconvariable=iconvariable,
+        self.render_default("default/html/template.twig", AllUserNames=AllUserNames, urldict=urldict, Appname=dictconf['appname'], iconvariable=iconvariable,
                             appdict=appdict, testAppIDS=testAppIDS, SpaceNames=SpaceNames, machintruc='ok',
                             errormessage=errormessage, Filespath=Filespath, pinnedcontent=pinnedcontent,
                             UserNames=UserNames, RoomName=uri[3], UserName=UserName, draftcsspath=draftcsspath,
-                            userlist=userlist, AllRoomName=AllRoomName, notifcontent=notifcontent, content=content,
-                            chat=1)
+                            userlist=userlist, notifcontent=notifcontent, content=content,
+                            chat=1)#AllRoomName=AllRoomName,
         # print settings['template_path']
         # self.render_default("default/html/template.twig")
         # self.send_error(499)
