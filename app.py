@@ -60,12 +60,17 @@ class JsonSearch(tornado.web.RequestHandler):
         return Template(tmpl).generate(**namespace)
     def post(self, args):
         print 'je post jsonsearch'
-        # sleep(2)
+        origin = self.request.protocol + "://" + self.request.host + self.request.uri#Tablename + MySpaceID + '/room/' + url[1]
+        print 'origin?', origin
+        # sleep(7)
         if self.get_arguments('edit'):
             groupname = self.get_arguments('groupname') #Refactor this, this is not a group name, but a room name
             users = self.get_arguments('userlist')
             appname = self.get_arguments('appname')
-            print 'values are ', groupname, users, appname
+            category_name = self.get_arguments('category_name')
+            currenturl = self.get_arguments('currenturl')
+            print 'values are ', groupname, users, appname, currenturl
+            sleep(7)
             db = connect(host=dictconf['SQLSERVER'], user=dictconf['SQLUSER'], passwd=dictconf['SQLPASS'],
                          db=dictconf['SQLDB'], charset='utf8mb4')
             cursor = db.cursor()
@@ -82,30 +87,52 @@ class JsonSearch(tornado.web.RequestHandler):
             print 'appname', appname
             # sleep(30)
             Tablename = Tableprefix[1] + appname[0] #Even with only one entry, appname is an list of unicode entries
+            sql = "SELECT ID FROM " + Tablename + "_categories WHERE Name = %s", [category_name]
+            cursor.execute(*sql)
+            category_id = cursor.fetchone()
             print 'Tablename is ', Tablename
             RoomID = ''.join(random.choice(string.hexdigits) for i in range(32)) #Todo: Add check to be sure that the roomID is unique
             # print self.request.path
-            sql = "INSERT INTO " + Tablename + " (RoomNumber, AppID, RoomID, RoomName, IsFileRoom) SELECT RoomNumber+1, %s, %s, %s, %s FROM " + Tablename + " ORDER BY RoomNumber DESC LIMIT 1", [Tableprefix[0], RoomID, groupname, '0']
+            print 'tableprefix', Tableprefix[0]
+            # sleep(20)
+            sql = "SELECT RoomNumber+1 FROM " + Tablename + " ORDER BY RoomNumber DESC LIMIT 1"
+            cursor.execute(sql)
+            lastroomnumber = cursor.fetchone()
+            print lastroomnumber
+            sql = "INSERT INTO " + Tablename + " (RoomNumber, AppID, RoomID, RoomName, IsFileRoom, CategoryID) VALUES (%s, %s, %s, %s, %s, %s)", (lastroomnumber[0], Tableprefix[0], RoomID, groupname, 0, category_id[0])
+            # sql = "INSERT INTO abcd_un (RoomNumber, AppID, RoomID, RoomName, IsFileRoom, CategoryID) (SELECT RoomNumber+1, %s, %s, %s, %s, %s FROM abcd_un ORDER BY RoomNumber DESC LIMIT 1)", [Tableprefix[0], RoomID, groupname[0], '0', category_id[0]]
             print 'sql ', sql
             cursor.execute(*sql)
-            # db.commit()
+            # print cursor._executed
+            db.commit()
             sql = "SELECT RoomNumber FROM " + Tablename + " WHERE RoomID = %s", [RoomID]
             cursor.execute(*sql)
             RoomNumber = cursor.fetchone()
             # for row in users:
-            format_strings = ','.join(['%s'] * len(users))
-            sql = "SELECT UserID FROM Users_info WHERE UserName IN (%s)" % format_strings, users
-            cursor.execute(*sql)
-            UserIDS = cursor.fetchall()
-            for row in UserIDS:
-                sql = "INSERT INTO "  + Tablename + '_user_rights' + " (RoomNumber, UserID, IsAllowed) VALUES (%s, %s, %s)", [RoomNumber, row, '1']
+
+            # print 'users', users
+            # sleep(5)
+            if users:
+                format_strings = ','.join(['%s'] * len(users))
+                print 'format?', format_strings
+                sql = "SELECT UserID FROM Users_info WHERE UserName IN (%s)" % format_strings, users
                 cursor.execute(*sql)
-            db.commit()
+                UserIDS = cursor.fetchall()
+                for row in UserIDS:
+                    sql = "INSERT INTO "  + Tablename + '_user_rights' + " (RoomNumber, UserID, IsAllowed) VALUES (%s, %s, %s)", [RoomNumber, row, '1']
+                    cursor.execute(*sql)
+                db.commit()
 
             # sleep(20)
         else:
             print'dans les choux'
             # sleep(5)
+        print 'current url', currenturl
+        # myredirecturl = '/'.join(currenturl)
+        # myredirecturl = str('/'.join(myredirecturl))
+        # print 'redirecturl', myredirecturl
+        sleep(5)
+        self.redirect('/' + appname[0] + currenturl[0])
     def get(self, args):
         print 'JsonSearch ok'
         json_results = {}
@@ -670,6 +697,7 @@ class PrivateRoom(BaseHandler):
     def pagerender(self, messages, notifications):#Renderding pages
         uri = self.request.uri
         print 'mon uri est', uri
+        sleep(5)
         # print ('static', os.path.join(os.path.dirname(__file__), "static"))
         try:
             url = uri.split('errorcode=')
@@ -1330,6 +1358,8 @@ class MainHandler(BaseHandler):
                 sql = "SELECT ID, Name FROM " +  Tablename + "_categories"
                 cursor.execute(sql)
                 categories = cursor.fetchall()
+                print 'categories', categories
+                # sleep(15)
                 appdict[row[2]] = {}
                 for entry in categories:
                     # print 'entry', entry
@@ -1417,7 +1447,7 @@ class MainHandler(BaseHandler):
         # print 'ok3'
         #machin serve as a check if user does not have access to the chat room, or if there isn't any TODO: refactor that stupid variable name
         # self.render_default("index.html", urldict=urldict, Appname=dictconf['appname'], iconvariable=iconvariable, appdict=appdict, testAppIDS=testAppIDS, SpaceNames=SpaceNames, machintruc='ok', errormessage=errormessage, Filespath=Filespath, pinnedcontent=pinnedcontent, UserNames=UserNames, RoomName=uri[3], UserName=UserName, draftcsspath=draftcsspath, userlist=userlist, AllRoomName=AllRoomName, notifcontent=notifcontent, content=content, chat=1)
-        self.render_default("default/html/template.twig", AllUserNames=AllUserNames, urldict=urldict, Appname=dictconf['appname'], iconvariable=iconvariable,
+        self.render_default("default/html/template.twig", currenturl='/'.join(uri), AllUserNames=AllUserNames, urldict=urldict, Appname=dictconf['appname'], iconvariable=iconvariable,
                             appdict=appdict, testAppIDS=testAppIDS, SpaceNames=SpaceNames, machintruc='ok',
                             errormessage=errormessage, Filespath=Filespath, pinnedcontent=pinnedcontent,
                             UserNames=UserNames, RoomName=uri[3], UserName=UserName, draftcsspath=draftcsspath,
