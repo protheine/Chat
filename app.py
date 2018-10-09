@@ -63,6 +63,95 @@ class JsonSearch(tornado.web.RequestHandler):
         origin = self.request.protocol + "://" + self.request.host + self.request.uri#Tablename + MySpaceID + '/room/' + url[1]
         print 'origin?', origin
         # sleep(7)
+        if self.get_arguments('category_delete'):
+            print'delete!'
+            # sleep(5)
+            delete_category_name = self.get_arguments('delete_category_name')
+            print 'cat name?', delete_category_name
+            sleep(5)
+            appname = self.get_arguments('appname')
+            currenturl = self.get_arguments('currenturl')
+            db = connect(host=dictconf['SQLSERVER'], user=dictconf['SQLUSER'], passwd=dictconf['SQLPASS'],
+                         db=dictconf['SQLDB'], charset='utf8mb4')
+            cursor = db.cursor()
+            BroswerSessionID = self.get_secure_cookie('SessionID')
+            sql = "SELECT UserID FROM Users WHERE SessionID = %s", [BroswerSessionID]
+            cursor.execute(*sql)
+            UserID = cursor.fetchone()
+            sql = "SELECT CompanyID FROM Users_info WHERE UserID = %s", [UserID]
+            cursor.execute(*sql)
+            OwnerID = cursor.fetchone()
+            sql = "SELECT AppID, Tableprefix FROM GroupApps WHERE AppName = %s AND OwnerID = %s", [appname, OwnerID]
+            cursor.execute(*sql)
+            Tableprefix = cursor.fetchone()
+            Tablename = Tableprefix[1] + appname[0]
+            sql = "SELECT ID FROM " + Tablename + "_categories WHERE Name = %s", [delete_category_name]
+            cursor.execute(*sql)
+            category_id = cursor.fetchone()
+            sql = "SELECT ID FROM " + Tablename + "_categories ORDER BY ID ASC LIMIT 1"
+            cursor.execute(sql)
+            first_category_id = cursor.fetchone()
+            print 'first cat and current cat id', first_category_id, category_id
+            sleep(5)
+            sql = "UPDATE " + Tablename + " SET CategoryID = %s WHERE CategoryID = %s", [first_category_id, category_id]
+            cursor.execute(*sql)
+            sql = "DELETE FROM " + Tablename + "_categories WHERE Name = %s", [delete_category_name]
+            cursor.execute(*sql)
+            db.commit()
+            db.close()
+            self.redirect('/' + appname[0] + currenturl[0])
+            # pass #Todo : we also need to move all the channel linked to the soon to be deleted category, to another one
+        if self.get_arguments('category_rename'):
+            new_category_name = self.get_arguments('new_categoryname')
+            old_category_name = self.get_arguments('old_category_name')
+            appname = self.get_arguments('appname')
+            currenturl = self.get_arguments('currenturl')
+            db = connect(host=dictconf['SQLSERVER'], user=dictconf['SQLUSER'], passwd=dictconf['SQLPASS'],
+                         db=dictconf['SQLDB'], charset='utf8mb4')
+            cursor = db.cursor()
+            BroswerSessionID = self.get_secure_cookie('SessionID')
+            sql = "SELECT UserID FROM Users WHERE SessionID = %s", [BroswerSessionID]
+            cursor.execute(*sql)
+            UserID = cursor.fetchone()
+            sql = "SELECT CompanyID FROM Users_info WHERE UserID = %s", [UserID]
+            cursor.execute(*sql)
+            OwnerID = cursor.fetchone()
+            sql = "SELECT AppID, Tableprefix FROM GroupApps WHERE AppName = %s AND OwnerID = %s", [appname, OwnerID]
+            cursor.execute(*sql)
+            Tableprefix = cursor.fetchone()
+            Tablename = Tableprefix[1] + appname[0]
+            # sql = 'UPDATE ' + Tablename + "_Files SET IsAttached = '0' WHERE Path LIKE %s", [
+                # '%' + tornado.escape.url_unescape(origin[1][0]) + '%']
+            print 'cat name, new then old', new_category_name, old_category_name
+            sql = 'UPDATE ' + Tablename + '_categories SET Name = %s WHERE Name = %s', [new_category_name, old_category_name]
+            cursor.execute(*sql)
+            db.commit()
+            db.close()
+            self.redirect('/' + appname[0] + currenturl[0])
+        if self.get_arguments('category_create'):
+            # pass
+            category_name = self.get_arguments('categoryname')
+            appname = self.get_arguments('appname')
+            currenturl = self.get_arguments('currenturl')
+            db = connect(host=dictconf['SQLSERVER'], user=dictconf['SQLUSER'], passwd=dictconf['SQLPASS'],
+                         db=dictconf['SQLDB'], charset='utf8mb4')
+            cursor = db.cursor()
+            BroswerSessionID = self.get_secure_cookie('SessionID')
+            sql = "SELECT UserID FROM Users WHERE SessionID = %s", [BroswerSessionID]
+            cursor.execute(*sql)
+            UserID = cursor.fetchone()
+            sql = "SELECT CompanyID FROM Users_info WHERE UserID = %s", [UserID]
+            cursor.execute(*sql)
+            OwnerID = cursor.fetchone()
+            sql = "SELECT AppID, Tableprefix FROM GroupApps WHERE AppName = %s AND OwnerID = %s", [appname, OwnerID]
+            cursor.execute(*sql)
+            Tableprefix = cursor.fetchone()
+            Tablename = Tableprefix[1] + appname[0]
+            sql = "INSERT INTO " + Tablename + "_categories (Name) VALUES (%s)", (category_name)
+            cursor.execute(*sql)
+            db.commit()
+            db.close()
+            self.redirect('/' + appname[0] + currenturl[0])
         if self.get_arguments('edit'):
             groupname = self.get_arguments('groupname') #Refactor this, this is not a group name, but a room name
             users = self.get_arguments('userlist')

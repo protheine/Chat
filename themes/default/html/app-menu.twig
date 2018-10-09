@@ -22,9 +22,9 @@
                                     <ul class="dropdown-menu" role="menu"><!--<span class="channels-count">(5)</span><a href="#"><span class="icon-plus"></span></a>-->
                                         <div class="wrapper">
                                         <a href="javascript:$('#modal{{ row }}').modal('show')" class="dropdown-item" data-toggle="modal" data-target="#modal">Add a #Channel</a><br /><!-- Modal popup in a dropdown doesn't work, must use directcall via jquery-->
-                                        <a href="#exampleModal" class="dropdown-item" data-toggle="modal" data-target="#exampleModal">Add category</a><br />
-                                        <a href="#exampleModal" class="dropdown-item" data-toggle="modal" data-target="#exampleModal">Rename category</a><br />
-                                        <a href="#exampleModal" class="dropdown-item" data-toggle="modal" data-target="#exampleModal">Delete category</a><br />
+                                        <a href="javascript:$('#modalcategory{{ row }}').modal('show')" class="dropdown-item" data-toggle="modal" data-target="#modal">Add category</a><br />
+                                        <a href="javascript:$('#modal_rename_category{{ row }}').modal('show')" class="dropdown-item" data-toggle="modal" data-target="#modal">Rename category</a><br />
+                                        <a href="javascript:$('#modal_delete_category{{ row }}').modal('show')" class="dropdown-item" data-toggle="modal" data-target="#exampleModal">Delete category</a><br />
 
                                     </ul>
 
@@ -72,8 +72,8 @@
                                         {#<select name="userselect" id="userselect" class="select-ajax" data-url-ajax="http://espace1.exaltia.org/un/groupsearch" data-select-template="formatAjaxObject" data-append-template="insertAjaxObject" multiple="">#}
                                         </select>
                                         <div form="{{ key }}form" id="userselect" class="new_members ajax-result">
-                                                {%  for row in AllUserNames %}
-                                                     <input type="checkbox" form="{{ key }}form" name="userlist" value="{{ row[0] }}"/> {{ row[0] }}<br />
+                                                {%  for entry in AllUserNames %}
+                                                     <input type="checkbox" form="{{ key }}form" name="userlist" value="{{ entry[0] }}"/> {{ entry[0] }}<br />
                                                 {% end %}
                                         {#<div class="actions_modal">#}
                                             {#<button type="submit" name="edit" form="form" class="btn btn-primary">Create group and edit</button>#}
@@ -83,6 +83,118 @@
                                         <div class="modal-footer">
                                             <button type="button" name="close" form="{{ key }}form" class="btn btn-secondary" data-dismiss="modal">close</button>
                                             <button type="submit" name="edit" form="{{ key }}form" class="btn btn-primary">Done</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- add category modal-->
+                        <div class="modal fade create-group" id="modalcategory{{ row }}" role="dialog">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <div class="modal-body">
+                                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                                        <h4 class="modal-title">Add a category</h4>
+                                        <form id="category{{ key }}form" action="http://espace1.exaltia.org/{{ key }}/groupsearch" method="post">
+                                            {% module xsrf_form_html() %}
+                                            <label>Categories are used to classify your channels</label>
+                                            {#{{ appdict[key] }}#}
+                                            {{ row }}
+                                            <input type="text" name="categoryname" class="verif content"/>
+                                            <input type ="hidden" name="appname" value="{{ key }}">
+                                            {#<input type ="hidden" name="category_name" value="{{ row }}">#}
+                                            <input type="hidden" name="currenturl" value="{{ currenturl }}">
+                                            {#<input type="text" id="json-ajax" name="users"/>#}
+                                        </form>
+                                        {#<label>Add users to this group <span>(optional)</span></label>#}
+                                        {#<select name="userselect" id="userselect" class="select-ajax" data-url-ajax="http://espace1.exaltia.org/un/groupsearch" data-select-template="formatAjaxObject" data-append-template="insertAjaxObject" multiple="">#}
+                                        </select>
+                                        {#<div form="{{ key }}form" id="userselect" class="new_members ajax-result">#}
+                                                {#{%  for row in AllUserNames %}#}
+                                                     {#<input type="checkbox" form="{{ key }}form" name="userlist" value="{{ row[0] }}"/> {{ row[0] }}<br />#}
+                                                {#{% end %}#}
+                                        {#<div class="actions_modal">#}
+                                            {#<button type="submit" name="edit" form="form" class="btn btn-primary">Create group and edit</button>#}
+                                            {#<button type="submit" name="create" form="form" class="btn btn-primary">Done</button>#}
+                                        {#</div>#}
+                                        {#</div>#}
+                                        <div class="modal-footer">
+                                            <button type="button" name="category_close" form="category{{ key }}form" class="btn btn-secondary" data-dismiss="modal">close</button>
+                                            <button type="submit" name="category_create" form="category{{ key }}form" class="btn btn-primary">Done</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal fade create-group" id="modal_rename_category{{ row }}" role="dialog">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <div class="modal-body">
+                                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                                        <h4 class="modal-title">Rename Category {{ row }}</h4>
+                                        <form id="rename_category{{ key }}form" action="http://espace1.exaltia.org/{{ key }}/groupsearch" method="post">
+                                            {% module xsrf_form_html() %}
+                                            <label>Categories are used to classify your channels</label>
+                                            {#{{ appdict[key] }}#}
+                                            {{ row }}
+                                            <input type="text" name="new_categoryname" class="verif content"/>
+                                            <input type ="hidden" name="appname" value="{{ key }}">
+                                            <input type ="hidden" name="old_category_name" value="{{ row }}">
+                                            <input type="hidden" name="currenturl" value="{{ currenturl }}">
+                                            {#<input type="text" id="json-ajax" name="users"/>#}
+                                        </form>
+                                        {#<label>Add users to this group <span>(optional)</span></label>#}
+                                        {#<select name="userselect" id="userselect" class="select-ajax" data-url-ajax="http://espace1.exaltia.org/un/groupsearch" data-select-template="formatAjaxObject" data-append-template="insertAjaxObject" multiple="">#}
+                                        </select>
+                                        {#<div form="{{ key }}form" id="userselect" class="new_members ajax-result">#}
+                                                {#{%  for row in AllUserNames %}#}
+                                                     {#<input type="checkbox" form="{{ key }}form" name="userlist" value="{{ row[0] }}"/> {{ row[0] }}<br />#}
+                                                {#{% end %}#}
+                                        {#<div class="actions_modal">#}
+                                            {#<button type="submit" name="edit" form="form" class="btn btn-primary">Create group and edit</button>#}
+                                            {#<button type="submit" name="create" form="form" class="btn btn-primary">Done</button>#}
+                                        {#</div>#}
+                                        {#</div>#}
+                                        <div class="modal-footer">
+                                            <button type="button" name="category_close" form="rename_category{{ key }}form" class="btn btn-secondary" data-dismiss="modal">close</button>
+                                            <button type="submit" name="category_rename" form="rename_category{{ key }}form" class="btn btn-primary">Done</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal fade create-group" id="modal_delete_category{{ row }}" role="dialog">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <div class="modal-body">
+                                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                                        <h4 class="modal-title">Delete Category {{ row }}</h4>
+                                        <form id="delete_category{{ row }}form" action="http://espace1.exaltia.org/{{ key }}/groupsearch" method="post">
+                                            {% module xsrf_form_html() %}
+                                            <label>Do you really want to delete {{ row }} ?</label>
+                                            {#{{ appdict[key] }}#}
+                                            {{ row }}
+                                            {#<input type="text" name="new_categoryname" class="verif content"/>#}
+                                            <input type ="hidden" name="appname" value="{{ key }}">
+                                            <input type ="hidden" name="delete_category_name" value="{{ row }}">
+                                            <input type="hidden" name="currenturl" value="{{ currenturl }}">
+                                            {#<input type="text" id="json-ajax" name="users"/>#}
+                                        </form>
+                                        {#<label>Add users to this group <span>(optional)</span></label>#}
+                                        {#<select name="userselect" id="userselect" class="select-ajax" data-url-ajax="http://espace1.exaltia.org/un/groupsearch" data-select-template="formatAjaxObject" data-append-template="insertAjaxObject" multiple="">#}
+                                        </select>
+                                        {#<div form="{{ key }}form" id="userselect" class="new_members ajax-result">#}
+                                                {#{%  for row in AllUserNames %}#}
+                                                     {#<input type="checkbox" form="{{ key }}form" name="userlist" value="{{ row[0] }}"/> {{ row[0] }}<br />#}
+                                                {#{% end %}#}
+                                        {#<div class="actions_modal">#}
+                                            {#<button type="submit" name="edit" form="form" class="btn btn-primary">Create group and edit</button>#}
+                                            {#<button type="submit" name="create" form="form" class="btn btn-primary">Done</button>#}
+                                        {#</div>#}
+                                        {#</div>#}
+                                        <div class="modal-footer">
+                                            <button type="button" name="category_close" form="delete_category{{ row }}form" class="btn btn-secondary" data-dismiss="modal">No</button>
+                                            <button type="submit" name="category_delete" form="delete_category{{ row }}form" class="btn btn-danger">Yes</button>
                                         </div>
                                     </div>
                                 </div>
