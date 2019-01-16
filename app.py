@@ -63,6 +63,86 @@ class JsonSearch(tornado.web.RequestHandler):
         origin = self.request.protocol + "://" + self.request.host + self.request.uri#Tablename + MySpaceID + '/room/' + url[1]
         print 'origin?', origin
         # sleep(7)
+        if self.get_arguments('rename_channel'):
+            # pass
+            new_channel_name = self.get_arguments('new_channel_name')
+            old_channel_name = self.get_arguments('old_channel_name')
+            appname = self.get_arguments('appname')
+            currenturl = self.get_arguments('currenturl')
+            db = connect(host=dictconf['SQLSERVER'], user=dictconf['SQLUSER'], passwd=dictconf['SQLPASS'],
+                         db=dictconf['SQLDB'], charset='utf8mb4')
+            cursor = db.cursor()
+            BroswerSessionID = self.get_secure_cookie('SessionID')
+            sql = "SELECT UserID FROM Users WHERE SessionID = %s", [BroswerSessionID]
+            cursor.execute(*sql)
+            UserID = cursor.fetchone()
+            sql = "SELECT CompanyID FROM Users_info WHERE UserID = %s", [UserID]
+            cursor.execute(*sql)
+            OwnerID = cursor.fetchone()
+            sql = "SELECT AppID, Tableprefix FROM GroupApps WHERE AppName = %s AND OwnerID = %s", [appname, OwnerID]
+            cursor.execute(*sql)
+            Tableprefix = cursor.fetchone()
+            Tablename = Tableprefix[1] + appname[0]
+            sql = "UPDATE " + Tablename + " SET RoomName = %s WHERE RoomName = %s", [new_channel_name, old_channel_name]
+            cursor.execute(*sql)
+            db.commit()
+            db.close()
+            print 'currenturl', currenturl
+            splitedurl = currenturl[0].split('/')
+            print 'splitedurl 3', splitedurl[3]
+            sleep(7)
+            #Redirection to the new channel name only if the renamed channel is the one currently displayed
+            if splitedurl[3] == old_channel_name[0]:
+                self.redirect('/' + appname[0] + splitedurl[0] + '/' + splitedurl[1] + '/' + splitedurl[2] + '/' + new_channel_name[0]) #We need to redirect to the new room name, the old one is not valid anymore
+            else:
+                self.redirect('/' + appname[0] + currenturl[0])
+        if self.get_arguments('modal_move_channel'):
+            pass
+            new_category = self.get_arguments('category_list')
+            Room_name = self.get_arguments('channel_name')
+            appname = self.get_arguments('appname')
+            currenturl = self.get_arguments('currenturl')
+            db = connect(host=dictconf['SQLSERVER'], user=dictconf['SQLUSER'], passwd=dictconf['SQLPASS'],
+                         db=dictconf['SQLDB'], charset='utf8mb4')
+            cursor = db.cursor()
+            BroswerSessionID = self.get_secure_cookie('SessionID')
+            sql = "SELECT UserID FROM Users WHERE SessionID = %s", [BroswerSessionID]
+            cursor.execute(*sql)
+            UserID = cursor.fetchone()
+            sql = "SELECT CompanyID FROM Users_info WHERE UserID = %s", [UserID]
+            cursor.execute(*sql)
+            OwnerID = cursor.fetchone()
+            sql = "SELECT AppID, Tableprefix FROM GroupApps WHERE AppName = %s AND OwnerID = %s", [appname, OwnerID]
+            cursor.execute(*sql)
+            Tableprefix = cursor.fetchone()
+            Tablename = Tableprefix[1] + appname[0]
+            sql = "SELECT ID FROM " + Tablename + "_categories WHERE Name = %s", [new_category]
+            cursor.execute(*sql)
+            category_id = cursor.fetchone()
+            sql = "UPDATE " + Tablename + " SET CategoryID = %s WHERE RoomName = %s", [category_id[0], Room_name[0]]
+            cursor.execute(*sql)
+            db.commit()
+            db.close()
+            self.redirect('/' + appname[0] + currenturl[0])
+        if self.get_arguments('delete_channel_delete'):
+            delete_channel_name = self.get_arguments('delete_channel_name')
+            appname = self.get_arguments('appname')
+            currenturl = self.get_arguments('currenturl')
+            db = connect(host=dictconf['SQLSERVER'], user=dictconf['SQLUSER'], passwd=dictconf['SQLPASS'],
+                         db=dictconf['SQLDB'], charset='utf8mb4')
+            cursor = db.cursor()
+            BroswerSessionID = self.get_secure_cookie('SessionID')
+            sql = "SELECT UserID FROM Users WHERE SessionID = %s", [BroswerSessionID]
+            cursor.execute(*sql)
+            UserID = cursor.fetchone()
+            sql = "SELECT CompanyID FROM Users_info WHERE UserID = %s", [UserID]
+            cursor.execute(*sql)
+            OwnerID = cursor.fetchone()
+            sql = "SELECT AppID, Tableprefix FROM GroupApps WHERE AppName = %s AND OwnerID = %s", [appname, OwnerID]
+            cursor.execute(*sql)
+            Tableprefix = cursor.fetchone()
+            Tablename = Tableprefix[1] + appname[0]
+            sql = "DELETE FROM " + Tablename
         if self.get_arguments('category_delete'):
             print'delete!'
             # sleep(5)
