@@ -11,13 +11,13 @@ from tornado import gen
 tornado.options.define("port", default=8080, help="run on the given port", type=int)
 class Jsontest1(tornado.web.RequestHandler):
     def set_default_headers(self):
-        print "setting headers!!!"
+        print("setting headers!!!")
         self.set_header("Access-Control-Allow-Origin", "*")
         self.set_header("Content-Type", "application/json")
 
 
     def get(self):
-        print 'hop'
+        print('hop')
         # self.content_type = 'application/json'
 
         # self.set_header("Access-Control-Allow-Origin: *")
@@ -49,9 +49,9 @@ class Jsontest1(tornado.web.RequestHandler):
         encoded_content = tornado.escape.json_encode(multikeys)
         # print 'encoded', multikeys
         # print 'type?', type(multikeys)
-        print 'encoded', encoded_content
+        print('encoded', encoded_content)
         self.write(encoded_content)
-        print "c'et fini!"
+        print("c'et fini!")
         # self.finish()
 class Application(tornado.web.Application):
     """
