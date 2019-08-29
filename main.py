@@ -5,11 +5,15 @@ import tornado.auth
 import tornado.options
 import tornado.escape
 import os
-import json
+from time import sleep
+
 from tornado import gen
-#
+##
 tornado.options.define("port", default=8080, help="run on the given port", type=int)
-class logintest(tornado.web.RequestHandler):
+class test(tornado.web.RequestHandler):
+    async def get(self):
+        self.write('Hello world')
+class LoginTest(tornado.web.RequestHandler):
     def set_default_headers(self):
         print("setting headers for options")
         self.set_header('Access-Control-Allow-Origin', '*')
@@ -23,12 +27,28 @@ class logintest(tornado.web.RequestHandler):
     #     self.set_header('X-XSRFToken', self.xsrf_token)
 
     def options(self):
-       pass
+        print('there')
+        pass
     def post(self):
         print('pouet')
-        print(self.request.headers)
+        # print(type(self.request.body))
+        httpbody = self.request.body.decode("utf-8")
+        httpbody = dict(httpbody)
+        print(type(httpbody))
+        sleep(5)
+        email = self.get_arguments('email')
+        password = self.get_arguments('password')
+        print('email is ', email)# == 'a@a.a')
+        response_json = {
+            'token': 'ABCDEFGHIJKLMOPQRSTUVWXYZ1234567890',
+            'email': email,
+            'username': 'fakestaticusername'
+        }
+        encoded_json = tornado.escape.json_encode(response_json)
+        self.write(encoded_json)
+        # print(self.request.headers)
 
-        print(self.request.body)
+        # print(self.request.body)
 class Jsontest1(tornado.web.RequestHandler):
     def set_default_headers(self):
         print("setting headers!!!")
@@ -39,6 +59,7 @@ class Jsontest1(tornado.web.RequestHandler):
     def get(self):
         print('hop')
         print('je get?')
+        print(self.request.headers)
         a = []
         testmsg = {
             "username": "Ewen Lidgey",
@@ -63,7 +84,8 @@ class Application(tornado.web.Application):
         # Handlers defining the url routing.
         handlers = [
             (r"/chat.json", Jsontest1),
-            (r"/login", logintest)
+            (r"/login", LoginTest),
+            (r"/test", test)
         ]
         debug = True
         settings = dict(
