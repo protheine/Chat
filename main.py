@@ -10,9 +10,9 @@ from time import sleep
 from tornado import gen
 ##
 tornado.options.define("port", default=8080, help="run on the given port", type=int)
-class test(tornado.web.RequestHandler):
-    async def get(self):
-        self.write('Hello world')
+# class test(tornado.web.RequestHandler):
+#     async def get(self):
+#         self.write('Hello world')
 class LoginTest(tornado.web.RequestHandler):
     def set_default_headers(self):
         print("setting headers for options")
@@ -32,13 +32,13 @@ class LoginTest(tornado.web.RequestHandler):
     def post(self):
         print('pouet')
         # print(type(self.request.body))
-        httpbody = self.request.body.decode("utf-8")
-        httpbody = dict(httpbody)
-        print(type(httpbody))
-        sleep(5)
-        email = self.get_arguments('email')
-        password = self.get_arguments('password')
-        print('email is ', email)# == 'a@a.a')
+        # httpbody = self.request.body.decode("utf-8")
+        # httpbody = dict(httpbody)
+        # print(type(httpbody))
+        # sleep(5)
+        # email = self.get_arguments('email')
+        # password = self.get_arguments('password')
+        # print('email is ', email)# == 'a@a.a')
         response_json = {
             'token': 'ABCDEFGHIJKLMOPQRSTUVWXYZ1234567890',
             'email': email,
