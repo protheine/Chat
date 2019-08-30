@@ -21,6 +21,7 @@ class LoginTest(tornado.web.RequestHandler):
         self.set_header('Access-Control-Allow-Headers',
                         'Content-Type, Access-Control-Allow-Origin, Access-Control-Allow-Headers, X-Requested-By, Access-Control-Allow-Methods')
         self.set_header('Access-Control-Allow-Credentials', 'true')
+        self.set_headers('Access-Control-Allow-Headers', 'Authorization')
     #     self.set_header('X-XSRFToken', self.xsrf_token)
 
     def options(self):
