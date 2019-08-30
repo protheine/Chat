@@ -10,9 +10,6 @@ from time import sleep
 from tornado import gen
 ##
 tornado.options.define("port", default=8080, help="run on the given port", type=int)
-# class test(tornado.web.RequestHandler):
-#     async def get(self):
-#         self.write('Hello world')
 class LoginTest(tornado.web.RequestHandler):
     def set_default_headers(self):
         print("setting headers for options")
@@ -84,8 +81,7 @@ class Application(tornado.web.Application):
         # Handlers defining the url routing.
         handlers = [
             (r"/chat.json", Jsontest1),
-            (r"/login", LoginTest),
-            (r"/test", test)
+            (r"/login", LoginTest)
         ]
         debug = True
         settings = dict(
