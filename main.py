@@ -38,7 +38,7 @@ class LoginTest(tornado.web.RequestHandler):
         # print('email is ', email)# == 'a@a.a')
         response_json = {
             'token': 'ABCDEFGHIJKLMOPQRSTUVWXYZ1234567890',
-            'email': email,
+            'email': 'fakemail@fakedomain.com',
             'username': 'fakestaticusername'
         }
         encoded_json = tornado.escape.json_encode(response_json)
