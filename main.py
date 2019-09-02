@@ -4,12 +4,16 @@ import tornado.websocket
 import tornado.auth
 import tornado.options
 import tornado.escape
+import tornado.websocket
 import os
 from time import sleep
 
 from tornado import gen
 ##
 tornado.options.define("port", default=8080, help="run on the given port", type=int)
+class websockettest(tornado.websocket.WebSocketHandler):
+    def open(self):
+        print('chaussette')
 class test(tornado.web.RequestHandler):
     async def get(self):
         self.write('Hello world')
@@ -70,23 +74,32 @@ class Jsontest1(tornado.web.RequestHandler):
     def get(self):
         print('hop')
         print('je get?')
-        print(self.request.headers)
-        a = []
-        testmsg = {
-            "username": "Ewen Lidgey",
-            "email": "elidgey0@soundcloud.com",
-            "userId": "21be5411-e474-4760-8973-d96d0649a3d3",
-            # "avatar": "https://robohash.org/quodnullarepellendus.jpg?size=200x200\u0026set=set1",
-            "body": "Vivamus vel nulla eget eros elementum pellentesque. Quisque porta volutpat erat. Quisque erat eros, viverra eget, congue eget, semper rutrum, nulla.",
-            "timestamp": "3:57 AM"
-        }
-        multikeys = []
-        for i in range(3):
-            multikeys.append(testmsg)
-        encoded_content = tornado.escape.json_encode(multikeys)
-        print('encoded', encoded_content)
-        self.write(encoded_content)
-        print("c'et fini!")
+        # print(self.request.headers)
+        httpheaders = self.request.headers
+        auth_token =(httpheaders.get_list('Authorization'))
+        auth_token = auth_token[0].split(' ')
+        if auth_token[0] =='Bearer':
+            if auth_token[1] == '1234567890ABCDEFGHIJKLMOPQRSTUVWXYZ':
+                a = []
+                testmsg = {
+                    "username": "Ewen Lidgey",
+                    "email": "elidgey0@soundcloud.com",
+                    "userId": "21be5411-e474-4760-8973-d96d0649a3d3",
+                    # "avatar": "https://robohash.org/quodnullarepellendus.jpg?size=200x200\u0026set=set1",
+                    "body": "Vivamus vel nulla eget eros elementum pellentesque. Quisque porta volutpat erat. Quisque erat eros, viverra eget, congue eget, semper rutrum, nulla.",
+                    "timestamp": "3:57 AM"
+                }
+                multikeys = []
+                for i in range(3):
+                    multikeys.append(testmsg)
+                encoded_content = tornado.escape.json_encode(multikeys)
+                print('encoded', encoded_content)
+                self.write(encoded_content)
+                print("c'et fini!")
+            else:
+                self.write_error(401)
+        else:
+            self.write_error(500)
 class Application(tornado.web.Application):
     """
     Main Class for this application holding everything together.
@@ -96,7 +109,8 @@ class Application(tornado.web.Application):
         handlers = [
             (r"/chat.json", Jsontest1),
             (r"/login", LoginTest),
-            (r"/test", test)
+            (r"/test", test),
+            (r"/", websockettest)
         ]
         debug = True
         settings = dict(
