@@ -10,6 +10,9 @@ from time import sleep
 from tornado import gen
 ##
 tornado.options.define("port", default=8080, help="run on the given port", type=int)
+class test(tornado.web.RequestHandler):
+    async def get(self):
+        self.write('Hello world')
 class LoginTest(tornado.web.RequestHandler):
     def set_default_headers(self):
         print("setting headers for options")
@@ -19,7 +22,7 @@ class LoginTest(tornado.web.RequestHandler):
         self.set_header('Content-type', 'application/json')
         self.set_header('Access-Control-Allow-Methods', 'POST, GET, OPTIONS')
         self.set_header('Access-Control-Allow-Headers',
-                        'Content-Type, Access-Control-Allow-Origin, Authorization, Access-Control-Allow-Headers, X-Requested-By, Access-Control-Allow-Methods')
+                        'Content-Type, Access-Control-Allow-Origin, Access-Control-Allow-Headers, X-Requested-By, Access-Control-Allow-Methods')
         self.set_header('Access-Control-Allow-Credentials', 'true')
     #     self.set_header('X-XSRFToken', self.xsrf_token)
 
@@ -33,12 +36,12 @@ class LoginTest(tornado.web.RequestHandler):
         # httpbody = dict(httpbody)
         # print(type(httpbody))
         # sleep(5)
-        # email = self.get_arguments('email')
-        # password = self.get_arguments('password')
-        # print('email is ', email)# == 'a@a.a')
+        email = self.get_arguments('email')
+        password = self.get_arguments('password')
+        print('email is ', email)# == 'a@a.a')
         response_json = {
-            'token': 'ABCDEFGHIJKLMOPQRSTUVWXYZ1234567890',
-            'email': 'fakemail@fakedomain.com',
+            'token': '1234567890ABCDEFGHIJKLMOPQRSTUVWXYZ',
+            'email': email,
             'username': 'fakestaticusername'
         }
         encoded_json = tornado.escape.json_encode(response_json)
@@ -48,11 +51,22 @@ class LoginTest(tornado.web.RequestHandler):
         # print(self.request.body)
 class Jsontest1(tornado.web.RequestHandler):
     def set_default_headers(self):
-        print("setting headers!!!")
-        self.set_header("Access-Control-Allow-Origin", "*")
-        self.set_header("Content-Type", "application/json")
+        print("setting headers jsontest!!!")
+        self.set_header('Access-Control-Allow-Origin', '*')
+        self.set_header('Access-Control-Allow-Headers', '*')
+        self.set_header('Access-Control-Max-Age', 1000)
+        self.set_header('Content-type', 'application/json')
+        self.set_header('Access-Control-Allow-Methods', 'POST, GET, OPTIONS')
+        self.set_header('Access-Control-Allow-Headers',
+                        'Content-Type, Access-Control-Allow-Origin, authorization, Access-Control-Allow-Headers, X-Requested-By, Access-Control-Allow-Methods')
+        self.set_header('Access-Control-Allow-Credentials', 'true')
 
-
+    def options(self):
+        print('options before get')
+        print(self.request.headers)
+        pass
+    def post(self):
+        print('pourquoi?')
     def get(self):
         print('hop')
         print('je get?')
@@ -81,7 +95,8 @@ class Application(tornado.web.Application):
         # Handlers defining the url routing.
         handlers = [
             (r"/chat.json", Jsontest1),
-            (r"/login", LoginTest)
+            (r"/login", LoginTest),
+            (r"/test", test)
         ]
         debug = True
         settings = dict(
