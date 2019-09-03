@@ -12,8 +12,13 @@ from tornado import gen
 ##
 tornado.options.define("port", default=8080, help="run on the given port", type=int)
 class websockettest(tornado.websocket.WebSocketHandler):
+    def check_origin(self, origin):
+        return True #Not secure!
     def open(self):
         print('chaussette')
+    def on_message(self, message):
+        print('message reçu')
+        print(message)
 class test(tornado.web.RequestHandler):
     async def get(self):
         self.write('Hello world')
