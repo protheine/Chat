@@ -6,11 +6,22 @@ import tornado.options
 import tornado.escape
 import tornado.websocket
 import os
-from time import sleep
-
-from tornado import gen
+import sys
+import hashlib
+# from cassandra.cluster import Cluster
+# from cassandra.auth import PlainTextAuthProvider #one module to authentificate them all!
+#import dbmodel
+# from time import sleep
+#
+# from tornado import gen
+# cluster = Cluster(['127.0.0.1'])
+# auth_provider = PlainTextAuthProvider(username='cassandra', password='cassandra')
+# cassandrasession = cluster.connect()
+#instancied_db_model = dbmodel
 ##
 tornado.options.define("port", default=8080, help="run on the given port", type=int)
+class cqlqueries(): #Use this in the futur to pass queries to the class
+    pass
 class websockettest(tornado.websocket.WebSocketHandler):
     def check_origin(self, origin):
         return True #Not secure!
@@ -18,7 +29,11 @@ class websockettest(tornado.websocket.WebSocketHandler):
         print('chaussette')
     def on_message(self, message):
         print('message reçu')
-        print(message)
+        try:
+            message = tornado.escape.json_decode(message)
+        except:
+            print('is this really json?')
+        print(message['message']['body'])
 class test(tornado.web.RequestHandler):
     async def get(self):
         self.write('Hello world')
@@ -40,18 +55,32 @@ class LoginTest(tornado.web.RequestHandler):
         pass
     def post(self):
         print('pouet')
-        # print(type(self.request.body))
-        # httpbody = self.request.body.decode("utf-8")
+        httpbody = (self.request.body)
+        httpbody = self.request.body.decode("utf-8")
         # httpbody = dict(httpbody)
-        # print(type(httpbody))
+        httpbody = tornado.escape.json_decode(httpbody)
+        # print('httpbody', httpbody['email'])
+
         # sleep(5)
-        email = self.get_arguments('email')
-        password = self.get_arguments('password')
-        print('email is ', email)# == 'a@a.a')
+
+        email = httpbody['email']
+        #email = tornado.escape.url_escape()
+        print('email is', email)
+        # email = email.hexdigest()
+        password = httpbody['password']
+        print('password is', password)
+        # result = instancied_db_model.users.objects.filter(email=email)
+        # sql = 'SELECT password FROM users_infos.passwords WHERE username = %s'
+        # result = cassandrasession.execute(sql, [email])
+        # for each in result:
+        #
+        #     print('email is ', email)# == 'a@a.a')
+
         response_json = {
             'token': '1234567890ABCDEFGHIJKLMOPQRSTUVWXYZ',
-            'email': email,
-            'username': 'fakestaticusername'
+            'userId': 'null',
+            'userEmail': email,
+            'isAdmin': 'True'
         }
         encoded_json = tornado.escape.json_encode(response_json)
         self.write(encoded_json)
@@ -110,6 +139,7 @@ class Application(tornado.web.Application):
     Main Class for this application holding everything together.
     """
     def __init__(self):
+
         # Handlers defining the url routing.
         handlers = [
             (r"/chat.json", Jsontest1),
@@ -138,6 +168,26 @@ class Application(tornado.web.Application):
         tornado.web.Application.__init__(self, handlers, **settings)
 
 def main():
+    if len(sys.argv) == 1:
+        print('you must specify "firstinit" or "run" arg')
+        sys.exit(1)
+    else:
+        if len(sys.argv) > 2:
+            print('too much command line arguments, exiting')
+            sys.exit(1)
+        else:
+            if str(sys.argv[1]) == 'firstinit':
+                pass
+            elif str(sys.argv[1]) == 'run':
+                pass
+            elif str(sys.argv[1]) == 'help':
+                print('Only 1 option accepted wich is either firstinit or run\n '
+                      'DO NOT run firstinit if you want to '
+                      'keep data and have already initialised the software')
+                sys.exit(0)
+            else:
+                print('invalid keyword, exiting')
+                sys.exit(1)
     application = Application()
     application.listen(tornado.options.options.port)
     tornado.ioloop.IOLoop.instance().start()
