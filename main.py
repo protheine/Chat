@@ -8,16 +8,16 @@ import sys
 #import python_core_api.websocket #For future use
 
 import hashlib
-# from cassandra.cluster import Cluster
-# from cassandra.auth import PlainTextAuthProvider #one module to authentificate them all!
-#import dbmodel
+from cassandra.cluster import Cluster
+from cassandra.auth import PlainTextAuthProvider #one module to authentificate them all!
+import dbmodel
 # from time import sleep
 #
 # from tornado import gen
-# cluster = Cluster(['127.0.0.1'])
-# auth_provider = PlainTextAuthProvider(username='cassandra', password='cassandra')
-# cassandrasession = cluster.connect()
-#instancied_db_model = dbmodel
+cluster = Cluster(['192.168.0.95'])
+auth_provider = PlainTextAuthProvider(username='cassandra', password='cassandra')
+cassandrasession = cluster.connect()
+instancied_db_model = dbmodel
 ##
 tornado.options.define("port", default=8080, help="run on the given port", type=int)
 class cqlqueries(): #Use this in the futur to pass queries to the class
@@ -43,23 +43,28 @@ class LoginTest(tornado.web.RequestHandler):
         # httpbody = dict(httpbody)
         httpbody = tornado.escape.json_decode(httpbody)
         email = httpbody['email']
-        password = httpbody['password']
-        print('password is', password)
-        # result = instancied_db_model.users.objects.filter(email=email)
-        # sql = 'SELECT password FROM users_infos.passwords WHERE username = %s'
-        # result = cassandrasession.execute(sql, [email])
-        # for each in result:
-        #
-        #     print('email is ', email)# == 'a@a.a')
+        httppassword = httpbody['password']
+        print('password is', httppassword)
+        result = instancied_db_model.users.objects.filter(email=email)
+        sql = 'SELECT password FROM users.users WHERE email = %s'
+        result = cassandrasession.execute(sql, [email])
+        # print('cqlresult', result, 'type', type(result))
+        for each in result:
+            print('each result', each, 'type', type(each))
+            if httppassword == each[0]:
+                response_json = {
+                    'token': '1234567890ABCDEFGHIJKLMOPQRSTUVWXYZZ', #Todo: generate token on the fly
+                    'userId': 'null',
+                    'userEmail': email,
+                    'isAdmin': 'True'  # Not sure if the UI take that in account ATM
+                }
+                encoded_json = tornado.escape.json_encode(response_json)
+                self.write(encoded_json)
 
-        response_json = {
-            'token': '1234567890ABCDEFGHIJKLMOPQRSTUVWXYZ',
-            'userId': 'null',
-            'userEmail': email,
-            'isAdmin': 'True' #Not sure if the UI take that in account ATM
-        }
-        encoded_json = tornado.escape.json_encode(response_json)
-        self.write(encoded_json)
+            else:
+                self.send_error(403) #if we don't send error, the application still gives access to the page
+
+
 
 class Application(tornado.web.Application):
     """
