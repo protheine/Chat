@@ -1,12 +1,11 @@
 import tornado.ioloop
 import tornado.web
-import tornado.websocket
 import tornado.auth
 import tornado.options
 import tornado.escape
-import tornado.websocket
 import os
 import sys
+#import chat.websocket
 import hashlib
 # from cassandra.cluster import Cluster
 # from cassandra.auth import PlainTextAuthProvider #one module to authentificate them all!
@@ -22,18 +21,7 @@ import hashlib
 tornado.options.define("port", default=8080, help="run on the given port", type=int)
 class cqlqueries(): #Use this in the futur to pass queries to the class
     pass
-class websockettest(tornado.websocket.WebSocketHandler):
-    def check_origin(self, origin):
-        return True #Not secure!
-    def open(self):
-        print('chaussette')
-    def on_message(self, message):
-        print('message reçu')
-        try:
-            message = tornado.escape.json_decode(message)
-        except:
-            print('is this really json?')
-        print(message['message']['body'])
+
 class test(tornado.web.RequestHandler):
     async def get(self):
         self.write('Hello world')
