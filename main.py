@@ -39,16 +39,10 @@ class test(tornado.web.RequestHandler):
         self.write('Hello world')
 class LoginTest(tornado.web.RequestHandler):
     def set_default_headers(self):
-        print("setting headers for options")
         self.set_header('Access-Control-Allow-Origin', '*')
         self.set_header('Access-Control-Allow-Headers', '*')
-        self.set_header('Access-Control-Max-Age', 1000)
         self.set_header('Content-type', 'application/json')
         self.set_header('Access-Control-Allow-Methods', 'POST, GET, OPTIONS')
-        self.set_header('Access-Control-Allow-Headers',
-                        'Content-Type, Access-Control-Allow-Origin, Access-Control-Allow-Headers, X-Requested-By, Access-Control-Allow-Methods')
-        self.set_header('Access-Control-Allow-Credentials', 'true')
-    #     self.set_header('X-XSRFToken', self.xsrf_token)
 
     def options(self):
         print('there')
@@ -59,14 +53,7 @@ class LoginTest(tornado.web.RequestHandler):
         httpbody = self.request.body.decode("utf-8")
         # httpbody = dict(httpbody)
         httpbody = tornado.escape.json_decode(httpbody)
-        # print('httpbody', httpbody['email'])
-
-        # sleep(5)
-
         email = httpbody['email']
-        #email = tornado.escape.url_escape()
-        print('email is', email)
-        # email = email.hexdigest()
         password = httpbody['password']
         print('password is', password)
         # result = instancied_db_model.users.objects.filter(email=email)
@@ -84,9 +71,6 @@ class LoginTest(tornado.web.RequestHandler):
         }
         encoded_json = tornado.escape.json_encode(response_json)
         self.write(encoded_json)
-        # print(self.request.headers)
-
-        # print(self.request.body)
 class Jsontest1(tornado.web.RequestHandler):
     def set_default_headers(self):
         print("setting headers jsontest!!!")
@@ -143,7 +127,7 @@ class Application(tornado.web.Application):
         # Handlers defining the url routing.
         handlers = [
             (r"/chat.json", Jsontest1),
-            (r"/login", LoginTest),
+            (r"/auth/login", LoginTest),
             (r"/test", test),
             (r"/", websockettest)
         ]
