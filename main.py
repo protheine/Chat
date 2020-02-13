@@ -5,7 +5,8 @@ import tornado.options
 import tornado.escape
 import os
 import sys
-#import chat.websocket
+import python_core_api.websocket
+
 import hashlib
 # from cassandra.cluster import Cluster
 # from cassandra.auth import PlainTextAuthProvider #one module to authentificate them all!
@@ -55,57 +56,11 @@ class LoginTest(tornado.web.RequestHandler):
             'token': '1234567890ABCDEFGHIJKLMOPQRSTUVWXYZ',
             'userId': 'null',
             'userEmail': email,
-            'isAdmin': 'True'
+            'isAdmin': 'True' #Not sure if the UI take that in account ATM
         }
         encoded_json = tornado.escape.json_encode(response_json)
         self.write(encoded_json)
-class Jsontest1(tornado.web.RequestHandler):
-    def set_default_headers(self):
-        print("setting headers jsontest!!!")
-        self.set_header('Access-Control-Allow-Origin', '*')
-        self.set_header('Access-Control-Allow-Headers', '*')
-        self.set_header('Access-Control-Max-Age', 1000)
-        self.set_header('Content-type', 'application/json')
-        self.set_header('Access-Control-Allow-Methods', 'POST, GET, OPTIONS')
-        self.set_header('Access-Control-Allow-Headers',
-                        'Content-Type, Access-Control-Allow-Origin, authorization, Access-Control-Allow-Headers, X-Requested-By, Access-Control-Allow-Methods')
-        self.set_header('Access-Control-Allow-Credentials', 'true')
 
-    def options(self):
-        print('options before get')
-        print(self.request.headers)
-        pass
-    def post(self):
-        print('pourquoi?')
-    def get(self):
-        print('hop')
-        print('je get?')
-        # print(self.request.headers)
-        httpheaders = self.request.headers
-        auth_token =(httpheaders.get_list('Authorization'))
-        auth_token = auth_token[0].split(' ')
-        if auth_token[0] =='Bearer':
-            if auth_token[1] == '1234567890ABCDEFGHIJKLMOPQRSTUVWXYZ':
-                a = []
-                testmsg = {
-                    "username": "Ewen Lidgey",
-                    "email": "elidgey0@soundcloud.com",
-                    "userId": "21be5411-e474-4760-8973-d96d0649a3d3",
-                    # "avatar": "https://robohash.org/quodnullarepellendus.jpg?size=200x200\u0026set=set1",
-                    "body": "Vivamus vel nulla eget eros elementum pellentesque. Quisque porta volutpat erat. Quisque erat eros, viverra eget, congue eget, semper rutrum, nulla.",
-                    "timestamp": "3:57 AM"
-                }
-                multikeys = []
-                for i in range(3):
-                    multikeys.append(testmsg)
-                encoded_content = tornado.escape.json_encode(multikeys)
-                print('encoded', encoded_content)
-                self.write(encoded_content)
-                print("c'et fini!")
-            else:
-                self.write_error(401)
-        else:
-            self.write_error(500)
 class Application(tornado.web.Application):
     """
     Main Class for this application holding everything together.
@@ -114,10 +69,10 @@ class Application(tornado.web.Application):
 
         # Handlers defining the url routing.
         handlers = [
-            (r"/chat.json", Jsontest1),
+            #(r"/chat.json", Jsontest1),
             (r"/auth/login", LoginTest),
             (r"/test", test),
-            (r"/", websockettest)
+            # (r"/", websockettest)
         ]
         debug = True
         settings = dict(
