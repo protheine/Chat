@@ -4,16 +4,16 @@ from cassandra.cqlengine import connection
 from cassandra.cqlengine.models import Model
 
 class users(Model):
-	owner_name = columns.Text()
-	address = columns.Text()
-	city = columns.Text()
-	country = columns.Text()
+	isactive = columns.Boolean()
+	isadmin = columns.Boolean()
+	_id = columns.Text()
 	email = columns.Text(primary_key=True)
-	first_name = columns.Text()
-	last_name = columns.Text()
-	nickname = columns.Text()
-	zip_code = columns.Text()
+	password = columns.Text()
+	name = columns.Text()
+	createdat = columns.DateTime()
+	lastlogin = columns.DateTime()
+	updatedat = columns.DateTime()
 
 
 
-connection.setup(['192.168.0.97'], "users_infos", protocol_version=3) #TODO: put at least the server ip in a separate config file
+connection.setup(['192.168.0.95'], "users", protocol_version=3) #TODO: put at least the server ip in a separate config file
