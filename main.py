@@ -5,7 +5,7 @@ import tornado.options
 import tornado.escape
 import os
 import sys
-import python_core_api.websocket
+#import python_core_api.websocket #For future use
 
 import hashlib
 # from cassandra.cluster import Cluster
