@@ -6,6 +6,7 @@ import tornado.escape
 import os
 import sys
 import traceback
+import configparser
 #import python_core_api.websocket #For future use
 
 import hashlib
@@ -15,12 +16,18 @@ import dbmodel
 # from time import sleep
 #
 # from tornado import gen
-cluster = Cluster(['192.168.0.95'])
+config = configparser.ConfigParser()
+try:
+    config.read('config.ini')
+except:
+    print('a problem occured with the config file, quitting')
+    sys.exit(1)
+cluster = Cluster([config['DEFAULT']['DatabaseURL']])
 auth_provider = PlainTextAuthProvider(username='cassandra', password='cassandra')
 cassandrasession = cluster.connect()
 instancied_db_model = dbmodel
 ##
-tornado.options.define("port", default=8080, help="run on the given port", type=int)
+tornado.options.define("port", default=8080, help="run on the given port", type=int) #Todo: put tornado port inside configfile too
 class cqlqueries(): #Use this in the futur to pass queries to the class
     pass
 
@@ -101,6 +108,12 @@ class Application(tornado.web.Application):
         tornado.web.Application.__init__(self, handlers, **settings)
 
 def main():
+    config = configparser.ConfigParser()
+    try:
+        config.read('config.ini')
+    except:
+        print('a problem occured with the config file, quitting')
+        sys.exit(1)
     if len(sys.argv) == 1:
         print('you must specify "firstinit" or "run" arg')
         sys.exit(1)
@@ -110,13 +123,13 @@ def main():
             sys.exit(1)
         else:
             if str(sys.argv[1]) == 'firstinit':
-                cluster = Cluster(['192.168.0.95'])
+                cluster = Cluster([config['DEFAULT']['DatabaseURL']])
                 auth_provider = PlainTextAuthProvider(username='cassandra', password='cassandra')
                 cassandrasession = cluster.connect()
                 print('create keyspace')
                 cassandrasession.execute("""
                         CREATE KEYSPACE IF NOT EXISTS users
-                        WITH replication = { 'class': 'SimpleStrategy', 'replication_factor': '2' }
+                        WITH replication = { 'class': 'SimpleStrategy', 'replication_factor': '1' }
                         """)
                 print('creating tables')
                 try:
