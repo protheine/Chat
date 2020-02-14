@@ -5,6 +5,7 @@ import tornado.options
 import tornado.escape
 import os
 import sys
+import traceback
 #import python_core_api.websocket #For future use
 
 import hashlib
@@ -109,7 +110,39 @@ def main():
             sys.exit(1)
         else:
             if str(sys.argv[1]) == 'firstinit':
-                pass
+                cluster = Cluster(['192.168.0.95'])
+                auth_provider = PlainTextAuthProvider(username='cassandra', password='cassandra')
+                cassandrasession = cluster.connect()
+                print('create keyspace')
+                cassandrasession.execute("""
+                        CREATE KEYSPACE IF NOT EXISTS users
+                        WITH replication = { 'class': 'SimpleStrategy', 'replication_factor': '2' }
+                        """)
+                print('creating tables')
+                try:
+                    cassandrasession.execute("""
+                           CREATE TABLE IF NOT EXISTS users.users (
+                                    isActive boolean,
+                                    isAdmin boolean,
+                                    "_id" varchar,
+                                    email varchar primary key,
+                                    password varchar,
+                                    name varchar,
+                                    createdAt timestamp,
+                                    lastLogin timestamp,
+                                    updatedAt timestamp
+                           )
+                           """)
+                    cassandrasession.execute("""
+                            INSERT INTO users.users (email, "_id", createdat, isactive, isadmin, lastlogin, name, password, updatedat) VALUES ('exaltia@exaltia.org', null, null, True, True, null, null, 'password', null)
+                            """,)
+                    print('database initialisation ended, will exit now, relaunch your software\n with run parameter instead of firstinit')
+                except:
+                    print('something went wrong but there is not enough code ATM to say what gone wrong')
+                    print(traceback.format_exc())
+                    sys.exit(1)
+                sys.exit(0)
+
             elif str(sys.argv[1]) == 'run':
                 pass
             elif str(sys.argv[1]) == 'help':
