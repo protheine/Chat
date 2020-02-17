@@ -91,7 +91,7 @@ class LoginTest(tornado.web.RequestHandler):
                     'token': '1234567890ABCDEFGHIJKLMOPQRSTUVWXYZZ', #Todo: generate token on the fly
                     'userId': 'null',
                     'userEmail': email,
-                    'isAdmin': 'True'  # Not sure if the UI take that in account ATM
+                    'isAdmin': True  # Not sure if the UI take that in account ATM
                 }
                 encoded_json = tornado.escape.json_encode(response_json)
                 self.write(encoded_json)
