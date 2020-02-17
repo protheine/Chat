@@ -164,19 +164,19 @@ def main():
                 try:
                     cassandrasession.execute("""
                            CREATE TABLE IF NOT EXISTS users.users (
-                                    isActive boolean,
-                                    isAdmin boolean,
+                                    is_active boolean,
+                                    is_admin boolean,
                                     "_id" varchar,
                                     email varchar primary key,
                                     password varchar,
                                     name varchar,
-                                    createdAt timestamp,
-                                    lastLogin timestamp,
-                                    updatedAt timestamp
+                                    created_at timestamp,
+                                    last_login timestamp,
+                                    updated_at timestamp
                            )
                            """)
                     cassandrasession.execute("""
-                            INSERT INTO users.users (email, "_id", createdat, isactive, isadmin, lastlogin, name, password, updatedat) VALUES ('exaltia@exaltia.org', null, null, True, True, null, null, 'password', null)
+                            INSERT INTO users.users (email, "_id", created_at, is_active, is_admin, last_login, name, password, updated_at) VALUES ('exaltia@exaltia.org', null, null, True, True, null, null, 'password', null)
                             """,)
                     print('database initialisation ended, will exit now, relaunch your software\n with run parameter instead of firstinit')
                 except:

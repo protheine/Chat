@@ -4,15 +4,15 @@ from cassandra.cqlengine import connection
 from cassandra.cqlengine.models import Model
 
 class users(Model):
-	isactive = columns.Boolean()
-	isadmin = columns.Boolean()
+	is_active = columns.Boolean()
+	is_admin = columns.Boolean()
 	_id = columns.Text()
 	email = columns.Text(primary_key=True)
 	password = columns.Text()
 	name = columns.Text()
-	createdat = columns.DateTime()
-	lastlogin = columns.DateTime()
-	updatedat = columns.DateTime()
+	created_at = columns.DateTime()
+	last_login = columns.DateTime()
+	updated_at = columns.DateTime()
 
 
 
