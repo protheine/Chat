@@ -7,6 +7,7 @@ import os
 import sys
 import traceback
 import configparser
+import hashlib
 #import python_core_api.websocket #For future use
 
 import hashlib
@@ -28,6 +29,12 @@ cassandrasession = cluster.connect()
 instancied_db_model = dbmodel
 ##
 tornado.options.define("port", default=8080, help="run on the given port", type=int) #Todo: put tornado port inside configfile too
+class myhashclass():
+    def myhashing(self, password):
+        password = password.encode('utf-8')
+        result = hashlib.sha512(os.urandom(16) + password).hexdigest()
+        return result
+
 class cqlqueries(): #Use this in the futur to pass queries to the class
     pass
 
@@ -83,12 +90,15 @@ class LoginTest(tornado.web.RequestHandler):
         result = instancied_db_model.users.objects.filter(email=email)
         sql = 'SELECT password FROM users.users WHERE email = %s'
         result = cassandrasession.execute(sql, [email])
+        mytoken = '1234567890ABCDEFGHIJKLMOPQRSTUVWXYZZ'
         # print('cqlresult', result, 'type', type(result))
+        instancehash = myhashclass.myhashing(self, mytoken)
+        hashedtoken = instancehash()
         for each in result:
             # print('each result', each, 'type', type(each))
             if httppassword == each[0]:
                 response_json = {
-                    'token': '1234567890ABCDEFGHIJKLMOPQRSTUVWXYZZ', #Todo: generate token on the fly
+                    'token': hashedtoken, #Todo: generate token on the fly
                     'userId': 'null',
                     'userEmail': email,
                     'isAdmin': 'True'  # Not sure if the UI take that in account ATM
