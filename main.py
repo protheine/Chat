@@ -34,6 +34,33 @@ class cqlqueries(): #Use this in the futur to pass queries to the class
 class test(tornado.web.RequestHandler):
     async def get(self):
         self.write('Hello world')
+class checkToken(tornado.web.RequestHandler):
+    def set_default_headers(self):
+        self.set_header('Access-Control-Allow-Origin', '*')
+        self.set_header('Access-Control-Allow-Headers', '*')
+        self.set_header('Content-type', 'application/json')
+        self.set_header('Access-Control-Allow-Methods', 'POST, GET, OPTIONS')
+
+    def options(self):
+        print('there')
+        pass
+    def post(self):
+        print('get')
+        # httpheaders = self.request.headers
+        # print(type(httpheaders))
+        httpheaders = self.request.headers
+        # print(dir(httpheaders))
+        authorization_header = httpheaders.get('Authorization')
+        print(authorization_header)
+        authorization_header = authorization_header.split(' ')
+        authorization_header = authorization_header[1]
+        if authorization_header == '1234567890ABCDEFGHIJKLMOPQRSTUVWXYZZ':
+            print('ok 201')
+            self.set_status(201)
+        else:
+            print('nop 401')
+            self.send_error(401)
+
 class LoginTest(tornado.web.RequestHandler):
     def set_default_headers(self):
         self.set_header('Access-Control-Allow-Origin', '*')
@@ -58,7 +85,7 @@ class LoginTest(tornado.web.RequestHandler):
         result = cassandrasession.execute(sql, [email])
         # print('cqlresult', result, 'type', type(result))
         for each in result:
-            print('each result', each, 'type', type(each))
+            # print('each result', each, 'type', type(each))
             if httppassword == each[0]:
                 response_json = {
                     'token': '1234567890ABCDEFGHIJKLMOPQRSTUVWXYZZ', #Todo: generate token on the fly
@@ -68,6 +95,7 @@ class LoginTest(tornado.web.RequestHandler):
                 }
                 encoded_json = tornado.escape.json_encode(response_json)
                 self.write(encoded_json)
+                # pass
 
             else:
                 self.send_error(403) #if we don't send error, the application still gives access to the page
@@ -85,6 +113,7 @@ class Application(tornado.web.Application):
             #(r"/chat.json", Jsontest1),
             (r"/auth/login", LoginTest),
             (r"/test", test),
+            (r"/auth/checkToken", checkToken)
             # (r"/", websockettest)
         ]
         debug = True
