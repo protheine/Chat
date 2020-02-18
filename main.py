@@ -10,7 +10,7 @@ import configparser
 import hashlib
 #import python_core_api.websocket #For future use
 
-import hashlib
+import bcrypt
 from cassandra.cluster import Cluster
 from cassandra.auth import PlainTextAuthProvider #one module to authentificate them all!
 import dbmodel
@@ -30,10 +30,11 @@ instancied_db_model = dbmodel
 ##
 tornado.options.define("port", default=8080, help="run on the given port", type=int) #Todo: put tornado port inside configfile too
 class myhashclass():
-    def myhashing(self, password):
-        password = password.encode('utf-8')
-        result = hashlib.sha512(os.urandom(16) + password).hexdigest()
-        return result
+    def myhashing(self, token):
+        token = token.encode('utf-8')
+        return bcrypt.hashpw(token, bcrypt.gensalt(12))
+    def mychecking(self, token, hashed_token):
+        return bcrypt.checkpw(token, hashed_token)
 
 class cqlqueries(): #Use this in the futur to pass queries to the class
     pass
@@ -56,12 +57,17 @@ class checkToken(tornado.web.RequestHandler):
         # httpheaders = self.request.headers
         # print(type(httpheaders))
         httpheaders = self.request.headers
-        # print(dir(httpheaders))
+        print(httpheaders.get_all)
+        email = '' #Todo: remove that line, it's temporary, for test
         authorization_header = httpheaders.get('Authorization')
         print(authorization_header)
         authorization_header = authorization_header.split(' ')
         authorization_header = authorization_header[1]
-        if authorization_header == '1234567890ABCDEFGHIJKLMOPQRSTUVWXYZZ':
+        sql = 'SELECT session_id FROM users.users WHERE email = %s'
+        result = cassandrasession.execute(sql, [email])
+        instancehash = myhashclass.mychecking(authorization_header)
+        # hashedtoken = instancehash(authorization_header)
+        if authorization_header == instancehash(authorization_header, result):
             print('ok 201')
             self.set_status(201)
         else:
@@ -90,13 +96,16 @@ class LoginTest(tornado.web.RequestHandler):
         result = instancied_db_model.users.objects.filter(email=email)
         sql = 'SELECT password FROM users.users WHERE email = %s'
         result = cassandrasession.execute(sql, [email])
-        mytoken = '1234567890ABCDEFGHIJKLMOPQRSTUVWXYZZ'
+        mytoken = '1234567890ABCDEFGHIJKLMOPQRSTUVWXYZZ' #Todo: Randomize this token
         # print('cqlresult', result, 'type', type(result))
-        instancehash = myhashclass.myhashing(self, mytoken)
-        hashedtoken = instancehash()
+
         for each in result:
             # print('each result', each, 'type', type(each))
             if httppassword == each[0]:
+                instancehash = myhashclass.myhashing(mytoken)
+                hashedtoken = instancehash(mytoken)
+                cql = "UPDATE users.users SET token = %s WHERE email = %s"
+                cqlresult = cassandrasession.execute(sql, [hashedtoken, email])
                 response_json = {
                     'token': hashedtoken, #Todo: generate token on the fly
                     'userId': 'null',
