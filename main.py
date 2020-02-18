@@ -102,8 +102,7 @@ class LoginTest(tornado.web.RequestHandler):
         for each in result:
             # print('each result', each, 'type', type(each))
             if httppassword == each[0]:
-                instancehash = myhashclass.myhashing(mytoken)
-                hashedtoken = instancehash(mytoken)
+                hashedtoken = myhashclass.myhashing(mytoken)
                 cql = "UPDATE users.users SET token = %s WHERE email = %s"
                 cqlresult = cassandrasession.execute(sql, [hashedtoken, email])
                 response_json = {
