@@ -30,10 +30,10 @@ instancied_db_model = dbmodel
 ##
 tornado.options.define("port", default=8080, help="run on the given port", type=int) #Todo: put tornado port inside configfile too
 class myhashclass():
-    def myhashing(self, token):
+    def myhashing(token):
         token = token.encode('utf-8')
         return bcrypt.hashpw(token, bcrypt.gensalt(12))
-    def mychecking(self, token, hashed_token):
+    def mychecking(token, hashed_token):
         return bcrypt.checkpw(token, hashed_token)
 
 class cqlqueries(): #Use this in the futur to pass queries to the class
