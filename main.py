@@ -7,6 +7,7 @@ import os
 import sys
 import traceback
 import configparser
+import bcrypt
 #import python_core_api.websocket #For future use
 
 import hashlib
