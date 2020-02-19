@@ -8,7 +8,9 @@ import sys
 import traceback
 import configparser
 import bcrypt
-#import python_core_api.websocket #For future use
+# Module for random generation of tokens before encryption
+import secrets
+# import python_core_api.websocket #For future use
 
 import hashlib
 from cassandra.cluster import Cluster
@@ -95,7 +97,7 @@ class LoginTest(tornado.web.RequestHandler):
         result = instancied_db_model.users.objects.filter(email=email)
         sql = 'SELECT password FROM users.users WHERE email = %s'
         result = cassandrasession.execute(sql, [email])
-        mytoken = '1234567890ABCDEFGHIJKLMOPQRSTUVWXYZZ' #Todo: Randomize this token
+        mytoken = secrets.token_urlsafe(20)
         # print('cqlresult', result, 'type', type(result))
         for each in result:
             # print('each result', each, 'type', type(each))
