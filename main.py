@@ -103,7 +103,7 @@ class LoginTest(tornado.web.RequestHandler):
                 hashedtoken = myhashclass.myhashing(mytoken)
                 hashedtoken = hashedtoken.decode('utf-8')
                 print(type(hashedtoken))
-                cassandrasession.execute('UPDATE users.users SET session_id = (%s) WHERE email = (%s)', [hashedtoken, email,])
+                cassandrasession.execute('UPDATE users.users SET session_id = %s WHERE email = %s', (hashedtoken, email,))
 
                 response_json = {
                     'token': '1234567890ABCDEFGHIJKLMOPQRSTUVWXYZZ', #Todo: generate token on the fly
