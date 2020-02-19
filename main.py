@@ -7,10 +7,9 @@ import os
 import sys
 import traceback
 import configparser
-import hashlib
 #import python_core_api.websocket #For future use
 
-import bcrypt
+import hashlib
 from cassandra.cluster import Cluster
 from cassandra.auth import PlainTextAuthProvider #one module to authentificate them all!
 import dbmodel
@@ -57,8 +56,7 @@ class checkToken(tornado.web.RequestHandler):
         # httpheaders = self.request.headers
         # print(type(httpheaders))
         httpheaders = self.request.headers
-        print(httpheaders.get_all)
-        email = '' #Todo: remove that line, it's temporary, for test
+        # print(dir(httpheaders))
         authorization_header = httpheaders.get('Authorization')
         print(authorization_header)
         authorization_header = authorization_header.split(' ')
@@ -98,7 +96,6 @@ class LoginTest(tornado.web.RequestHandler):
         result = cassandrasession.execute(sql, [email])
         mytoken = '1234567890ABCDEFGHIJKLMOPQRSTUVWXYZZ' #Todo: Randomize this token
         # print('cqlresult', result, 'type', type(result))
-
         for each in result:
             # print('each result', each, 'type', type(each))
             if httppassword == each[0]:
@@ -108,10 +105,10 @@ class LoginTest(tornado.web.RequestHandler):
                 cassandrasession.execute('UPDATE users.users SET session_id = (%s) WHERE email = (%s)', [hashedtoken, email,])
 
                 response_json = {
-                    'token': hashedtoken, #Todo: generate token on the fly
-                    'userId': 'null',
-                    'userEmail': email,
-                    'isAdmin': 'True'  # Not sure if the UI take that in account ATM
+                    'token': '1234567890ABCDEFGHIJKLMOPQRSTUVWXYZZ', #Todo: generate token on the fly
+                    '_id': 'null',
+                    'email': email,
+                    'is_admin': True  # Not sure if the UI take that in account ATM
                 }
                 encoded_json = tornado.escape.json_encode(response_json)
                 self.write(encoded_json)
