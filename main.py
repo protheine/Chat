@@ -108,7 +108,7 @@ class LoginTest(tornado.web.RequestHandler):
                 cassandrasession.execute('UPDATE users.users SET session_id = %s WHERE email = %s', (hashedtoken, email,))
 
                 response_json = {
-                    'token': '1234567890ABCDEFGHIJKLMOPQRSTUVWXYZZ', #Todo: generate token on the fly
+                    'token': hashedtoken,
                     '_id': 'null',
                     'email': email,
                     'is_admin': True  # Not sure if the UI take that in account ATM
